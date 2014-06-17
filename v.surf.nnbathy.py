@@ -69,9 +69,10 @@
 #% description: Settings
 #%end
 
+import os
+
 from grass.script.core import parser
 import grass.script as grass
-import os
 
 ### kod z http://trac.osgeo.org/grass/browser/grass-addons/grass6/vector/v.surf.nnbathy/v.surf.nnbathy
 
