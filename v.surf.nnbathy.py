@@ -77,24 +77,27 @@ import grass.script as grass
 ### kod z http://trac.osgeo.org/grass/browser/grass-addons/grass6/vector/v.surf.nnbathy/v.surf.nnbathy
 
 def main():
-	print options
 	print options['input']
-### vypocetni region
+	### vypocetni region
 	reg = grass.read_command("g.region", flags='p')    ### r.reclass.area.py  ??flags='p'
 	kv = grass.parse_key_val(reg, sep=':')
 	reg_N = float(kv['north'])
 	reg_W = float(kv['west'])
 	reg_S = float(kv['south'])
 	reg_E = float(kv['east'])
+	cols = float(kv['cols'])
+	rows = float(kv['rows'])
 	reg=(reg_N, reg_W, reg_S, reg_E)
 	area=(reg_N-reg_S)*(reg_E-reg_W)
 
 	if area == 0:
 		grass.fatal(_("xy-locations are not supported"))
 		grass.fatal(_("Need projected data with grids in meters"))
-	if not file :
+	
+	if not options['file'] :
 		TMPXYZ='input_xyz'
-		
+		XYZout='output_xyz'
+				
 		if int(options['layer']) == 0:
 			LAYER=''
 			COLUMN=''
@@ -103,13 +106,12 @@ def main():
 			if options['zcolumn']:
 				COLUMN=options['zcolumn']
 			else:
-				g.message('Name of z column required for 2D vector maps.')
-
-		#if options['kwhere']:
-		#	v.out.ascii -r input=options['input'] output=TMPXYZ format=point fs=space dp=15 where=options['kwhere'] LAYER COLUMN
-		#else:
-		#	v.out.ascii -r input=options['input'] output=TMPXYZ format=point fs=space dp=15 LAYER COLUMN
-
+				grass.message('Name of z column required for 2D vector maps.')	
+		TMP='output_4c'
+		if options['kwhere']:
+			grass.run_command("v.out.ascii",flags='r', overwrite=1, input=options['input'], output=TMP, format="point", separator="space",dp=15, where=options['kwhere'], layer=LAYER, columns=COLUMN)
+		else:
+			grass.run_command("v.out.ascii",flags='r', overwrite=1, input=options['input'], output=TMP, format="point", separator="space", dp=15, layer=LAYER, columns=COLUMN)
 		if int(options['layer']) > 0:
 			#http://stackoverflow.com/questions/2491222/how-to-rename-a-file-using-python
 			#http://stackoverflow.com/questions/2499746/extracting-columns-from-text-file-using-perl-one-liner-similar-to-unix-cut
@@ -117,15 +119,31 @@ def main():
 			#os.rename('TMPXYZ','TMPXYZ.cat')
 			#TMPXYZ.cat.split.(" ")[1,2,4]
 			#os.remove(TMPXYZ.cat)
-			for line in open("TMPXYZ"):
+			fin=open(TMP, 'r')
+			fout=open(TMPXYZ, 'w')
+			for line in fin:
 				parts = line.split(" ")
-    			print " ".join(parts[0,1,3])
-	else:
-		TMPXYZ=options['file']
-	print TMPXYZ
-
-	# set the working region for nnbathy (it's cell-center oriented)
+				#print parts[0]+' '+parts[1]+' '+parts[3]
+				fout.write(parts[0]+' '+parts[1]+' '+parts[3])
+		else:
+			TMPXYZ=options['file']
 	
+	# set the working region for nnbathy (it's cell-center oriented)
+	nn_n=reg_N
+	nn_s=reg_S
+	nn_w=reg_W
+	nn_e=reg_E
+	
+	null="NaN"
+	type="double"
+
+	####interpolate
+	grass.message('"nnbathy" is performing the interpolation now. This may take some time.')
+	grass.message("Once it completes an 'All done.' message will be printed.")
+	algo=options['algorithm']	
+	#'alg'+options['algorithm']
+	grass.call('nnbathy, -i=TMPXYZ, -n=cols*rows, -o=XYZout')
+
 	return 0
 
 options, flags = parser()
