@@ -87,6 +87,8 @@ def main():
 	reg_E = float(kv['east'])
 	cols = float(kv['cols'])
 	rows = float(kv['rows'])
+	nsres = float(kv['nsres'])
+	ewres = float(kv['ewres'])
 	reg=(reg_N, reg_W, reg_S, reg_E)
 	area=(reg_N-reg_S)*(reg_E-reg_W)
 
@@ -129,10 +131,10 @@ def main():
 			TMPXYZ=options['file']
 	
 	# set the working region for nnbathy (it's cell-center oriented)
-	nn_n=reg_N
-	nn_s=reg_S
-	nn_w=reg_W
-	nn_e=reg_E
+	nn_n=reg_N - nsres/2
+	nn_s=reg_S + nsres/2
+	nn_w=reg_W + ewres/2
+	nn_e=reg_E - ewres/2
 	
 	null="NaN"
 	type="double"
@@ -140,9 +142,43 @@ def main():
 	####interpolate
 	grass.message('"nnbathy" is performing the interpolation now. This may take some time.')
 	grass.message("Once it completes an 'All done.' message will be printed.")
-	algo=options['algorithm']	
-	#'alg'+options['algorithm']
-	grass.call('nnbathy, -i=TMPXYZ, -n=cols*rows, -o=XYZout')
+	###volani nnbathy	
+	#grass.call('nnbathy, -i=TMPXYZ, -n=cols*rows, -o=XYZout')
+
+	# Y in "r.stats -1gn" output is in descending order, thus -y must be in
+	# MAX MIN order, not MIN MAX, for nnbathy not to produce a grid upside-down
+
+	# convert the X,Y,Z nnbathy output into a GRASS ASCII grid, then import with r.in.ascii:
+	
+	# 1 create header
+	TMP='output_grd'
+	header=open(TMP,'w')
+	header.write('north: '+str(nn_n)+'\n'+'south: '+str(nn_s)+'\n'+'west: '+str(nn_w)+'\n'+'east: '+str(nn_e)+'\n'+'rows: '+str(rows)+'\n'+'cols: '+str(cols)+'\n'+'type: '+type+'\n'+'null: '+null)
+	
+	# 2 do the conversion
+	grass.message("Converting nnbathy output to GRASS raster ...")
+	print 'cols='+str(cols)
+	for i in xrange(1,10):
+		pass
+	
+	# 3 import
+	grass.run_command('r.in.ascii',input="$TMP.$PROG.output_grd", output="$OUTPUT", quiet=1)
+
+	# store comand history in raster's metadata
+	if options['input']:
+		grass.run_command('r.support',map=options['output'],history="v.surf.nnbathy alg="+options['algorithm']+" input="+options['input']+" output="+options['output'])
+	else:grass.run_command('r.support',map=options['output'],history="v.surf.nnbathy alg="+options['algorithm']+" input="+options['file']+" output="+options['output'])
+	
+	grass.run_command('r.support', map=options['output'], history="")
+	grass.run_command('r.support', map=options['output'], history="nnbathy run syntax:")
+	grass.run_command('r.support', map=options['output'], history="")
+	grass.run_command('r.support', map=options['output'], history="nnbathy -W 0 -P alg=$ALG -n ${cols}x$rows )
+	grass.run_command('r.support', map=options['output'], history="-x $nn_w $nn_e ")
+	grass.run_command('r.support', map=options['output'], history="-y $nn_n $nn_s ")
+	grass.run_command('r.support', map=options['output'], history="-i tmp_in > tmp_out")
+	grass.run_command('r.support', map=options['output'], history="")
+
+	grass.message("Done. "+options['output']+" created.")
 
 	return 0
 
