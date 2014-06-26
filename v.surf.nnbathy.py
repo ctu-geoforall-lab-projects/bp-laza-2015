@@ -77,7 +77,17 @@ import grass.script as grass
 ### kod z http://trac.osgeo.org/grass/browser/grass-addons/grass6/vector/v.surf.nnbathy/v.surf.nnbathy
 
 def main():
-	print options['input']
+	### uvodni kontroly
+	if (options['input'] and options['file']):
+		grass.message("Please specify either the 'input' or 'file' option, not both.")
+	
+	if not(options['input'] or options['file']):
+		grass.message("Please specify either the 'input' or 'file' option.")
+
+	if (options['file'] and os.path.isfile(options['file'])):
+		grass.message("File "+options['file']+" does not exist.")
+
+	
 	### vypocetni region
 	reg = grass.read_command("g.region", flags='p')    ### r.reclass.area.py  ??flags='p'
 	kv = grass.parse_key_val(reg, sep=':')
@@ -142,6 +152,7 @@ def main():
 	####interpolate
 	grass.message('"nnbathy" is performing the interpolation now. This may take some time.')
 	grass.message("Once it completes an 'All done.' message will be printed.")
+	
 	###volani nnbathy	
 	#grass.call('nnbathy, -i=TMPXYZ, -n=cols*rows, -o=XYZout')
 
@@ -165,6 +176,7 @@ def main():
 	grass.run_command('r.in.ascii',input="$TMP.$PROG.output_grd", output="$OUTPUT", quiet=1)
 
 	# store comand history in raster's metadata
+	
 	if options['input']:
 		grass.run_command('r.support',map=options['output'],history="v.surf.nnbathy alg="+options['algorithm']+" input="+options['input']+" output="+options['output'])
 	else:grass.run_command('r.support',map=options['output'],history="v.surf.nnbathy alg="+options['algorithm']+" input="+options['file']+" output="+options['output'])
@@ -172,7 +184,7 @@ def main():
 	grass.run_command('r.support', map=options['output'], history="")
 	grass.run_command('r.support', map=options['output'], history="nnbathy run syntax:")
 	grass.run_command('r.support', map=options['output'], history="")
-	grass.run_command('r.support', map=options['output'], history="nnbathy -W 0 -P alg=$ALG -n ${cols}x$rows )
+	grass.run_command('r.support', map=options['output'], history="nnbathy -W 0 -P alg=$ALG -n ${cols}x$rows" )
 	grass.run_command('r.support', map=options['output'], history="-x $nn_w $nn_e ")
 	grass.run_command('r.support', map=options['output'], history="-y $nn_n $nn_s ")
 	grass.run_command('r.support', map=options['output'], history="-i tmp_in > tmp_out")
