@@ -70,11 +70,16 @@
 #%end
 
 import os
+import atexit
 
 from grass.script.core import parser
 import grass.script as grass
 
 ### kod z http://trac.osgeo.org/grass/browser/grass-addons/grass6/vector/v.surf.nnbathy/v.surf.nnbathy
+
+TMP=None
+TMPXYZ=None
+XYZout=None
 
 def main():
 	### uvodni kontroly
@@ -95,8 +100,8 @@ def main():
 	reg_W = float(kv['west'])
 	reg_S = float(kv['south'])
 	reg_E = float(kv['east'])
-	cols = float(kv['cols'])
-	rows = float(kv['rows'])
+	cols = int(kv['cols'])
+	rows = int(kv['rows'])
 	nsres = float(kv['nsres'])
 	ewres = float(kv['ewres'])
 	reg=(reg_N, reg_W, reg_S, reg_E)
@@ -107,8 +112,9 @@ def main():
 		grass.fatal(_("Need projected data with grids in meters"))
 	
 	if not options['file'] :
-		TMPXYZ='input_xyz'
-		XYZout='output_xyz'
+		global TMPXYZ
+		TMPXYZ=grass.tempfile()
+		XYZout=grass.tempfile()
 				
 		if int(options['layer']) == 0:
 			LAYER=''
@@ -119,7 +125,8 @@ def main():
 				COLUMN=options['zcolumn']
 			else:
 				grass.message('Name of z column required for 2D vector maps.')	
-		TMP='output_4c'
+		global TMP
+		TMP=grass.tempfile()
 		if options['kwhere']:
 			grass.run_command("v.out.ascii",flags='r', overwrite=1, input=options['input'], output=TMP, format="point", separator="space",dp=15, where=options['kwhere'], layer=LAYER, columns=COLUMN)
 		else:
@@ -133,12 +140,17 @@ def main():
 			#os.remove(TMPXYZ.cat)
 			fin=open(TMP, 'r')
 			fout=open(TMPXYZ, 'w')
+			# TODO: try block...
 			for line in fin:
 				parts = line.split(" ")
 				#print parts[0]+' '+parts[1]+' '+parts[3]
 				fout.write(parts[0]+' '+parts[1]+' '+parts[3])
+			close(fout)
+			close(fin)
 		else:
-			TMPXYZ=options['file']
+			pass # TODO: chyba ?
+	else:
+		TMPXYZ=options['file']
 	
 	# set the working region for nnbathy (it's cell-center oriented)
 	nn_n=reg_N - nsres/2
@@ -154,7 +166,7 @@ def main():
 	grass.message("Once it completes an 'All done.' message will be printed.")
 	
 	###volani nnbathy	
-	#grass.call('nnbathy, -i=TMPXYZ, -n=cols*rows, -o=XYZout')
+	grass.call(['nnbathy', '-i=%s' % TMPXYZ, '-n=%d*%d' % (cols, rows), '-o=%s' % XYZout])
 
 	# Y in "r.stats -1gn" output is in descending order, thus -y must be in
 	# MAX MIN order, not MIN MAX, for nnbathy not to produce a grid upside-down
@@ -194,9 +206,15 @@ def main():
 
 	return 0
 
-options, flags = parser()
-main()
+def cleanup():
+	if TMP:
+		os.remove(TMP)
+	if TMPXYZ:
+		os.remove(TMPXYZ)
+	if XYZout:
+		os.remove(XYZout)
 
-
-
-
+if __name__ == "__main__":
+	options, flags = parser()
+	atexit.register(cleanup)
+	main()
