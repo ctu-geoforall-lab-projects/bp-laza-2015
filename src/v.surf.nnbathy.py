@@ -71,6 +71,7 @@
 
 import os
 import atexit
+import sys
 
 from grass.script.core import parser
 import grass.script as grass
@@ -78,6 +79,7 @@ import grass.script as grass
 ### kod z http://trac.osgeo.org/grass/browser/grass-addons/grass6/vector/v.surf.nnbathy/v.surf.nnbathy
 
 TMP=None
+TMPcat=None
 TMPXYZ=None
 XYZout=None
 
@@ -106,16 +108,18 @@ def main():
 	ewres = float(kv['ewres'])
 	reg=(reg_N, reg_W, reg_S, reg_E)
 	area=(reg_N-reg_S)*(reg_E-reg_W)
+	ALG=options['algorithm']
 
 	if area == 0:
 		grass.fatal(_("xy-locations are not supported"))
 		grass.fatal(_("Need projected data with grids in meters"))
 	
+	global TMPXYZ
+	TMPXYZ=grass.tempfile()
+		
 	if not options['file'] :
-		global TMPXYZ
-		TMPXYZ=grass.tempfile()
-		XYZout=grass.tempfile()
-				
+		TMPcat=grass.tempfile()		
+			
 		if int(options['layer']) == 0:
 			LAYER=''
 			COLUMN=''
@@ -125,30 +129,29 @@ def main():
 				COLUMN=options['zcolumn']
 			else:
 				grass.message('Name of z column required for 2D vector maps.')	
-		global TMP
-		TMP=grass.tempfile()
+				
 		if options['kwhere']:
-			grass.run_command("v.out.ascii",flags='r', overwrite=1, input=options['input'], output=TMP, format="point", separator="space",dp=15, where=options['kwhere'], layer=LAYER, columns=COLUMN)
+			grass.run_command("v.out.ascii",flags='r', overwrite=1, input=options['input'], output=TMPcat, format="point", separator="space",dp=15, where=options['kwhere'], layer=LAYER, columns=COLUMN)
 		else:
-			grass.run_command("v.out.ascii",flags='r', overwrite=1, input=options['input'], output=TMP, format="point", separator="space", dp=15, layer=LAYER, columns=COLUMN)
+			grass.run_command("v.out.ascii",flags='r', overwrite=1, input=options['input'], output=TMPcat, format="point", separator="space", dp=15, layer=LAYER, columns=COLUMN)
+		
 		if int(options['layer']) > 0:
-			#http://stackoverflow.com/questions/2491222/how-to-rename-a-file-using-python
-			#http://stackoverflow.com/questions/2499746/extracting-columns-from-text-file-using-perl-one-liner-similar-to-unix-cut
-			#cut -f1,2,4 -d' ' "$TMPXYZ.cat" > "$TMPXYZ"			
-			#os.rename('TMPXYZ','TMPXYZ.cat')
-			#TMPXYZ.cat.split.(" ")[1,2,4]
-			#os.remove(TMPXYZ.cat)
-			fin=open(TMP, 'r')
+			fin=open(TMPcat, 'r')
 			fout=open(TMPXYZ, 'w')
-			# TODO: try block...
-			for line in fin:
-				parts = line.split(" ")
-				#print parts[0]+' '+parts[1]+' '+parts[3]
-				fout.write(parts[0]+' '+parts[1]+' '+parts[3])
-			close(fout)
-			close(fin)
+			# TODO: try block... ???? duvod? co vlastne zkousim?
+			try:
+				for line in fin:
+					parts = line.split(" ")
+					#print parts[0]+' '+parts[1]+' '+parts[3]
+					fout.write(parts[0]+' '+parts[1]+' '+parts[3])
+			except:
+				# print "Invalid input!"
+				grass.message("Invalid input!")	
+			fin.close()
+			fout.close()
 		else:
-			pass # TODO: chyba ?
+			# TODO: chyba ?
+			grass.message("Z coordinates are used.")
 	else:
 		TMPXYZ=options['file']
 	
@@ -165,27 +168,46 @@ def main():
 	grass.message('"nnbathy" is performing the interpolation now. This may take some time.')
 	grass.message("Once it completes an 'All done.' message will be printed.")
 	
-	###volani nnbathy	
-	grass.call(['nnbathy', '-i=%s' % TMPXYZ, '-n=%d*%d' % (cols, rows), '-o=%s' % XYZout])
-
+	###volani nnbathy
+	global XYZout
+	XYZout=grass.tempfile()
+	#saveout=sys.stdout
+	#fsock=open(XYZout, 'w')
+	#sys.stdout=fsock
+	grass.call(['nnbathy', '-W', '%d' % 0, '-i', '%s' % TMPXYZ, '-o', '%s' % XYZout, '-x', '%d' % nn_w, '%d' % nn_e, '-y', '%d' % nn_n, '%d' % nn_s, '-P', '%s' % ALG, '-n', '%dx%d' % (cols,rows)])
+	#sys.stdout=saveout
+	#fsock.close()
 	# Y in "r.stats -1gn" output is in descending order, thus -y must be in
 	# MAX MIN order, not MIN MAX, for nnbathy not to produce a grid upside-down
 
-	# convert the X,Y,Z nnbathy output into a GRASS ASCII grid, then import with r.in.ascii:
 	
+
+	# convert the X,Y,Z nnbathy output into a GRASS ASCII grid, then import with r.in.ascii:
 	# 1 create header
-	TMP='output_grd'
+	TMP=grass.tempfile()	
 	header=open(TMP,'w')
-	header.write('north: '+str(nn_n)+'\n'+'south: '+str(nn_s)+'\n'+'west: '+str(nn_w)+'\n'+'east: '+str(nn_e)+'\n'+'rows: '+str(rows)+'\n'+'cols: '+str(cols)+'\n'+'type: '+type+'\n'+'null: '+null)
+	header.write('north: %s\nsouth: %s\neast: %s\nwest: %s\nrows: %s\ncols: %s\ntype: %s\nnull: %s\n\n'% (nn_n, nn_s, nn_e, nn_w, rows, cols, type, null))
+	header.close()
 	
 	# 2 do the conversion
 	grass.message("Converting nnbathy output to GRASS raster ...")
-	print 'cols='+str(cols)
-	for i in xrange(1,10):
-		pass
+	fin=open(TMPXYZ,'r')	
+	fout=open(TMP,'a')
+	cur_col=1;
+	for line in fin:
+		parts = line.split(" ")
+		if cur_col==cols:
+			cur_col=0
+			fout.write(str(parts[2]))
+		else:	
+			fout.write(str(parts[2]).rstrip('\n')+' ')
+		cur_col+=1
+	
+	fin.close()
+	fout.close()
 	
 	# 3 import
-	grass.run_command('r.in.ascii',input="$TMP.$PROG.output_grd", output="$OUTPUT", quiet=1)
+	grass.run_command('r.in.ascii',input=TMP, output=options['output'], quiet=1)
 
 	# store comand history in raster's metadata
 	
