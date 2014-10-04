@@ -84,6 +84,9 @@ TMPXYZ=None
 XYZout=None
 
 def main():
+        if not grass.find_program('nnbathy'):
+                grass.fatal('nnbathy is not available')
+        
 	### uvodni kontroly
 	if (options['input'] and options['file']):
 		grass.message("Please specify either the 'input' or 'file' option, not both.")
@@ -172,11 +175,19 @@ def main():
 	global XYZout
 	XYZout=grass.tempfile()
 	#saveout=sys.stdout
-	#fsock=open(XYZout, 'w')
+	fsock=open(XYZout, 'w')
 	#sys.stdout=fsock
-	grass.call(['nnbathy', '-W', '%d' % 0, '-i', '%s' % TMPXYZ, '-o', '%s' % XYZout, '-x', '%d' % nn_w, '%d' % nn_e, '-y', '%d' % nn_n, '%d' % nn_s, '-P', '%s' % ALG, '-n', '%dx%d' % (cols,rows)])
+	grass.call(['nnbathy',
+                    '-W', '%d' % 0,
+                    '-i', '%s' % TMPXYZ,
+                    '-x', '%d' % nn_w, '%d' % nn_e,
+                    '-y', '%d' % nn_n, '%d' % nn_s,
+                    '-P', '%s' % ALG,
+                    '-n', '%dx%d' % (cols,rows)],
+                   stdout=fsock)
+        
 	#sys.stdout=saveout
-	#fsock.close()
+	fsock.close()
 	# Y in "r.stats -1gn" output is in descending order, thus -y must be in
 	# MAX MIN order, not MIN MAX, for nnbathy not to produce a grid upside-down
 
@@ -191,7 +202,7 @@ def main():
 	
 	# 2 do the conversion
 	grass.message("Converting nnbathy output to GRASS raster ...")
-	fin=open(TMPXYZ,'r')	
+	fin=open(XYZout,'r')	
 	fout=open(TMP,'a')
 	cur_col=1;
 	for line in fin:
@@ -207,7 +218,7 @@ def main():
 	fout.close()
 	
 	# 3 import
-	grass.run_command('r.in.ascii',input=TMP, output=options['output'], quiet=1)
+	grass.run_command('r.in.ascii',input=TMP, output=options['output'], quiet=True)
 
 	# store comand history in raster's metadata
 	
