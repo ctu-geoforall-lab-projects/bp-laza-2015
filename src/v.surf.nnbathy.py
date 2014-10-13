@@ -177,13 +177,12 @@ def main():
             if int(options['layer']) > 0:
                 fin = open(TMPcat, 'r')
                 fout = open(TMPXYZ, 'w')
-                # TODO: try block... ???? duvod? co vlastne zkousim?
                 try:
                     for line in fin:
                         parts = line.split(" ")
                         fout.write(parts[0]+' '+parts[1]+' '+parts[3])
-                except:
-                    grass.message("Invalid input!")
+                except StandardError, e:
+                    grass.fatal_error("Invalid input: %s" % e)
                 fin.close()
                 fout.close()
             else:
