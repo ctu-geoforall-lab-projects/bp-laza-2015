@@ -95,7 +95,7 @@ def main():
     def region():
         # set the region
         # TODO globalni promenne?
-        global area, ALG, nn_n, nn_s, nn_w, nn_e, null, cols, rows
+        global area, ALG, nn_n, nn_s, nn_w, nn_e, null, ctype, cols, rows
         reg = grass.read_command("g.region", flags='p')
         kv = grass.parse_key_val(reg, sep=':')
         reg_N = float(kv['north'])
@@ -116,7 +116,7 @@ def main():
         nn_w = reg_W + ewres/2
         nn_e = reg_E - ewres/2
         null = "NaN"
-        type = "double"
+        ctype = "double"
 
     def initial_controls():
         # setup temporary files
@@ -181,8 +181,8 @@ def main():
             TMPXYZ = options['file']
 
     def compute():
-        grass.message('"nnbathy" is performing the interpolation now. This may take some time.')
-        grass.message("Once it completes an 'All done.' message will be printed.")
+        grass.message('"nnbathy" is performing the interpolation now. This may take some time...')
+        grass.verbose("Once it completes an 'All done.' message will be printed.")
 
         #nnbathy calling
         fsock = open(XYZout, 'w')
@@ -205,7 +205,8 @@ def main():
         # convert the X,Y,Z nnbathy output into a GRASS ASCII grid, then import with r.in.ascii
         # 1 create header
         header = open(TMP, 'w')
-        header.write('north: %s\nsouth: %s\neast: %s\nwest: %s\nrows: %s\ncols: %s\ntype: %s\nnull: %s\n\n' % (nn_n, nn_s, nn_e,  nn_w, rows, cols, type, null))
+        header.write('north: %s\nsouth: %s\neast: %s\nwest: %s\nrows: %s\ncols: %s\ntype: %s\nnull: %s\n\n' % \
+                         (nn_n, nn_s, nn_e,  nn_w, rows, cols, ctype, null))
         header.close()
 
         # 2 do the conversion
@@ -230,30 +231,22 @@ def main():
         # store comand history in raster's metadata
         # TODO formatovani
         if options['input']:
-            grass.run_command('r.support', map=options['output'], history="v.surf.nnbathy alg=%s input=%s output=%s" % (options['algorithm'], options['input'], options['output']))
+            grass.run_command('r.support', map=options['output'],
+                              history="v.surf.nnbathy alg=%s input=%s output=%s" % (options['algorithm'], options['input'], options['output']))
         else:
-            grass.run_command('r.support', map=options['output'], history="v.surf.nnbathy alg=%s input=%s output=%s" % (options['algorithm'], options['file'], options['output']))
+            grass.run_command('r.support', map=options['output'],
+                              history="v.surf.nnbathy alg=%s input=%s output=%s" % (options['algorithm'], options['file'], options['output']))
 
-        grass.run_command('r.support', map=options['output'], history="nnbathy run syntax:")
-        grass.run_command('r.support', map=options['output'], history="")
-        grass.run_command('r.support', map=options['output'], history="nnbathy,")
-        grass.run_command('r.support', map=options['output'], history="'-W', '%d' % 0")
-        grass.run_command('r.support', map=options['output'], history="'-i', '%s' % TMPXYZ")
-        grass.run_command('r.support', map=options['output'], history="'-x', '%d' % nn_w, '%d' % nn_e")
-        grass.run_command('r.support', map=options['output'], history="'-y', '%d' % nn_n, '%d' % nn_s")
-        grass.run_command('r.support', map=options['output'], history="'-P', '%s' % ALG")
-        grass.run_command('r.support', map=options['output'], history="'-n', '%dx%d' % (cols,rows)"
-        grass.run_command('r.support', map=options['output'], history="'stdout = fsock'"
-        grass.run_command('r.support', map=options['output'], history="")
-        grass.message("Done. %s created." % options['output'])
+        grass.run_command('r.support', map=options['output'], history="\nnnbathy run syntax:\nnbathy -W %d -i %s -x '%d %d' -y '%d %d' -P %s -n %dx%d" % \
+                              (0, TMPXYZ, nn_w, nn_e, nn_n, nn_s, ALG, cols,rows))
+        grass.message("Done. Raster map <%s> created." % options['output'])
 
     region()
     initial_controls()
     compute()
     convert()
     import_to_raster()
-        # TODO CHYBA: volba <output>: <vystup> existuje.
-        # TODO UPOZORNĚNÍ: nevhodný typ pole, používám celé číslo
+        # TODO UPOZORNeNi: nevhodny typ pole, pouzivam cele cislo
 
 def cleanup():
     if TMP:
