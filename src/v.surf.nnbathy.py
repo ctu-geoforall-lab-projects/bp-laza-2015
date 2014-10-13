@@ -85,11 +85,21 @@ import sys
 from grass.script.core import parser
 import grass.script as grass
 
+# from nnbathy import nnbathy_vector, nnbathy_file
+
 TMP = None
 TMPcat = None
 TMPXYZ = None
 XYZout = None
 
+# def main():
+#     if vector: 
+#         obj = nnbathy_vector(nazev vektor)
+#     else:
+#         obj = nnbathy_file(cesta k souboru)
+
+#     obj.compute()
+#     obj.create_output()
 
 def main():
     def region():
