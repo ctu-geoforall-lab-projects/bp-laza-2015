@@ -168,9 +168,11 @@ def main():
                     grass.message('Name of z column required for 2D vector maps.')
 
             if options['kwhere']:
-                grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=TMPcat, format="point", separator="space", dp=15, where=options['kwhere'], layer=LAYER, columns=COLUMN)
+                grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=TMPcat,
+                                  format="point", separator="space", dp=15, where=options['kwhere'], layer=LAYER, columns=COLUMN)
             else:
-                grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=TMPcat, format="point", separator="space", dp=15, layer=LAYER, columns=COLUMN)
+                grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=TMPcat,
+                                  format="point", separator="space", dp=15, layer=LAYER, columns=COLUMN)
 
             if int(options['layer']) > 0:
                 fin = open(TMPcat, 'r')
@@ -198,13 +200,13 @@ def main():
         fsock = open(XYZout, 'w')
         #TODO zkontrolovat zarovnani
         grass.call(['nnbathy',
-                         '-W', '%d' % 0,
-                         '-i', '%s' % TMPXYZ,
-                         '-x', '%d' % nn_w, '%d' % nn_e,
-                         '-y', '%d' % nn_n, '%d' % nn_s,
-                         '-P', '%s' % ALG,
-                         '-n', '%dx%d' % (cols, rows)],
-                         stdout=fsock)
+                    '-W', '%d' % 0,
+                    '-i', '%s' % TMPXYZ,
+                    '-x', '%d' % nn_w, '%d' % nn_e,
+                    '-y', '%d' % nn_n, '%d' % nn_s,
+                    '-P', '%s' % ALG,
+                    '-n', '%dx%d' % (cols, rows)],
+                   stdout=fsock)
         fsock.close()
 
         #TODO
@@ -242,12 +244,15 @@ def main():
         # TODO formatovani
         if options['input']:
             grass.run_command('r.support', map=options['output'],
-                              history="v.surf.nnbathy alg=%s input=%s output=%s" % (options['algorithm'], options['input'], options['output']))
+                              history="v.surf.nnbathy alg=%s input=%s output=%s" % \
+                                  (options['algorithm'], options['input'], options['output']))
         else:
             grass.run_command('r.support', map=options['output'],
-                              history="v.surf.nnbathy alg=%s input=%s output=%s" % (options['algorithm'], options['file'], options['output']))
+                              history="v.surf.nnbathy alg=%s input=%s output=%s" % \
+                                  (options['algorithm'], options['file'], options['output']))
 
-        grass.run_command('r.support', map=options['output'], history="\nnnbathy run syntax:\nnbathy -W %d -i %s -x '%d %d' -y '%d %d' -P %s -n %dx%d" % \
+        grass.run_command('r.support', map=options['output'],
+                          history="\nnnbathy run syntax:\nnbathy -W %d -i %s -x '%d %d' -y '%d %d' -P %s -n %dx%d" % \
                               (0, TMPXYZ, nn_w, nn_e, nn_n, nn_s, ALG, cols,rows))
         grass.message("Done. Raster map <%s> created." % options['output'])
 
