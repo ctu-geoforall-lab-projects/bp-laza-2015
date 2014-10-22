@@ -102,7 +102,7 @@ def main():
     if (options['file'] and os.path.isfile(options['file'])):
         grass.message("File "+options['file']+" does not exist.")
 
-    if (option['input']): 
+    if options['input']: 
         obj = nnbathy_vector(options['input'])
     else:
         obj = nnbathy_file(options['file'])

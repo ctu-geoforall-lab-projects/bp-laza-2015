@@ -1,5 +1,3 @@
-import grass.script as grass
-
 class nnbathy:
     def __init__(self, name):
         self.name = name
