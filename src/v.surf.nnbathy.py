@@ -92,6 +92,8 @@ TMPcat = None
 TMPXYZ = None
 XYZout = None
 
+
+
 def main():
     if (options['input'] and options['file']):
         grass.fatal("Please specify either the 'input' or 'file' option, not both.")
@@ -102,10 +104,10 @@ def main():
     if (options['file'] and os.path.isfile(options['file'])):
         grass.message("File "+options['file']+" does not exist.")
 
-    if options['input']: 
-        obj = nnbathy_vector(options['input'])
+    if (options['input']): 
+        obj = nnbathy_vector(options)
     else:
-        obj = nnbathy_file(options['file'])
+        obj = nnbathy_file(options)
     
     obj.compute()
     obj.create_output()

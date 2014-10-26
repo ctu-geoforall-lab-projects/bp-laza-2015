@@ -1,12 +1,10 @@
-class nnbathy:
-    def __init__(self, name):
-        self.name = name
-        # self.temp = grass.tempfile
-        self.TMPXYZ = grass.tempfile()
-        self.XYZout = grass.tempfile()
-        self.TMP = grass.tempfile()	
-        self.TMPcat = grass.tempfile()
+import grass.script as grass
+import os
 
+class nnbathy:
+    def __init__(self):
+        # self.temp = grass.tempfile
+        pass
 
     def region(self):
         reg = grass.read_command("g.region", flags='p')
@@ -21,7 +19,7 @@ class nnbathy:
         ewres = float(kv['ewres'])
         reg = (reg_N, reg_W, reg_S, reg_E)
         self.area = (reg_N-reg_S)*(reg_E-reg_W)
-        self.ALG = options['algorithm']
+        self.ALG = 'nn'
 
         # set the working region for nnbathy (it's cell-center oriented)
         self.nn_n = reg_N - nsres/2
@@ -66,7 +64,7 @@ class nnbathy:
         cur_col = 1
         for line in fin:
             parts = line.split(" ")
-            if cur_col == cols:
+            if cur_col == self.cols:
                 cur_col = 0
                 fout.write(str(parts[2]))
             else:
@@ -76,13 +74,13 @@ class nnbathy:
         fout.close()
 
         # 3 import to raster
-        grass.run_command('r.in.ascii', input=self.TMP, output=options['output'], quiet=True)
-        pass
+        grass.run_command('r.in.ascii', input=self.TMP, output=self.options['output'], quiet=True)
+        grass.message("All done. Raster map <%s> created." % self.options['output'])
 
     def __del__(self):
         # cleanup
         if self.TMP:
-            os.remove(self.TMP)
+           os.remove(self.TMP)
         if self.TMPXYZ:
             os.remove(self.TMPXYZ)
         if self.XYZout:
@@ -92,24 +90,34 @@ class nnbathy:
 
 class nnbathy_raster(nnbathy):
     #__init__(self, name):
-    def __init__(name):
-        self._load()
+    def __init__(self, options):
+        self.TMPXYZ = grass.tempfile()
+        self.XYZout = grass.tempfile()
+        self.TMP = grass.tempfile()
+        self.TMPcat = grass.tempfile()
+        self.options = options
+        self._load(options)
 
-    def _load(self):
+    def _load(self, options):
         # nacte vstupni raster
         # r.out.ascii input=self.name
         self.region()
+        self.name = options['output']
         grass.run_command('r.stats', flags='1gn', input=self.name, output=self.TMPXYZ, quiet=True)
         # print self.null
 
 class nnbathy_vector(nnbathy):
-    def __init__(self, name):
-        self._load()
+    def __init__(self, options):
+        self.TMPXYZ = grass.tempfile()
+        self.XYZout = grass.tempfile()
+        self.TMP = grass.tempfile()
+        self.TMPcat = grass.tempfile()
+        self.options = options
+        self._load(options)
 
-    def _load(self):
+    def _load(self, options):
         # nacte vstupni vektor
         self.region()
-
         if int(options['layer']) == 0:
             LAYER = ''
             COLUMN = ''
@@ -121,15 +129,16 @@ class nnbathy_vector(nnbathy):
                 grass.message('Name of z column required for 2D vector maps.')
 
         if options['kwhere']:
-            grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=TMPcat, \
-                              format="point", separator="space", dp=15, where=options['kwhere'], layer=LAYER, columns=COLUMN)
+            grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=self.TMPcat, \
+                              format="point", separator="space", dp=15, where=options['kwhere'], layer=LAYER, \
+                              columns=COLUMN)
         else:
-            grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=TMPcat, \
+            grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=self.TMPcat, \
                               format="point", separator="space", dp=15, layer=LAYER, columns=COLUMN)
 
         if int(options['layer']) > 0:
-            fin = open(TMPcat, 'r')
-            fout = open(TMPXYZ, 'w')
+            fin = open(self.TMPcat, 'r')
+            fout = open(self.TMPXYZ, 'w')
             try:
                 for line in fin:
                     parts = line.split(" ")

@@ -68,7 +68,7 @@ XYZout = None
 TMP = None
 
 def main():
-    obj = nnbathy_raster(options['input'])
+    obj = nnbathy_raster(options)
     obj.compute()
     obj.create_output()
 
