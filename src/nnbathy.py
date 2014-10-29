@@ -1,9 +1,15 @@
 import grass.script as grass
 import os
 
-class nnbathy:
-    def __init__(self):
+class Nnbathy:
+    def __init__(self, options):
         # self.temp = grass.tempfile
+        self.TMPXYZ = grass.tempfile()
+        self.XYZout = grass.tempfile()
+        self.TMP = grass.tempfile()
+        self.TMPcat = grass.tempfile()
+        self.options = options
+        self.region()
         pass
 
     def region(self):
@@ -88,36 +94,26 @@ class nnbathy:
         if self.TMPcat:
             os.remove(self.TMPcat)    
 
-class nnbathy_raster(nnbathy):
+class Nnbathy_raster(Nnbathy):
     #__init__(self, name):
     def __init__(self, options):
-        self.TMPXYZ = grass.tempfile()
-        self.XYZout = grass.tempfile()
-        self.TMP = grass.tempfile()
-        self.TMPcat = grass.tempfile()
-        self.options = options
+        Nnbathy.__init__(self, options)
         self._load(options)
 
     def _load(self, options):
         # nacte vstupni raster
         # r.out.ascii input=self.name
-        self.region()
         self.name = options['output']
         grass.run_command('r.stats', flags='1gn', input=self.name, output=self.TMPXYZ, quiet=True)
         # print self.null
 
-class nnbathy_vector(nnbathy):
+class Nnbathy_vector(Nnbathy):
     def __init__(self, options):
-        self.TMPXYZ = grass.tempfile()
-        self.XYZout = grass.tempfile()
-        self.TMP = grass.tempfile()
-        self.TMPcat = grass.tempfile()
-        self.options = options
+        Nnbathy.__init__(self, options)
         self._load(options)
 
     def _load(self, options):
         # nacte vstupni vektor
-        self.region()
         if int(options['layer']) == 0:
             LAYER = ''
             COLUMN = ''
@@ -152,10 +148,11 @@ class nnbathy_vector(nnbathy):
             grass.message("Z coordinates are used.")
 
 
-class nnbathy_file:
-    def __init__(self, name):
-        self._load()
+class Nnbathy_file:
+    def __init__(self, options):
+        self.options = options
+        self._load(options)
 
-    def _load(self):
+    def _load(self, options):
         # nacte vstupni soubor
-        self.TMPXYZ=self.name
+        self.TMPXYZ=options['file']

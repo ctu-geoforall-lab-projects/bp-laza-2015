@@ -61,14 +61,14 @@ import sys
 
 from grass.script.core import parser
 import grass.script as grass
-from nnbathy import nnbathy_raster
+from nnbathy import Nnbathy_raster
 
 TMPXYZ = None
 XYZout = None
 TMP = None
 
 def main():
-    obj = nnbathy_raster(options)
+    obj = Nnbathy_raster(options)
     obj.compute()
     obj.create_output()
 

@@ -85,7 +85,7 @@ import sys
 from grass.script.core import parser
 import grass.script as grass
 
-from nnbathy import nnbathy_vector
+from nnbathy import Nnbathy_vector, Nnbathy_file
 
 TMP = None
 TMPcat = None
@@ -105,10 +105,10 @@ def main():
         grass.message("File "+options['file']+" does not exist.")
 
     if (options['input']): 
-        obj = nnbathy_vector(options)
+        obj = Nnbathy_vector(options)
     else:
-        obj = nnbathy_file(options)
-    
+        obj = Nnbathy_file(options)
+
     obj.compute()
     obj.create_output()
 
