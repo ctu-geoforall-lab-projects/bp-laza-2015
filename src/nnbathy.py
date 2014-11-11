@@ -1,29 +1,32 @@
 import grass.script as grass
 import os
 
+
 class Nnbathy:
+    # base class
     def __init__(self, options):
-        # self.temp = grass.tempfile
-        self.TMPXYZ = grass.tempfile()
-        self.XYZout = grass.tempfile()
-        self.TMP = grass.tempfile()
-        self.TMPcat = grass.tempfile()
+        self._tmpxyz = grass.tempfile()
+        self._xyzout = grass.tempfile()
+        self._tmp = grass.tempfile()
+        self._tmpcat = grass.tempfile()
         self.options = options
         self.region()
         pass
 
     def region(self):
+        # set the computive region
         reg = grass.read_command("g.region", flags='p')
         kv = grass.parse_key_val(reg, sep=':')
         reg_N = float(kv['north'])
         reg_W = float(kv['west'])
         reg_S = float(kv['south'])
         reg_E = float(kv['east'])
-        self.cols = int(kv['cols'])
-        self.rows = int(kv['rows'])
         nsres = float(kv['nsres'])
         ewres = float(kv['ewres'])
-        reg = (reg_N, reg_W, reg_S, reg_E)
+
+        # set variables
+        self.cols = int(kv['cols'])
+        self.rows = int(kv['rows'])
         self.area = (reg_N-reg_S)*(reg_E-reg_W)
         self.ALG = 'nn'
 
@@ -34,18 +37,19 @@ class Nnbathy:
         self.nn_e = reg_E - ewres/2
         self.null = "NaN"
         self.ctype = "double"
-    
-    def compute(self):
-        # volat nnbathy
-        grass.message('"nnbathy" is performing the interpolation now. This may take some time...')
-        grass.verbose("Once it completes an 'All done.' message will be printed.")
 
-        #nnbathy calling
-        fsock = open(self.XYZout, 'w')
-        #TODO zkontrolovat zarovnani
+    def compute(self):
+        # computing
+        grass.message('"nnbathy" is performing the interpolation now. \
+                      This may take some time...')
+        grass.verbose("Once it completes an 'All done.' \
+                      message will be printed.")
+
+        # nnbathy calling
+        fsock = open(self._xyzout, 'w')
         grass.call(['nnbathy',
                     '-W', '%d' % 0,
-                    '-i', '%s' % self.TMPXYZ,
+                    '-i', '%s' % self._tmpxyz,
                     '-x', '%d' % self.nn_w, '%d' % self.nn_e,
                     '-y', '%d' % self.nn_n, '%d' % self.nn_s,
                     '-P', '%s' % self.ALG,
@@ -53,20 +57,20 @@ class Nnbathy:
                    stdout=fsock)
         fsock.close()
 
-
     def create_output(self):
-        # vytvori vystupni rastr
-        # convert the X,Y,Z nnbathy output into a GRASS ASCII grid, then import with r.in.ascii
+        # create the output raster map
+        # convert the X,Y,Z nnbathy output into a GRASS ASCII grid
+        # then import with r.in.ascii
         # 1 create header
-        header = open(self.TMP, 'w')
-        header.write('north: %s\nsouth: %s\neast: %s\nwest: %s\nrows: %s\ncols: %s\ntype: %s\nnull: %s\n\n' % \
-                         (self.nn_n, self.nn_s, self.nn_e,  self.nn_w, self.rows, self.cols, self.ctype, self.null))
+        header = open(self._tmp, 'w')
+        header.write('north: %s\nsouth: %s\neast: %s\nwest: %s\nrows: %s\ncols: %s\ntype: %s\nnull: %s\n\n' %
+                     (self.nn_n, self.nn_s, self.nn_e,  self.nn_w, self.rows, self.cols, self.ctype, self.null))
         header.close()
 
         # 2 do the conversion
         grass.message("Converting nnbathy output to GRASS raster ...")
-        fin = open(self.XYZout, 'r')
-        fout = open(self.TMP, 'a')
+        fin = open(self._xyzout, 'r')
+        fout = open(self._tmp, 'a')
         cur_col = 1
         for line in fin:
             parts = line.split(" ")
@@ -80,61 +84,70 @@ class Nnbathy:
         fout.close()
 
         # 3 import to raster
-        grass.run_command('r.in.ascii', input=self.TMP, output=self.options['output'], quiet=True)
-        grass.message("All done. Raster map <%s> created." % self.options['output'])
+        grass.run_command('r.in.ascii', input=self._tmp,
+                          output=self.options['output'], quiet=True)
+        grass.message("All done. Raster map <%s> created."
+                      % self.options['output'])
 
     def __del__(self):
         # cleanup
-        if self.TMP:
-           os.remove(self.TMP)
-        if self.TMPXYZ:
-            os.remove(self.TMPXYZ)
-        if self.XYZout:
-            os.remove(self.XYZout)    
-        if self.TMPcat:
-            os.remove(self.TMPcat)    
+        if self._tmp:
+            os.remove(self._tmp)
+        if self._tmpxyz:
+            os.remove(self._tmpxyz)
+        if self._xyzout:
+            os.remove(self._xyzout)
+        if self._tmpcat:
+            os.remove(self._tmpcat)
+
 
 class Nnbathy_raster(Nnbathy):
-    #__init__(self, name):
+    # class for raster input
     def __init__(self, options):
         Nnbathy.__init__(self, options)
         self._load(options)
 
     def _load(self, options):
-        # nacte vstupni raster
-        # r.out.ascii input=self.name
-        self.name = options['output']
-        grass.run_command('r.stats', flags='1gn', input=self.name, output=self.TMPXYZ, quiet=True)
-        # print self.null
+        # load input raster
+        grass.run_command('r.stats', flags='1gn', input=options['input'],
+                          output=self._tmpxyz, quiet=True, overwrite=True)
+
 
 class Nnbathy_vector(Nnbathy):
+    # class for vector input
     def __init__(self, options):
         Nnbathy.__init__(self, options)
         self._load(options)
 
     def _load(self, options):
-        # nacte vstupni vektor
+        # load input vector, initial controls
         if int(options['layer']) == 0:
-            LAYER = ''
-            COLUMN = ''
+            _layer = ''
+            _column = ''
         else:
-            LAYER = int(options['layer'])
+            _layer = int(options['layer'])
             if options['zcolumn']:
-                COLUMN = options['zcolumn']
+                _column = options['zcolumn']
             else:
                 grass.message('Name of z column required for 2D vector maps.')
 
+        # convert vector to ASCII
         if options['kwhere']:
-            grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=self.TMPcat, \
-                              format="point", separator="space", dp=15, where=options['kwhere'], layer=LAYER, \
-                              columns=COLUMN)
+            grass.run_command("v.out.ascii", flags='r', overwrite=1,
+                              input=options['input'], output=self._tmpcat,
+                              format="point", separator="space", dp=15,
+                              where=options['kwhere'], layer=_layer,
+                              columns=_column)
         else:
-            grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=self.TMPcat, \
-                              format="point", separator="space", dp=15, layer=LAYER, columns=COLUMN)
+            grass.run_command("v.out.ascii", flags='r', overwrite=1,
+                              input=options['input'], output=self._tmpcat,
+                              format="point", separator="space", dp=15,
+                              layer=_layer, columns=_column)
 
+        # edit ASCII file, crop out one column
         if int(options['layer']) > 0:
-            fin = open(self.TMPcat, 'r')
-            fout = open(self.TMPXYZ, 'w')
+            fin = open(self._tmpcat, 'r')
+            fout = open(self._tmpxyz, 'w')
             try:
                 for line in fin:
                     parts = line.split(" ")
@@ -144,15 +157,15 @@ class Nnbathy_vector(Nnbathy):
             fin.close()
             fout.close()
         else:
-            # TODO: chyba ?
             grass.message("Z coordinates are used.")
 
 
 class Nnbathy_file:
+    # class for file input
     def __init__(self, options):
         self.options = options
         self._load(options)
 
     def _load(self, options):
-        # nacte vstupni soubor
-        self.TMPXYZ=options['file']
+        # load input file
+        self._tmpxyz = options['file']

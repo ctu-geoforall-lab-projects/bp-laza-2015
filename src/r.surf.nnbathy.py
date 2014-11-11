@@ -56,16 +56,13 @@
 #%end
 
 import os
-import atexit
 import sys
 
 from grass.script.core import parser
 import grass.script as grass
+
 from nnbathy import Nnbathy_raster
 
-TMPXYZ = None
-XYZout = None
-TMP = None
 
 def main():
     obj = Nnbathy_raster(options)
@@ -74,5 +71,4 @@ def main():
 
 if __name__ == "__main__":
     options, flags = parser()
-    # atexit.register(cleanup)
     main()

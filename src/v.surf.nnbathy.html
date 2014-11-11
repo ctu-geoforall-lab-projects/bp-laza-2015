@@ -42,7 +42,7 @@ non-NULL input points have their value exactly preserved in the output.</li>
 <li>There is circa 0.2 KB memory overhead per each <em>input</em> cell.
 However, the <em>output</em> grid can be of any size, if <em>nnbathy</em> is
 built with -DNN_SERIAL switch.</li>
-<li><em>v.surf.nnbathy</em> creates 3 temporary files: ASCII x,y,z lists of
+<li><em>v.surf.nnbathy</em> creates 4 temporary files: ASCII x,y,z lists of
 the input points and output cells, and the output list converted into GRASS ASCII
 format. Then it makes a GRASS raster map from the latter - and only then it
 removes the 3 temp files, when the script terminates. Thus, at the script

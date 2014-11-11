@@ -78,25 +78,20 @@
 #% description: Settings
 #%end
 
-import os
-import atexit
 import sys
+import os
 
 from grass.script.core import parser
 import grass.script as grass
 
 from nnbathy import Nnbathy_vector, Nnbathy_file
 
-TMP = None
-TMPcat = None
-TMPXYZ = None
-XYZout = None
-
-
 
 def main():
+    # initial controls
     if (options['input'] and options['file']):
-        grass.fatal("Please specify either the 'input' or 'file' option, not both.")
+        grass.fatal("Please specify either the 'input' \
+                    or 'file' option, not both.")
 
     if not(options['input'] or options['file']):
         grass.message("Please specify either the 'input' or 'file' option.")
@@ -104,7 +99,8 @@ def main():
     if (options['file'] and os.path.isfile(options['file'])):
         grass.message("File "+options['file']+" does not exist.")
 
-    if (options['input']): 
+    # vector or file input?
+    if (options['input']):
         obj = Nnbathy_vector(options)
     else:
         obj = Nnbathy_file(options)
@@ -114,5 +110,4 @@ def main():
 
 if __name__ == "__main__":
     options, flags = parser()
-    # atexit.register(cleanup)
     main()
