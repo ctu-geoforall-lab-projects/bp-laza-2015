@@ -1,0 +1,755 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[czech, english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[final,pdftex, colorlinks=false]{hyperref}
+\usepackage{xcolor}
+\usepackage{comment}
+\usepackage{todonotes}
+
+\usepackage{listings}			%vkladani kodu
+\lstset{basicstyle=\scriptsize,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue},
+  breaklines=true
+}
+
+%okraje
+\usepackage[
+left=35mm,
+right=25mm,
+top=40mm,
+bottom=35mm]
+{geometry}
+
+\author{Adam Laža}
+
+%%%%%%%%%%Prikazy%%%%%%%%%%
+\renewcommand\baselinestretch{1.3}		%radkovani
+\parskip=0.8ex plus 0.4ex minus 0.1 ex	%mezera mezi odstavci
+
+\newcommand{\keywords}[2]{\noindent\textbf{#1: }#2}
+
+\newcommand{\necislovana}[1]{%
+\phantomsection
+\addcontentsline{toc}{section}{#1}
+\section*{#1}
+\markboth{\uppercase{#1}}{}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%Zahlavi%%%%%%%%%%%
+\usepackage{fancyhdr}
+\fancyhead[L]{ČVUT v~Praze}
+\setlength{\headheight}{16pt}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\pagestyle{empty}
+
+\newpage
+\input{titulbp}
+
+\newpage
+\begin{abstract}
+\bigskip
+Cílem této bakalářské práce je návrh a implementace interpolace metodou přirozeného souseda pro GRASS GIS 7. Starší verze 6 tohoto open-source softwaru sice tuto metodu nabízí v rámci volitelně doinstalovatelných balíčků Add-Ons, ale jako modul napsaný v bashi a s vnitřní závislostí na knihovně \textit{nn-c}. Tato knihovna obsahuje knihovnu \textit{Triangle}, která nedovoluje zařazení tohoto nástroje do oficiální distribuce GRASS GISu.
+
+V rámci této bakalářské práce byl modul přepsán do jazyka Python, tak aby vyhovoval verzi 7. Následně byla vytvořena knihovna, která nevyužívá knihovnu \textit{Triangle}, tak aby mohl tento interpolační nástroj zařazen do oficiální distribude GRASS GISu.
+Část textu této práce se dále zabývá porovnání rychlosti a kvality výstupu mezi GRASS GISem a ostatními gisovými softwary.
+
+\bigskip
+\keywords{Kličová slova}{GIS, GRASS GIS, interpolace, přirozený soused}
+
+\end{abstract}
+
+\selectlanguage{english}
+\begin{abstract}
+\bigskip
+Abstract in english.
+
+\bigskip
+\keywords{Keywords}{GIS, GRASS GIS, natural neighbour interpolation}
+
+\end{abstract}
+\selectlanguage{czech}
+
+\newpage
+\tableofcontents
+
+\newpage
+\pagestyle{fancy}
+
+\necislovana{Úvod}
+V reálném životě se většinou nesetkáváme s případem, kdy pro naši oblast zájmu, ať už se jedná o interval, plochu nebo prostor, máme dostatek bodových dat o daném jevu. Mnohem častěji máme k dispozici pouze soubor bodových dat, která jsou buď náhodně nebo uspořádaně rozmístěna po naší oblasti zájmu. Fyzické zhuštění takovéto sítě a sběr dalších dat může být časově či finančně náročné, příliš obtížné nebo v rámci možností metod zcela nereálné.
+
+Obvykle ovšem potřebujeme znát hodnotu daného jevu i mimo měřené body, nejčastěji pro celé zájmové území. V takovéto chvíli se musíme použít nějaký interpolační nástroj, který vypočte přibližnou hodnotu v území mezi měřenými body. Jako příklad může být uvedeno vytvoření výškopisu, či DMT pro území, kde máme k dispozici data o výšce v pravidelné mřížce nebo teplotní mapa na základě údajů z nepravidelně rozmístěných meteostanic.
+
+V této práci se budu zabývat interpolací přirozeného souseda a její implementací do GRASS GISu 7\footnote{\url{http://grass.osgeo.org}}. 
+
+
+\newpage
+\section{GRASS GIS}
+GRASS (Geographic Resources Analysis Support System) GIS je geografický informační systém pro správu a analýzu prostorových dat, obrazových záznamů, produkci map a grafických výstupů, prostorové modelování a 3D vizualizaci. Na mnoha platformách (GNU/Linux, MS Windows, MAC OS) umožňuje práci s rastrovými i vektorovými daty a to buď pomocí příkazové řádky nebo grafického uživatelského rozhraní. GRASS GIS je otevřený a volně šiřitelný software pod licencí GNU GPL.
+
+Historie\footnote{Praktická rukověť ke geografickému informačnímu systému GRASS \url{http://geo.fsv.cvut.cz/data/grasswikicz/grass_prirucka/grass_prirucka_0.4.pdf}} GRASS GISu začíná v roce 1982, kdy začal být vyvíjen U.S. Army Corps of Enginneer/CERL (Construction Engineering Research Lab) pro vojenské účely. Nicméně koncem osmdesátých let byly veškeré zdrojové kódy dány k dispozici veřejnosti. Na začátku devadesátých let se začal pomocí internetu celosvětově rozšiřovat. V roce 1995 CERL odstoupil od projektu a vývoje se ujal GRASS Development Team, který zahrnoval odborníky z celého světa.
+
+GRASS je jeden z nejznámějších open-source GIS softwarů, jehož vývoj trvá déle než třicet let. Jádro softwaru je napsáno v jazyce C. Avšak snahou vývojářů je rozšíření GRASSu mezi širší odbornou veřejnost a proto v rámci snadnějšího použití jsou do programu začleněny moduly napsané v jazyce Python nebo C. Aktuálně je k dispozici verze 7, na jejímž vývoji se podílí několik vývojářů z řad dobrovolníků po celém světe.
+
+\newpage
+\section{Postup řešení}
+\subsection{Bash}
+Při řešení otázky, jak implementovat metodu přirozeného souseda pro GRASS 7, jsem vycházel z modulu napsaného pro GRASS GIS 6, který jsem měl k dispozici. Jednalo se o modul \textit{v.surf.nnbathy} pro vektorová data. Tento modul byl napsán v Bashi. Pro novou verzi GRASS GISu 7, ve které si vývojáři kladou za cíl zpřístupnit tento software širší veřejnosti, tento modul v Bashi ovšem nebylo možno použít, neboť do nové verze se počítá pouze s moduly v jazyce Python a C.
+
+\subsubsection{v.surf.nnbathy}\footnote{\url{http://svn.osgeo.org/grass/grass-addons/grass6/raster/v.surf.nnbathy/description.html}}
+\textit{v.surf.nnbathy} je modul napsaný v bashi. Slouží jako interface mezi \textit{nnbathy} z externí knihovny \textit{nn-c} a GRASS GISem. \textit{v.surf.nnbathy} nabízí celkem tři algoritmy interpolace. Defaultně je nastaven \textit{Watsonův algoritmus 	pro Sibsonovu interpolaci}. Další možností je \textit{Delaunayova triangulace} a poslední \textit{Bělikovův a Semenovův algoritmus pro nesibsonovu interpolaci}. Pro Delaunayvou triangulaci, která je základem pro všechny tři algoritmy, se využívá knihovny \textit{Triangle} napsanou Jonathanem Richardem Schewchukem. Parametry pro spuštění modulu jsou tyto (nepovinné v hranatých závorkách):
+\begin{description}
+\item[output] Proměnná typu \textit{string}, název výstupní rastrové mapy, jediný povinný parametr.
+\item[input] Proměnná typu \textit{string}, název vstupní vektorové mapy.
+\item[[file]] Proměnná typu \textit{string}, název vstupního souboru.
+\item[[zcolumn]] Proměnná typu \textit{string}, název sloupce z atributové tabulky, jehož data budou použity pro interpolaci.
+\item[[layer]] Proměnná typu \textit{integer}, nastavení, zda se jedná od 2D nebo 3D vektorová data.
+\item[[where]] Proměnná typu \textit{string}, SQL where podmínka.
+\item[[alg]] Proměnná typu \textit{string}, název použitého algoritmu.
+\end{description}
+
+Z výše uvedeného seznamu, lze vidět, že jako vstupní data je možné použít vektorovou mapu nebo textový soubor.
+
+\todo[inline]{TODO Vlozit obrazek vstupni mapy a priklad vstupniho souboru}
+\todo[inline]{Vkladat kod do vlastni prace??, nastaveni listing}
+
+Volání v příkazové řádce pak může vypadata například takto:
+\begin{lstlisting}[language=bash,caption={bash version}]
+user@my_comp:~$ v.surf.nnbathy input=elevation_lid792_randpts@PERMANENT output=raster_map zcolumn=value alg=nn
+\end{lstlisting}
+
+%r.surf v bashi
+\begin{comment}
+\subsubsection{r.surf.nnbathy}\footnote{\url{http://svn.osgeo.org/grass/grass-addons/grass6/vector/r.surf.nnbathy/description.html}}
+Modul \textit{r.surf.nnbathy} pracuje na podobném principu jako modul \textit{v.surf.nnbathy}, jen pro rastrová data. Při volání je možnost použít méně parametrů.
+\begin{description}
+\item[output] Proměnná typu \textit{string}, název výstupní rastrové mapy, jediný povinný parametr.
+\item[input] Proměnná typu \textit{string}, název vstupní vektorové mapy.
+\item[[alg]] Proměnná typu \textit{string}, název použitého algoritmu.
+\end{description}
+
+Volání v příkazové řádce pak může vypadata například takto:
+\begin{lstlisting}[language=bash,caption={bash version}]
+user@my_comp:~$ v.surf.nnbathy input=elevation_lid792_randpts@PERMANENT output=raster_map zcolumn=value alg=nn
+\end{lstlisting}
+\end{comment}
+
+\newpage
+\subsection{Python}
+Jako první krok pro implementaci interpolace přirozeného souseda pro GRASS GIS 7 bylo potřeba stávající modul v bashi přepsat do podporovaného programovacího jazyka. Pro verzi 7 bylo možné napsat moduly buďto v jazyce C nebo Python. Z důvodu nepříliš velké zkušenosti v programování byl pro začátek zvolen jazyk Python, který je pro méně zkušené programátory vice přívětivý. 
+
+\subsubsection{v.surf.nnbathy.py}
+\todo[inline]{Z gitu stahnout kod bez objektu}
+\begin{lstlisting}
+\end{lstlisting}
+
+V následující části této práce bude popsáno jak pythoní modul funguje, jaká jsou vstupní a výstupní data, jaké vytváří dočasné soubory.
+
+\paragraph{Vstupní data}
+Stejně jako původní bashový modul, i tento modul pracuje se vstupními daty buď v podobě textového ASCII souboru nebo vektorové mapy. Textový ASCII s \textit{n} body musí obsahovat \textit{n} řádků a 3 sloupce. V prvních dvou sloupcích je uložen údaj o poloze v podobě x a y souřadnice. Ve třetím sloupci jsou pak uloženy hodnoty veličiny, kterou chceme interpolovat.
+
+%ukazka TMPXYZ
+\begin{lstlisting}
+638234.122902785427868 221198.4894384436775 62.817782000000001
+638755.665974545176141 220976.783764891704777 9.190488000000000
+638729.530741120455787 219988.669646041787928 91.799952000000005
+638088.941303733270615 220228.186909802345326 76.839046999999994
+638158.578729554312304 220794.514421981060877 2.037001000000000
+637781.724264170858078 219988.193243810994318 8.298977000000001
+638359.847223712014966 220692.375897407706361 15.550326000000000
+639137.670258715632372 221096.622500944242347 16.613054999999999
+637783.077698686625808 219603.568831721117022 38.046551000000001
+639157.228799516917206 219692.376464909117203 82.820330999999996
+\end{lstlisting}
+
+Druhou možností vstupních dat je pak vektorová mapa s body. V tomto případě je pak při volání modulu použít parametr \textit{zcolumn}, který určuje z jakého sloupce atributové tabulky se budou brát hodnoty k interpolaci.
+
+
+\paragraph{Funkce region()}
+Každá operace prováděná v GRASS GISu je prováděna pouze na určitém rozsahu území, tzv. \textit{výpočetním regionu}. \textit{Výpočetní region} je určen jako obdélník daný mezními kartografickými souřadnicemi a počtem řádků a sloupců. 
+Funkce \textit{region()} všechna nastavení uloží do proměných. Dále vypočte plochu výpočetního regionu. Na rozdíl od GRASS GISu, který jako mezní kartografické souřadnice bere vnější rohy rohových buněk obdélníku, knihovna \textit{nn-c} používá středy rohových buněk, a proto je třeba nastavení výpočetního regionu opravit o rozlišení buněk.
+
+\begin{lstlisting}[language=python, caption={python version}]
+    def region():
+        # set the region
+        global area, ALG, nn_n, nn_s, nn_w, nn_e, null, ctype, cols, rows
+        reg = grass.read_command("g.region", flags='p')
+        kv = grass.parse_key_val(reg, sep=':')
+        reg_N = float(kv['north'])
+        reg_W = float(kv['west'])
+        reg_S = float(kv['south'])
+        reg_E = float(kv['east'])
+        cols = int(kv['cols'])
+        rows = int(kv['rows'])
+        nsres = float(kv['nsres'])
+        ewres = float(kv['ewres'])
+        reg = (reg_N, reg_W, reg_S, reg_E)
+        area = (reg_N-reg_S)*(reg_E-reg_W)
+        ALG = options['algorithm']
+
+        # set the working region for nnbathy (it's cell-center oriented)
+        nn_n = reg_N - nsres/2
+        nn_s = reg_S + nsres/2
+        nn_w = reg_W + ewres/2
+        nn_e = reg_E - ewres/2
+        null = "NaN"
+        ctype = "double"
+\end{lstlisting}
+
+\paragraph{Funkce initials\_controls()}
+Ve chvíli, kdy je nastavený výpočetní region,můžeme provést úvodní kontroly a přípravy před samotným výpočtem. Zejména zda plocha výpočetního regionu není nulová a je kde provádět interpolaci. Dále je třeba zajistit jednoznačné určení vstupních dat, tedy zda se bude pracovat s ASCII souborem nebo vektorovou mapou, a jejich kontrolu, popřípadě SQL podmínku. Také kontrolujeme zda z knihovny \textit{nn-c} máme nainstalovaný program \textit{nnbathy}, který interpolaci provádí. Také je třeba vytvořit dočasné pomocné soubory, které využijeme při práci s daty. 
+
+V případě, že pracujeme s vektorovou mapu, uložíme informace o bodových datech do dočasného proměnné \textit{TMPcat} pomocí modulu \textit{v.out.ascii}. Výstupem toho modulu je ASCII soubor o \textit{n} řádcích a čtyřech sloupcích. V prvních dvou sloupcích je uložená poloha bodu, ve třetím jeho id a ve čtvrtém hodnota k interpolaci. 
+
+%ukazka souboru TMPcat
+\begin{lstlisting}
+638234.122902785427868 221198.4894384436775 1 62.817782000000001
+638755.665974545176141 220976.783764891704777 2 9.190488000000000
+638729.530741120455787 219988.669646041787928 3 91.799952000000005
+638088.941303733270615 220228.186909802345326 4 76.839046999999994
+638158.578729554312304 220794.514421981060877 5 2.037001000000000
+637781.724264170858078 219988.193243810994318 6 8.298977000000001
+638359.847223712014966 220692.375897407706361 7 15.550326000000000
+639137.670258715632372 221096.622500944242347 8 16.613054999999999
+637783.077698686625808 219603.568831721117022 9 38.046551000000001
+639157.228799516917206 219692.376464909117203 10 82.820330999999996
+\end{lstlisting}
+
+Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné \textit{TMPYZ} si uložíme pouze informace o poloze a hodnotu k interpolaci. V případě, že nepracujeme s vektorovou mapou, ale ASCII souborem, tak tento soubor rovnou uložíme do proměnné \textit{TMPXYZ}.
+
+%kod initial_controls()
+\begin{lstlisting}
+    def initial_controls():
+        # setup temporary files
+        global TMP, TMPcat, XYZout, TMPXYZ
+        TMPXYZ = 'tmpxyz.txt'
+        TMPcat = 'TMPcat.txt'
+        TMP = grass.tempfile()
+        #TMPcat = grass.tempfile()
+        #TMPXYZ = grass.tempfile()
+        XYZout = grass.tempfile()
+
+        if (TMPcat or TMPXYZ or XYZout or TMP) is None:
+            grass.fatal("Unable to create temporary files.")
+
+        # other controls
+        if not grass.find_program('nnbathy'):
+            grass.fatal('nnbathy is not available')
+
+        if (options['input'] and options['file']):
+            grass.message("Please specify either the 'input' or 'file' option, not both.")
+
+        if not(options['input'] or options['file']):
+            grass.message("Please specify either the 'input' or 'file' option.")
+
+        if (options['file'] and os.path.isfile(options['file'])):
+            grass.message("File "+options['file']+" does not exist.")
+
+        if area == 0:
+            grass.fatal(_("xy-locations are not supported"))
+            grass.fatal(_("Need projected data with grids in meters"))
+
+        if not options['file']:
+            if int(options['layer']) == 0:
+                LAYER = ''
+                COLUMN = ''
+            else:
+                LAYER = int(options['layer'])
+                if options['zcolumn']:
+                    COLUMN = options['zcolumn']
+                else:
+                    grass.message('Name of z column required for 2D vector maps.')
+
+            if options['kwhere']:
+                grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=TMPcat, format="point", separator="space", precision=15, where=options['kwhere'], layer=LAYER, columns=COLUMN)
+            else:
+                grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=TMPcat, format="point", separator="space", precision=15, layer=LAYER, columns=COLUMN)
+
+            if int(options['layer']) > 0:
+                fin = open(TMPcat, 'r')
+                fout = open(TMPXYZ, 'w')
+                try:
+                    for line in fin:
+                        parts = line.split(" ")
+                        fout.write(parts[0]+' '+parts[1]+' '+parts[3])
+                except:
+                    grass.message("Invalid input!")
+                fin.close()
+                fout.close()
+            else:
+                grass.message("Z coordinates are used.")
+        else:
+            TMPXYZ = options['file']
+\end{lstlisting}
+
+\paragraph{Funkce compute()}
+V této části kódu je volán program \textit{nnbathy} s následujícími vstupními paramatry:
+\begin{description}
+\item[-w]{proměnná typu double, omezuje extrapolaci přiřezením minimální váhy pro vrchol Delaunayovi sítě. V našem případě nastavena nula, což zamezuje extrapolaci.}
+\item[-i]{proměnná typu string, název vstupního souboru o \textit{n} řádcích, se třemi sloupci, x a y souřadnicí a hodnotou k interpolaci}
+\item[-x]{dvojice $x_min$, $x^max$ typu double, mezní hodnoty výstupní mřížky}
+\item[-y]{dvojice $x_min$, $x^max$ typu double, mezní hodnoty výstupní mřížky}
+\item[-P]{proměnná typu string, použitá metoda interpolace}
+\item[-n]{dvojice double x double, rozlišení výstupní mřížky}
+\end{description}
+
+%ukazka XYZout
+\begin{lstlisting}
+637725 221045 NaN
+637735 221045 NaN
+637745 221045 NaN
+637755 221045 NaN
+637765 221045 NaN
+637775 221045 23.2274425578696
+637785 221045 20.3234644594092
+637795 221045 23.6841650075168
+637805 221045 27.1014688330494
+637815 221045 30.5774260647664
+\end{lstlisting}
+
+Výstupem z \textit{nnbathy} je soubor \textit{XYZout}. Obsahuje data o výstupní mřížce buňku po buňce ve třech sloupcích. V prvních dvou jsou x a y souřadnice, ve třetím vyinterpolovaná hodnota. V případě buňek mimo oblast, kde probíhala interpolace, je ve třetím sloupci uložena hodnota NaN.
+
+%kod compute()
+\begin{lstlisting}
+def compute():
+        grass.message('"nnbathy" is performing the interpolation now. This may take some time...')
+        grass.verbose("Once it completes an 'All done.' message will be printed.")
+
+        #nnbathy calling
+        fsock = open(XYZout, 'w')
+        #TODO zkontrolovat zarovnani
+        grass.call(['nnbathy',
+                         '-W', '%d' % 0,
+                         '-i', '%s' % TMPXYZ,
+                         '-x', '%d' % nn_w, '%d' % nn_e,
+                         '-y', '%d' % nn_n, '%d' % nn_s,
+                         '-P', '%s' % ALG,
+                         '-n', '%dx%d' % (cols, rows)],
+                         stdout=fsock)
+        fsock.close()
+\end{lstlisting}
+
+\paragraph{Funkce convert()}
+Výstupní textový soubor z \textit{nnbathy} je třeba upravit, aby s ním bylo možné dále pracovat v GRASS GISu. Pro další práci slouží dočasný soubor \textit{TMP}. Při vytváření na začátku tohoto souboru vznikne hlavička, která obsahuje data o hranicích, rozlišení, typu a hodnotě null.
+
+%Ukázka hlavičky
+\begin{lstlisting}
+north: 228495.0
+south: 215005.0
+east: 644995.0
+west: 630005.0
+rows: 1350
+cols: 1500
+type: double
+null: NaN
+\end{lstlisting}
+
+Dále je potřeba vybrat vyinterpolované hodnoty jednotlivých buněk ze souboru \textit{XYZout}, kde jsou uloženy ve třetím sloupci na samostatných řádcích, a vložit je do souboru \textit{TMP} v pravidelné mřížce.
+
+%ukázka souboru TMP
+\begin{lstlisting}
+\end{lstlisting}
+
+\paragraph{Funkce import\_to\_raster()}
+
+
+\paragraph{Výstupní data}
+
+\newpage
+\subsection{OOP}
+V průběhu práce na přidání pythoního modulu \textit{v.surf.nnbathy} jsem zjistil, že v GRASS GISu verze 6 je k dispozici také bash modul \textit{r.surf.nnbathy}, který pracuje s rastrovými daty. Jelikož větší část kódu byla pro moduly v.surf.nnbathy a r.surf.nnbathy společná, rozhodl jsem se hlavní výpočetní část spojit. Na místo dvou procedurálních modulů byla objektově vytvořena knihovna \textit{nnbathy.py} a dva moduly \textit{v.surf.nnabthy.py} pro vektorová data a \textit{r.surf.nnbathy.py} pro data rastrová, které knihovnu \textit{nnbathy} volají.
+
+\subsubsection{v.surf.nnbathy}
+V objektově orientovaném modulu pro vektorová data, tak zůstaly úvodní část, která automaticky generuje GUI, úvodní vstupní kontroly a dále if podmínka, která vyhodnocovala, zda vstupují vektorová data v podobě vektorové mapy nebo ASCII souboru.
+
+\subsubsection{r.surf.nnbathy}
+Modul \textit{r.surf.nnbathy} pracuje na podobném principu jako modul \textit{v.surf.nnbathy}, jen pro rastrová data. Při volání je možnost použít méně parametrů.
+\begin{description}
+\item[output] Proměnná typu \textit{string}, název výstupní rastrové mapy, jediný povinný parametr.
+\item[input] Proměnná typu \textit{string}, název vstupní vektorové mapy.
+\item[[alg]] Proměnná typu \textit{string}, název použitého algoritmu.
+\end{description}
+
+Volání v příkazové řádce pak může vypadata například takto:
+\begin{lstlisting}[language=bash,caption={bash version}]
+user@my_comp:~$ v.surf.nnbathy input=elevation_lid792_randpts@PERMANENT output=raster_map zcolumn=value alg=nn
+\end{lstlisting}
+
+I v tomto modulu zůstala část, která vytváří GUI. Protože ale modul pracuje s daty pouze v podobě rastrové mapy nebyly potřeba žádně vstupní kontroly ani if podmínka.
+
+\subsubsection{nnbathy}
+V knihovně nnbathy, které oba moduly volají tedy zůstala hlavní výpočetní část kódu.
+
+
+%r.surf.nnbathy v bashi kod
+\begin{comment}
+\begin{lstlisting}[language=bash,caption={bash version}]
+#!/bin/sh
+
+############################################################################
+#
+# MODULE:     v.surf.nnbathy
+#
+# AUTHOR(S):  Hamish Bowman, Otago University, New Zealand
+#		Based on r.surf.nnbathy by Maciej Sieczka
+#
+# PURPOSE:    Interpolate raster surface using the "nnbathy" natural
+#             neighbor interpolation program.
+#
+# COPYRIGHT:  (c) 2014 Hamish Bowman, Maciej Sieczka, and the GRASS Development Team
+#
+# LICENSE:    This program is free software under the GNU General Public
+#             License (>=v2). Read the file COPYING that comes with GRASS
+#             for details.
+#
+#############################################################################
+
+# NOTES:
+#
+# 1. Requires nnbathy executable v 1.75 or later. Follow the instruction in
+#    html manual page to obtain it.
+#
+# 2. When creating the input raster map, make sure it's extents cover
+#    your whole region of interest, the cells you wish to interplate on are
+#    NULL, and the resolution is correct. Same as most GRASS raster modules
+#    this one is region sensitive too.
+
+
+#%Module
+#% description: Interpolates a raster map using the nnbathy natural neighbor interpolation program.
+#%End
+#%Option
+#% key: input
+#% type: string
+#% gisprompt: old,vector,vector
+#% description: Name of input vector points map
+#% guisection: Selection
+#% required : no
+#%End
+#%Option
+#% key: output
+#% gisprompt: new,cell,raster
+#% type: string
+#% description: Name for output raster map
+#% required : yes
+#%End
+#%Option
+#% key: zcolumn
+#% type: string
+#% required: no
+#% multiple: no
+#% description: Name of the attribute column with values to be used for approximation (if layer>0)
+#% guisection: Selection
+#%End
+#%Option
+#% key: layer
+#% type: integer
+#% required: no
+#% multiple: no
+#% label: Layer number
+#% description: If set to 0, z coordinates are used. (3D vector only)
+#% answer: 1
+#% gisprompt: old_layer,layer,layer_zero
+#% guisection: Selection
+#%End
+#%Option
+#% key: where
+#% type: string
+#% required: no
+#% multiple: no
+#% key_desc: sql_query
+#% label: WHERE conditions of SQL statement without 'where' keyword
+#% description: Example: income < 1000 and inhab >= 10000
+#% guisection: Selection
+#%End
+#%option
+#% key: alg
+#% type: string
+#% options: l,nn,ns
+#% answer: nn
+#% descriptions: l;Linear;nn;Sibson natural neighbor;ns;Non-Sibsonian natural neighbor
+#% description: Interpolation algorithm
+#%End
+#%Option
+#% key: file
+#% type: string
+#% gisprompt: old_file,file,input
+#% label: Name of input text file
+#% description: Containing x,y,z data as three space separated columns
+#% required : no
+#%End
+
+
+if [ -z "$GISBASE" ]; then
+  echo "ERROR: You must be in GRASS GIS to run this program." 1>&2
+  exit 1
+fi
+
+if [ "$1" != "@ARGS_PARSED@" ]; then
+  exec g.parser "$0" "$@"
+fi
+
+if [ -n "$GIS_OPT_INPUT" ] && [ -n "$GIS_OPT_FILE" ] ; then
+  g.message -e "Please specify either the 'input' or 'file' option, not both."
+  exit 1
+fi
+
+if [ -z "$GIS_OPT_INPUT" ] && [ -z "$GIS_OPT_FILE" ] ; then
+  g.message -e "Please specify either the 'input' or 'file' option."
+  exit 1
+fi
+
+if [ -n "$GIS_OPT_FILE" ] && [ ! -e "$GIS_OPT_FILE" ] ; then
+  g.message -e "File '$GIS_OPT_FILE' does not exist."
+  exit 1
+fi
+
+# check if we have awk
+if [ ! -x "`which awk`" ]; then
+  g.message -e '"awk" executable required but not found.'
+  exit 1
+fi
+
+# check if we have nnbathy
+if [ ! -x "`which nnbathy`" ]; then
+  g.message -e '"nnbathy" executable required but not found. Follow the instructions in v.surf.nnbathy manual to install.'
+  exit 1
+fi
+
+# check nnbathy version
+nnv=`nnbathy -v | sed 's/ /\n/g' | sort -nr | head -n1`
+nnv_ok=`echo $nnv | awk '{ if ($0<1.76) {print 0} else {print 1} }'`
+
+if [ $nnv_ok -eq 0 ]; then
+  g.message -e '"nnbathy" version >= 1.76 is required.'
+  exit 1
+fi
+
+# set up temporary files
+TMP="`g.tempfile pid=$$`"
+if [ $? -ne 0 ] || [ -z "$TMP" ]; then
+  g.message -e 'Unable to create temporary files.' 1>&2
+  exit 1
+fi
+
+# set environment so that awk works properly in all languages
+unset LC_ALL
+LC_NUMERIC=C
+export LC_NUMERIC
+
+PROG=`basename $0`
+
+# define cleanup procedure
+proc_cleanup() {
+  # Reset traps before normal script termination to avoid bogus ERROR message, as
+  # we put a trap on signal 0.
+  trap - 0 2 3 15 
+  rm -f "$TMP" "$TMP.$PROG.input_xyz" "$TMP.$PROG.output_xyz" "$TMP.$PROG.output_grd"
+}
+
+# define run-time error handling procedure
+proc_runtime_error() {
+  g.message -e "There was an error at the script's run time. Please try to debug the problem if you can and let the GRASS developers know."
+  exit 1
+}
+
+# define user-break procedure
+proc_user_break() {
+  g.message -e "User break!"
+  proc_cleanup
+  exit 1
+}
+
+# set trap for when script terminates
+trap "proc_runtime_error" 0
+
+# trap user break
+trap "proc_user_break" 2 3 15
+
+
+# assign main variables from user's input
+INPUT="$GIS_OPT_INPUT"
+OUTPUT="$GIS_OPT_OUTPUT"
+ALG="$GIS_OPT_ALG"
+
+
+### DO IT ###
+
+# Make script terminate (ie. emit signal 0) if any statement returns a
+# non-0 value. Then we trap signal 0, which lets handle such errors.
+# However, the trap on signal 0 must be reset before normal script
+# termination to avoid a bogus ERROR message then - this is done in the
+# cleanup procedure.
+set -e
+
+# grab the current region settings
+eval `g.region -gu`
+
+if [ -n "$GIS_OPT_INPUT" ] ; then
+  # spit out coords + values to be interpolated
+  ## FIXME: check if data is 3D or use output column
+  # column=  (slow!!)
+  TMPXYZ="$TMP.$PROG.input_xyz"
+  
+  if [ "$GIS_OPT_LAYER" -eq 0 ] ; then
+    # 3D vector points
+    LAYER=""
+    COLUMN=""
+  else
+    LAYER="layer=$GIS_OPT_LAYER"
+    if [ -n "$GIS_OPT_ZCOLUMN" ] ; then
+      COLUMN="columns=$GIS_OPT_ZCOLUMN"
+    else
+      g.message -e "Name of z column required for 2D vector maps."
+      exit 1
+    fi
+  fi
+
+  if [ -n "$GIS_OPT_WHERE" ] ; then
+    v.out.ascii -r input="$INPUT" output="$TMPXYZ" format=point fs=space \
+       dp=15 where="$GIS_OPT_WHERE" $LAYER $COLUMN
+  else
+    v.out.ascii -r input="$INPUT" output="$TMPXYZ" format=point fs=space \
+       dp=15 $LAYER $COLUMN
+  fi
+
+  if [ "$GIS_OPT_LAYER" -gt 0 ] ; then
+    # crop away the cat column
+    mv "$TMPXYZ" "$TMPXYZ.cat"
+    cut -f1,2,4 -d' ' "$TMPXYZ.cat" > "$TMPXYZ"
+    rm "$TMPXYZ.cat"
+  fi
+
+else
+  TMPXYZ="$GIS_OPT_FILE"
+fi
+
+
+# set the working region for nnbathy (it's cell-center oriented)
+nn_n=`echo $n | awk -v res="$nsres" '{printf "%.8f", $1 - res/2.0}'`
+nn_s=`echo $s | awk -v res="$nsres" '{printf "%.8f", $1 + res/2.0}'`
+nn_w=`echo $w | awk -v res="$ewres" '{printf "%.8f", $1 + res/2.0}'`
+nn_e=`echo $e | awk -v res="$ewres" '{printf "%.8f", $1 - res/2.0}'`
+
+null="NaN"
+type="double"
+
+
+#### interpolate
+g.message '"nnbathy" is performing the interpolation now. This may take some time.'
+g.message "Once it completes an 'All done.' message will be printed."
+
+
+nnbathy -W 0 -P alg="$ALG" -n "${cols}x${rows}" \
+	-x "$nn_w" "$nn_e" -y "$nn_n" "$nn_s" \
+	-i "$TMPXYZ" \
+       > "$TMP.$PROG.output_xyz"
+
+
+# Y in "r.stats -1gn" output is in descending order, thus -y must be in
+# MAX MIN order, not MIN MAX, for nnbathy not to produce a grid upside-down
+
+# convert the X,Y,Z nnbathy output into a GRASS ASCII grid, then import with r.in.ascii:
+
+# 1 create header
+cat << EOF > "$TMP.$PROG.output_grd"
+north: $n
+south: $s
+east: $e
+west: $w
+rows: $rows
+cols: $cols
+null: $null
+type: $type
+EOF
+
+# 2 do the conversion
+g.message "Converting nnbathy output to GRASS raster ..."
+
+awk -v cols="$cols" '
+BEGIN {col_cur=1; ORS=" "}
+{
+ if (col_cur==cols) {ORS="\n"; col_cur=0; print $3; ORS=" "}
+		    else {print $3}
+ col_cur++
+}' "$TMP.$PROG.output_xyz" >> "$TMP.$PROG.output_grd"
+
+# 3 import
+r.in.ascii input="$TMP.$PROG.output_grd" output="$OUTPUT" --quiet
+
+# store comand history in raster's metadata
+
+if [ -n "$GIS_OPT_INPUT" ] ; then
+  r.support map="$OUTPUT" history="v.surf.nnbathy alg=$ALG input=$INPUT output=$OUTPUT"
+  #TODO: layer= where= zcolumn=
+else
+  r.support map="$OUTPUT" history="v.surf.nnbathy alg=$ALG input=$FILE output=$OUTPUT"
+fi
+r.support map="$OUTPUT" history=""
+r.support map="$OUTPUT" history="nnbathy run syntax:"
+r.support map="$OUTPUT" history=""
+r.support map="$OUTPUT" history="nnbathy -W 0 -P alg=$ALG -n ${cols}x$rows "
+r.support map="$OUTPUT" history="-x $nn_w $nn_e "
+r.support map="$OUTPUT" history="-y $nn_n $nn_s "
+r.support map="$OUTPUT" history="-i tmp_in > tmp_out"
+r.support map="$OUTPUT" history=""
+
+### ALL DONE ###
+
+proc_cleanup
+
+g.message "Done. <$GIS_OPT_OUTPUT> created."
+
+\end{lstlisting}
+\end{comment}
+
+
+
+\newpage
+\section{Interpolace přirozeným sousedem}
+
+\todo[inline]{Prostudovat a probrat s T. Bayerem, po te opravit a doplnit!}
+
+\subsection{Thiessenovy polygony}
+\textit{Thiessenovy polygony} jsou sice samostatnou interpolační metodou, \textit{metoda přirozeného souseda} (MPS) je však využívá jako základ pro výpočet vah a proto bude jejich výpočet zmíněn i zde.
+
+\textit{Thiessenovy polygony} známé taky jako \textit{Voronoiovy diagramy} jsou definovány takto: Nechť V je množina \textit{n} bodů v rovině. Rovinu rozdělíme na \textit{n} oblastí \textit{R} takových, že $R_i$ obsahuje všechny body z $E^2$, pro něž je bod $p_i  \in V$ nejbližší soused. Toto rozdělení roviny se nazývá Voronoiův diagram (VD) množiny bodů.
+
+Nechť \textbf{A} = {$A_1,...,A_n$} je množina \textit{n} bodů. Voronoiův diagram $A_i$ je:\newline
+$V(A_i)={X \in R^d : |X-A_i| \le |X-A_j| \forall _j = 1,...,n},$\newline kde $|X-A|$ vyjadřuje Eukleidovskou vzdálenost mezi body $X,A$ v prostoru $R^d$
+
+VD má následující vlastnosti. Všechny oblasti jsou konvexní a oblast $R_i$ obsahuje jediný bod $p_i \in V$. Některé oblasti jsou neohraničené. Tyto obsahují body $p_i \in CH(V)$. Počet hran a uzlů VD je přímo úměrný počtu bodů v množině \textit{V}. Pokud žádné 4 body neleží na kružnici, uzly mají stupeň 3. Uzel VD leží ve středu kružnice určené 3 body z \textit{V}, které leží v přilehlých oblastech VD a neleží na přímce.
+\bigskip
+\textbf{Algoritmus konstrukce Voronoiova diagramu}
+
+Množinu \textit{n} bodů v rovině rozdělíme svislou přímkou na dvě stejně velké podmnožiny \textit{V1} a \textit{V2}. Při dosažení malého počtu bodů zkonstruujeme VD1 a VD2 rozdělených množin , jinak dělení rekurzivně opakujeme. Po vyřešení dílčích VD spojujeme dvojice VD následujícím způsobem:
+
+Nechť VD1 a VD2 kspi dva vypočítáné Voronoiovy diagramy množin oddělených hraniční svislou přímkou. Pro jejich spojení využijeme skutečnosti, že hrany výsledného VD patří buď zcela do VD1 nebo VD2, nebo leží na osách úseček, spojujících body z V1 a V2 (tzv. bisektory). Tyto hrany tvoří řetěz, který je monotónní ve směru osy \textit{y}.
+
+Nalezneme konvexní obal sjednocených množin \textit{V1} a \textit{V2}. Nový konvexní obal obsahuje úsečky tečné k původním konvexním obalům. Sestrojíme bisektory těchto tečných úseček.
+
+Nechť \textit{l} je bisektor horní úsečky, určené vrcholykonvexního obalu. Přímka \textit{l} leží současně v oblastech $R_i \subset VD1$ a $R_j \subset VD2$. Určíme místo, ve kterém \textit{l} opustí buď oblast $R_i$ nebo $R_j$  a vstoupí do oblasti $R_k$. Oblast $R_k$ patří buď k VD1, nebo k VD2 a obsahuje bod $p_k$. Na hranici ukončíme hranu \textit{l} a vytvoříme novou hranu, která leží na bisektoru bodů $p_k$ a zbývajícího bodu $p_i$ nebo $p_j$ (pokud opustíme oblast $R_j$ nebo $R_i$). 
+
+Směrem dolů vytváříme další hrany VD a algoritmus ukončíme, pokud dosáhneme spodní polopřímkové hrany.
+
+\textbf{Delaunayova triangulace}
+
+Nechť \textit{V} je množina \textit{n} bodů. Předpokládáme, že žádné 4 body z \textit{V} neleží na kružnici. Pokud propojíme všechny sousední body určené Voronoiovým diagramem úsečkami, dostaneme triangulační síť, kterou studoval Delaunay v roce 1935. Tato triangulace je výhodná např. pro interpolaci, neboť minimalizuje délky hran trojúhelníků a zpřesňuje tak výpočty přírůstků. 
+
+\subsection{Samotná interpolace}
+MPS může být použita i pro bod \textit{x}, který není součástí množiny \textit{A}. V tomto případě přirození sousedé bodu \textit{A} jsou body z množiny \textit{A},jejichž Voronoiovy diagramy by byly pozměneny v případě, že by bod \textit{A} byl vložen do VD(\textit{S}).
+
+Průnik \textit{x} vytvoří nový VD, který "ukrade" plochu VD, které by byly jeho přirozenými sousedy. 
+
+
+\end{document}

@@ -1,0 +1,49 @@
+\begin{center}
+%napisy
+\newcommand{\napisCVUT}{České vysoké učení technické v Praze}
+\newcommand{\napisFS}{Fakulta stavební}
+\newcommand{\napisObor}{Obor geodézie, kartografie a geoinformatika}
+\newcommand{\napisKatedra}{Katedra geomatiky}
+\newcommand{\napisVedouci}{Vedoucí práce: Ing. Martin Landa, Ph.D.}
+\newcommand{\napisAutor}{Adam Laža}
+\newcommand{\napisDatum}{Praha 2015}
+\newcommand{\napisNazevI}{Interpolace metodou přirozeného souseda}
+\newcommand{\napisNazevAjI}{Natural neighbour interpolation}
+\newcommand{\napisBakalarka}{Bakalářská práce}
+\newcommand{\napisPraha}{Praha 2015}
+%
+% prikazy
+%\newcommand{\velka}[1]{\uppercase{#1}}
+\newcommand{\velka}[1]{\textsc{#1}}
+%
+% 
+\newif\ifpatitul
+\patitultrue
+
+\ifpatitul
+{\Large\velka{\napisCVUT}}\\
+\velka{\Large\napisFS}\\
+\vfill
+{\LARGE\velka{\napisBakalarka}}
+\vfill
+{\large\napisPraha\hfill\napisAutor}
+\newpage
+\fi%patitul
+
+
+{\Large\velka{\napisCVUT}}\\
+{\Large\velka{\napisFS}}\\
+{\Large\velka{\napisObor}}
+\vfill
+\includegraphics[width=3cm]{logo_cvut_cb} %~
+\vfill
+{\Large\velka{\napisBakalarka}}\\
+\Large\velka{\napisNazevI}\\
+\large\velka{\napisNazevAjI}
+\vfill
+{\large%
+\napisVedouci\\
+\napisKatedra\\
+\bigskip
+\napisDatum\hfill\napisAutor}
+\end{center}
