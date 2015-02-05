@@ -1,6 +1,7 @@
 *.aux
 *.log
 *.out
-bp-laza.pdf
-bp-laza.synctex.gz
+adam-laza-bp-2015.pdf
+*.synctex.gz
 *.toc
+*~
