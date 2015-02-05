@@ -1,0 +1,6 @@
+*.aux
+*.log
+*.out
+bp-laza.pdf
+bp-laza.synctex.gz
+*.toc
