@@ -58,23 +58,23 @@ bottom=35mm]
 \newpage
 \begin{abstract}
 \bigskip
-Cílem této bakalářské práce je návrh a implementace interpolace metodou přirozeného souseda pro GRASS GIS 7. Starší verze 6 tohoto open-source softwaru sice tuto metodu nabízí v rámci volitelně doinstalovatelných balíčků Add-Ons, ale jako modul napsaný v bashi a s vnitřní závislostí na knihovně \textit{nn-c}. Tato knihovna obsahuje knihovnu \textit{Triangle}, která nedovoluje zařazení tohoto nástroje do oficiální distribuce GRASS GISu.
+Cílem této bakalářské práce je návrh a implementace nástroje pro interpolaci metodou přirozeného souseda pro GRASS GIS 7. Starší verze GRASS GIS 6 sice tuto metodu nabízí v rámci volitelně doinstalovatelných balíčků Add-Ons, ale jako modul napsaný v Bashi a s vnitřní závislostí na knihovně \textit{nn-c}. Tato knihovna obsahuje knihovnu \textit{Triangle}, která nedovoluje zařazení tohoto nástroje do oficiální distribuce GRASS GISu.
 
-V rámci této bakalářské práce byl modul přepsán do jazyka Python, tak aby vyhovoval verzi 7. Následně byla vytvořena knihovna, která nevyužívá knihovnu \textit{Triangle}, tak aby mohl tento interpolační nástroj zařazen do oficiální distribude GRASS GISu.
+V rámci této bakalářské práce byl modul přepsán do jazyka Python, tak aby vyhovoval verzi 7. Práce se dále zabývá možnostmi budoucí implementace knihovny v jazyce C bez závislosti na knihovně \textit{Triangle}, tak aby mohl tento interpolační nástroj zařazen do oficiální distribude GRASS GISu.
 Část textu této práce se dále zabývá porovnání rychlosti a kvality výstupu mezi GRASS GISem a ostatními gisovými softwary.
 
 \bigskip
-\keywords{Kličová slova}{GIS, GRASS GIS, interpolace, přirozený soused}
+\keywords{Klíčová slova}{GIS, GRASS GIS, interpolace, přirozený soused, Delaunayho triangulace, Voronoiovy polygony}
 
 \end{abstract}
 
 \selectlanguage{english}
 \begin{abstract}
 \bigskip
-Abstract in english.
+The aim of this bachelor thesis is the project and the implementation of a tool for a natural neighbour interpolation pro GRASS GIS 7. Previous version GRASS GIS 6 contains such a tool as a optional package of Add-Ons, but this modul is written in Bash and with inner dependency on \textit{nn-c} library. Due to this library contains \textit{Triangle} library which is not under the GNU GPL licence it is not possible to add the interpolation tool into official GRASS GIS distribution.
 
 \bigskip
-\keywords{Keywords}{GIS, GRASS GIS, natural neighbour interpolation}
+\keywords{Keywords}{GIS, GRASS GIS, natural neighbour interpolation, Delaunay triangulation, Voronoi's polygons}
 
 \end{abstract}
 \selectlanguage{czech}
@@ -950,6 +950,45 @@ Nechť \textit{V} je množina \textit{n} bodů. Předpokládáme, že žádné 4
 MPS může být použita i pro bod \textit{x}, který není součástí množiny \textit{A}. V tomto případě přirození sousedé bodu \textit{A} jsou body z množiny \textit{A},jejichž Voronoiovy diagramy by byly pozměneny v případě, že by bod \textit{A} byl vložen do VD(\textit{S}).
 
 Průnik \textit{x} vytvoří nový VD, který "ukrade" plochu VD, které by byly jeho přirozenými sousedy. 
+
+\newpage
+\section{Delaunayova triangulace}
+Interpolace metodou přirozeného souseda vychází z Delanayovi triangulace(DT) či Voronoiových diagramů(VD). Jak DT či VD jsou důležité konstrukce ve výpočetní geometrii. Delaunayova triangulace lze odvodit z Voronoiových diagramů a stejně tak Voronoivy diagramy se dají naopak odvodit z Dalunayovi triangulace.
+
+\subsection{Triangulace obecně}
+Triangulace se dá využít pro znázornění geometrie nebo jiných prostorových informací. V GIS systémech se triangulace využívá pro vyjádření povrchu, své uplatnění najde také v počítačové grafice a vizualizaci.
+
+V našem případě budeme triangulaci provádět uvnitř takzvaného \textit{konvexního obalu}. Konvexní obal množiny bodů P je takový obal, který obsahuje všechny body množiny bodů P, má co nejmenší plochu a zároveň ve kterém spojnice mezi kterýmikoliv body množiny bodů P leží uvnitř obalu.
+\todo[inline]{obrazek konvex hullu, domeny}
+
+V podstatě by se dalo říct, že triangulace je jakákoliv náhodná siť mezi body v prostoru. Tato práce se však bude zabývat triangulační sítí se specifickými vlastnostmi.
+
+
+\begin{enumerate}
+\item Žádný z trojúhelníků $t_ijk$ není zdegenerovaný, tzn. že vrcholy \textit{i,j,k} neleží na přímce.
+\item Žádná dvojice trojůhelníků se nepřekrývá, tzn $Int(t_ijk) \cap Int(t_lmn) = \emptyset$
+\item Hranice dvou trojúhelníků se setkávají pouze na jejich hranách nebo v jejich vrcholech.
+\item Sjednocení všech trojúhelníků v celé triangulační síti se rovná celé doméně $\omega$, nad kterou triangulaci provádíme.
+\item Doména $\omega$ musí být spojitá.
+\item Triangulační síť nesmí obsahovat díry.
+\item Jestliže vrchol $v_i$ leží na hranici konvexního obalu, pak musí exitovat právě dvě hraniční hrany, které mají vrchol $v_i$ jako společný vrchol. To mimo jiné znamená, že počet hraničních vrcholů je roven počtu hraničních hran.
+\end{enumerate}
+
+
+Pokud jsou naplněny první čtyři podmínky, může se triangulace nazvat \textit{validní}. V případě, že naplníme všech sedm podmínek, dá se mluvit o \textit{regulérní} triangulaci.
+
+
+\subsection{Optimální triangulace}
+
+Nad doménou $\omega$ neexistuje pouze jediná triangulační síť, v závislosti na počtu bodů v množině a jejich konfiguraci existuje poměrně velké množství možností, jak bude triangulační síť vypadat. Ne všechny triangulace jsou však vhodné k dalšímu zpracovávání, a právě proto je snaha najít \textit{optimální} triangulaci.
+
+Při řešení otázky, jak vypadá optimální triangulace, je zásadní zamyslet se nad tvarem trojúhelníků. V ideálním případě by byly všechny trojúhelníky rovnostranné, leč tento případ se v případě náhodně roztroušených dat nevyskytuje.
+
+Při tvorbě optimální triangulace se tedy problém řeší z opačného konce. Zásadní snahou při tvorbě sítě by mělo být vyhýbání se podlouhlým, štíhlým nebo téměř degenerovaným trojúhelníkům. 
+
+\paragraph{MaxMin podmínka}
+
+Pokud nad množinou bodů P provedeme všechny možné triangulace, můžeme nejoptimálnější triangulaci určit pomocí MaxMin podmínky. V případě MaxMin podmínky je pro každou možnou triangulaci nalezen největší minimální vnitřní úhel trojúhelníku a ten je porovnán s největším minimálním úhel ostatních triangulací. Triangulace, která splňuje MaxMin podmínku, a je provedena uvnitř konvexního obalu se nazýva Delaunayova triangulace.
 
 
 \end{document}
