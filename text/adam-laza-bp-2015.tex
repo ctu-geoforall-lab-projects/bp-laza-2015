@@ -124,8 +124,8 @@ V našem případě budeme triangulaci provádět uvnitř takzvaného \textit{ko
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.6\textwidth]{../img/body.png}}{\caption{Soubor bodů}}{\label{fig:soubor_bodu}}
-\ffigbox{\includegraphics[width=0.6\textwidth]{../img/domain.png}}{\caption{Konvexní obal nad doménou $\Omega$ }}{\label{fig:domena}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{../img/body.png}}{\caption{Soubor bodů}}{\label{fig:soubor_bodu}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{../img/domain.png}}{\caption{Konvexní obal nad doménou $\Omega$ }}{\label{fig:domena}}
 \end{floatrow}
 \end{figure}
 
@@ -197,8 +197,8 @@ Problém nastává ve chvíli, kdy některé body, mezi kterými chceme triangul
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.6\textwidth]{../img/minmax1.png}}{\caption{Případ1}}{\label{fig:neutral_case_1}}
-\ffigbox{\includegraphics[width=0.6\textwidth]{../img/minmax2.png}}{\caption{Případ2}}{\label{fig:neutral_case_2}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{../img/minmax1.png}}{\caption{Případ1}}{\label{fig:neutral_case_1}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{../img/minmax2.png}}{\caption{Případ2}}{\label{fig:neutral_case_2}}
 \end{floatrow}
 \end{figure}
 
@@ -207,11 +207,23 @@ Nejčastěji tento jev nastává u čtyřúhelníků, jejichž všechny vrcholy 
 \newpage
 \section{Voronoiovy diagramy}
 
-Voronoiovy diagramy úzce souvisí s Delaunayovou triangulací. Představme si opět množinu bodů $P = \{p_1,...p_N\} $ v prostoru a nechť je $d(p_i,p_j) $ Eukleidovská vzdálenost mezi body $p_i$ a $p_j$. Po té každému bodu $p_i$v množině $P$ přiřadíme takovou oblast, která splňuje následující podmínku: 
+Voronoiovy diagramy úzce souvisí s Delaunayovou triangulací. Představme si opět množinu bodů $P = \{p_1,...p_N\} $ v rovině $E^2$ a nechť je $d(p_i,p_j) $ Eukleidovská vzdálenost mezi body $p_i$ a $p_j$. Rovinu po té rozdělíme na oblasti $V(p_i,...,p_N)$, kde každému bodu $p_i$ z množiny $P$ přiřadíme takovou oblast, která splňuje následující podmínku: 
 
 $V(p_i) = \{ x: d(x, p_i) < d(x, p_j), j = 1,...,N\}$.
 
-Pro každou takovouto oblast přiřazenou bodu $p_i$ po té platí, že všechny body uvnitř této oblasti jsou k bodu $p_i$ blíž než ke kterémukoliv jinému bodu z množiny $P$ a takovouto oblast nazýváme \textit{Voronoiův polygon}.
+Pro každou takovouto oblast přiřazenou bodu $p_i$ po té platí, že všechny body uvnitř této oblasti jsou k bodu $p_i$ blíž než ke kterémukoliv jinému bodu z množiny $P$. Toto rozdělení roviny se nazývá \textit{Voronoiův diagram (VD)} množiny bodů
+
+\bigskip
+Voronoiův diagram má následující vlastnosti: 
+\begin{enumerate}
+\item Voronoiův diagram pro množinu bodů je pouze jeden.
+\item Všechny oblasti jsou konvexní.
+\item Oblast $V(p_i)$ obsahuje jediný bod $p_i \in P$.
+\item Oblasti na okraji jsou neohraničené.
+\item Počet hran a uzlů je přímo úměrný počtu bodů v množině P.
+\item Pokud žádné 4 body neleží na kružnici, uzly mají stupeň 3.
+\item Uzel leží ve středu kružnice určené 3 body z P, které leží v přilehlých oblastech a neleží na přímce.
+\end{enumerate}
 
 \begin{figure}[h!]
 \centering
@@ -220,14 +232,53 @@ Pro každou takovouto oblast přiřazenou bodu $p_i$ po té platí, že všechny
 \label{fig:vor_pol}
 \end{figure}
 
+Nechť $H(p_i,P_j)$ je polorovina obsahující všechny body v rovině, jejichž vzdálenost od bodu $p_i$ je menší než od bodu $p_j$. Potom Voronoiova oblast $V(p_i)$ je průnikem N-1 polorovin,
+$V(p_i)= \bigcap\limits_{\substack{j=1,...,N \\ i\not=j}}H(p_i,p_j)$, kde každá oblast má maximálně N-1 stran.
 
+Z Obrázku \ref{fig:vor_pol} je vidět, že oblasti přiřazené pro body na okraji konvexního obalu nejsou zcela ohraničené a uzavřené. Jednotlivé hranice oblastí nazýváme \textit{Voronoiovi polygony}, které jsou složeny z takzvaných \textit{Voronoiových hran a bodů}. O dvou bodech $p_j$ a $p_k$ můžeme tvrdit, že jsou \textit{Voronoiovi sousedé}, pokud oblasti, kterým náleží, sdílí společnou \textit{Voronoiovu hranu}. 
 
+Občas se můžeme setkat i s označením \textit{Thiessenovy polygony} podle klimatologa Thiessena, který Voronoiovi diagramy používal k interpolaci klimatických dat z náhodně distribuovaných meteorologických stanic.
 
+\newpage
+\subsection{Voronoiovy diagramy a Delaunayova triangulace}
 
+Konstrukce VD a DT jsou vzájemně duální, to znamená, že jedna může bát odvezena od druhé a naopak. 
+Pokud pro množinu bodů v rovině provedeme rozdělení do Voronoiových diagramů a následně spojíme úsečkami všechny Voronoiovi sousedy získáme Delaunayovu triangulaci.
 
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.45\textwidth]{../img/vd_vor.png}}{\caption{Voronoiův diagram souboru bodů}}{\label{fig:vd_vor}}
+\ffigbox{\includegraphics[width=0.45\textwidth]{../img/vd_del.png}}{\caption{Voronoiův diagram a Delaunayova trinagulace}}{\label{fig:vd_del}}
+\end{floatrow}
+\end{figure}
+
+Na Obrázku \ref{fig:vd_vor} můžeme vidět Voronoiův diagram pro množinu bodů. Pokud každou dvojici Voronoiových sousedů spojíme spojnicí, jak je vidět na Obrázku \ref{fig:vd_del} získáme několik trojúhelníků, které se nepřekrývají a tvoří trojúhelníkovou síť. Spojnice mezi body, které jsou přiřazeny k neuzavřeným oblastím, tvoří konvexní obal. Pro trojúhelníkovou síť uvnitř tohoto konvexního obalu se jedná o Delaunayovu triangulaci.
+
+Trojúhelníky této sítě se nazývají \textit{Delaunayovi trojúhelníky}, které jsou tvořeny spojnicemi tzv. \textit{Delaunayvými hranami}. Dále je také zřejmé, že Voronoiovy hrany leží na ose Delaunayových hran.
+
+\todo[inline]{Circle criterion}
+
+\newpage
+\section{Algoritmy pro tvorbu Delaunayovi triangulace}
+\subsection{LOP}
+\subsection{Jednoduchý algoritmus}
+\subsection{Paprskovitý algoritmus}
+\subsection{Algoritmus Step-by-Step}
+\subsection{Incrementální algoritmus}
+\subsection{Algoritmus Rozděl a panuj}
+\subsection{Vkládání bodu}
+\subsection{Prohození hran}
 
 \newpage
 \section{Datové struktury}
+\subsection{Minimální trojúhelníková struktura}
+\subsection{Trojúhelníková struktura se sousedy}
+\subsection{Vertex-based struktura se sousedy}
+\subsection{Half-edge datová struktura}
+\subsection{Winged-edge datová struktura}
+\subsection{Dart-based datová struktura}
+
 
 \newpage
 \section{Postup řešení}
