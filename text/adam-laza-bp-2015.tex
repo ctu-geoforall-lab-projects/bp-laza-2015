@@ -261,9 +261,38 @@ Trojúhelníky této sítě se nazývají \textit{Delaunayovi trojúhelníky}, k
 
 \newpage
 \section{Algoritmy pro tvorbu Delaunayovi triangulace}
-\subsection{LOP}
+\subsection{Lokální optimalizace}
+\textit{Lokální optimalizace (LO)} je proces přetvoření stávající triangulace v novou, optimálnější. Proces je prováděn pomocí prohazování hran na základě Kruhové nebo MaxMin podmínky. 
+
+Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čtyřúhelník tvořený dvěma trojúhelníky se společnou hranou $e_i$. Pomineme možnost, že čtyřúhelník je nekonvexní nebo že všechny body leží na kružnici. Po té za použití MaxMin nebo Kruhové podmínky rozhodněme, zda je třeba prohodit hranu $e_i$. V případě, že po použití Lokální optimalizace není potřeba prohodit hranu, můžeme ji prohlásit za lokálně optimální. V případě, že  budeme lokální optimalizaci používat opakovaně pro všechny hrany v triangulaci, dokud nebudou všechny hrany lokálně optimální, získáme optimální triangulaci.
+
+1. proveď náhodnou regulérni triangulaci $\Delta$ množiny bodů $P$
+2. if je $\Delta$ lokálně optimální
+	stop
+3. zvol vnitřní hranu $e_i$ trinagulace $\Delta$
+4. pokud je $e_i$ lokálně optimální
+	goto 3.
+5. prohoď $e_i$ za $e_i^1$ (přetvoř triangulaci $\Delta$ v triangulaci $\Delta^1$)
+6. přiřaď $\Delta$:=$\Delta$
+7. goto 2
+
+
 \subsection{Jednoduchý algoritmus}
+Tento algoritmus je poměrně jednoduchý a snadný na implementaci, obzvlášť pokud je zvolena vhodná datová struktura. Nicméně není příliš optimální, co se týče času běhu a v kroku 3 může kumulovat podlouhlé čí téměř degenerované trojúhelníky, což vede k nestabilitě. 
+
+1. vytvoř konvexní obal množiny bodů $P$
+2. vlož jeden z vnitřních bodů množiny $P$ a vytvoř počáteční triangulaci $\Delta_1$
+3. opakovaně vkládej vnitřní body množiny $P$ a pokaždé vytvoř novou triangulaci $\Delta$
+4. použij LO dokud nebudou všechny hrany lokálně optimální
+
 \subsection{Paprskovitý algoritmus}
+
+Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný postup, jak nalézt počáteční triangulaci $\Delta_1$.
+
+1. Najdi bod $p$ poblíž středu množiny $P$ a paprskovitě ho spoj s ostatními body.
+2. Seřaď body {P/p} podle orientace a vzdálenosti od bodu $p$ a v tomto pořadí je spoj hranami. 
+3. Vytvoř trojúhelník mezi třemi body ($p_{i-1}$,$p_i$,$p_{i+1}$) na hranici triangulace. Opakuj tak dlouho dokud nemůže být přídán další trojúhelník. Vznikne triangulace mezi všemi body a s konvexním obalem.
+4. použij LO dokud nebudou všechny hrany lokálně optimální
 \subsection{Algoritmus Step-by-Step}
 \subsection{Incrementální algoritmus}
 \subsection{Algoritmus Rozděl a panuj}
