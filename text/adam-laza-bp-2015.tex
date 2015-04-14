@@ -266,14 +266,24 @@ Trojúhelníky této sítě se nazývají \textit{Delaunayovi trojúhelníky}, k
 
 Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čtyřúhelník tvořený dvěma trojúhelníky se společnou hranou $e_i$. Pomineme možnost, že čtyřúhelník je nekonvexní nebo že všechny body leží na kružnici. Po té za použití MaxMin nebo Kruhové podmínky rozhodněme, zda je třeba prohodit hranu $e_i$. V případě, že po použití Lokální optimalizace není potřeba prohodit hranu, můžeme ji prohlásit za lokálně optimální. V případě, že  budeme lokální optimalizaci používat opakovaně pro všechny hrany v triangulaci, dokud nebudou všechny hrany lokálně optimální, získáme optimální triangulaci.
 
+\todo[inline]{Jak psát pseudokód??}
+
 1. proveď náhodnou regulérni triangulaci $\Delta$ množiny bodů $P$
+
 2. if je $\Delta$ lokálně optimální
+
 	stop
+	
 3. zvol vnitřní hranu $e_i$ trinagulace $\Delta$
+
 4. pokud je $e_i$ lokálně optimální
+
 	goto 3.
+	
 5. prohoď $e_i$ za $e_i^1$ (přetvoř triangulaci $\Delta$ v triangulaci $\Delta^1$)
+
 6. přiřaď $\Delta$:=$\Delta$
+
 7. goto 2
 
 
@@ -281,29 +291,107 @@ Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čty�
 Tento algoritmus je poměrně jednoduchý a snadný na implementaci, obzvlášť pokud je zvolena vhodná datová struktura. Nicméně není příliš optimální, co se týče času běhu a v kroku 3 může kumulovat podlouhlé čí téměř degenerované trojúhelníky, což vede k nestabilitě. 
 
 1. vytvoř konvexní obal množiny bodů $P$
+
 2. vlož jeden z vnitřních bodů množiny $P$ a vytvoř počáteční triangulaci $\Delta_1$
+
 3. opakovaně vkládej vnitřní body množiny $P$ a pokaždé vytvoř novou triangulaci $\Delta$
+
 4. použij LO dokud nebudou všechny hrany lokálně optimální
+
 
 \subsection{Paprskovitý algoritmus}
 
 Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný postup, jak nalézt počáteční triangulaci $\Delta_1$.
 
 1. Najdi bod $p$ poblíž středu množiny $P$ a paprskovitě ho spoj s ostatními body.
+
 2. Seřaď body {P/p} podle orientace a vzdálenosti od bodu $p$ a v tomto pořadí je spoj hranami. 
+
 3. Vytvoř trojúhelník mezi třemi body ($p_{i-1}$,$p_i$,$p_{i+1}$) na hranici triangulace. Opakuj tak dlouho dokud nemůže být přídán další trojúhelník. Vznikne triangulace mezi všemi body a s konvexním obalem.
-4. použij LO dokud nebudou všechny hrany lokálně optimální
+
+4. použij LO dokud nebudou všechny hrany lokálně optimální.
+
 \subsection{Algoritmus Step-by-Step}
-\subsection{Incrementální algoritmus}
+
+Tento postup tvoří triangulaci postupně, trojúhelník po trojúhelníku. Na začátku jsou vybrány dva body, které jsou sami sobě Voronoiovými sousedy a mezi nimi je vytvořena základní Delaunayova hrana. K této hraně se nalezne další bod, tak aby vyhovoval kruhové podmínce a který společně s hranou vytvoří Delaunayův trojúhelník. Ze vzniklé triangulace se vybere další hrana na okraji triangulace a ta je dále považována za základní a opět pro ni hledáme bod, který vytvoří další trojúhelník a celý postup se opakuje. Postup se ukončí ve chvíli, když narazíme na hranu konvexního obalu a není žádná další hrana, pro kterou bychom mohli najít bod k připojení.
+
+Základní vlastnost toho postupu je, že se v každém kroku ke stávající triangulaci připojí další bod a triangulaci tak rozšíří. Vznikající triangulace je už v procesu tvoření Delaunayova a není tedy třeba žádné následující optimalizace.
+
+\subsection{Inkrementální algoritmus}
+
+Tento postup na rozdíl od těch předchozích není statický. Nepotřebuje tedy na vstupu znát všechny body z množiny $P$. V tomto postupu si na vstupu vystačíme s počáteční triangulací, což může být jeden čí více trojúhelníků nebo triangulace konvexního obalu. Do počáteční triangulace postupně vkládáme jednotlivé body z množiny $P$. Na pořadí vkládání bodů záleží pouze z hlediska operačního času, na samotnou tvorbu triangulace nemá pořadí vliv. Pro nově vložený bod přetvoříme triangulaci a upravíme ji tak, aby byla Delaunayovská. 
+
 \subsection{Algoritmus Rozděl a panuj}
-\subsection{Vkládání bodu}
-\subsection{Prohození hran}
+
+Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovské triangulaci nabízí nejlepší výsledky, co se výkonnosti týče. Tento přístup je založený na jednoduchých krocích:
+
+1. Rekurzivní dělení množiny bodů $P$ až do stavu, kdy se pro podmnožinu nabízí jednoduché geometrické řešení.
+
+2. Vytvoření prozatimní triangulace, která nemusí být Delaunayovská.
+
+3. Připojení ke stávající triangulaci a její legalizace na Delaunayovskou.
+
 
 \newpage
 \section{Datové struktury}
-\subsection{Minimální trojúhelníková struktura}
+
+Existuje mnoho různých datových struktur pro uložení topologických informací o triangulační síti. Každá nabízí nějaké výhody a uživatel většinou musí řešit dva problémy. Jednak požadavky na uložení dat a pak dostatečnou efektivitu při získávání informací ze struktury.
+
+\todo[inline]{Obrázek menší triangulace}
+
+\subsection{Jednoduchá trojúhelníková struktura}
+Tato struktura ukládá informace v nejjednodušší podobě. Pracuje pouze s trojicemi id jednotlivých vrcholů trojúhelníků v seznamu nebo v poli.
+
+\begin{tabular}{|c||c|c|c|}
+\hline
+Trojúhelník & i & j & k\\
+\hline
+1 & 1 & 7 & 2\\
+2 & 2 & 7 & 4\\
+3 & 2 & 4 & 3\\
+4 & 7 & 6 & 4\\
+5 & 6 & 6 & 5\\
+5 & 5 & 1 & 6\\
+\hline
+\end{tabular}
+
+
 \subsection{Trojúhelníková struktura se sousedy}
+
+Tato struktura přináší rozšíření o informaci, s kterými trojúhelníky daný trojúhelník sousedí. K zapotřebí je tedy další seznam, který obsahuje id trojúhelníku.
+
+\begin{tabular}{|c||c|c|c||c|c|c|}
+\hline
+Trojúhelník & i & j & k & $t_{j,k}$ & $t_{k,i}$ & $t_{i,j}$\\
+\hline
+1 & 1 & 7 & 2 & 2 & - & 6\\
+2 & 2 & 7 & 4 & 4 & 3 & 1\\
+3 & 2 & 4 & 3 & - & - & 2\\
+4 & 7 & 6 & 4 & 5 & 2 & 6\\
+5 & 6 & 6 & 5 & - & - & 4\\
+5 & 5 & 1 & 6 & - & 4 & 1\\
+\hline
+\end{tabular}
+
+
 \subsection{Vertex-based struktura se sousedy}
+
+Vertex-based struktura se sousedy je poměrně úsporná struktura, co se objemu dat týče. Ke každému vrcholu $v_i$ v síti jsou uloženy do seznamu sousedů vrcholy, které jsou s ním spojené. V případě že $v_i$ leží na konvexním obalu je seznam sousedů ukončen 'pseudovrcholem'. 
+
+\begin{tabular}{|c||c|c|c|c|c|c||c|}
+\hline
+Vrchol & \multicolumn{6}{|c||}{Sousedé} & Suma sousedů\\
+\hline
+1 & 6 & 7 & 2 & 0 &   &   & 4\\
+2 & 1 & 7 & 4 & 3 & 0 &   & 9\\
+3 & 2 & 4 & 0 &   &   &   & 12\\
+4 & 3 & 2 & 7 & 6 & 5 & 0 & 18\\
+5 & 4 & 6 & 0 &   &   &   & 21\\
+6 & 5 & 4 & 7 & 1 & 0 &   & 26\\
+7 & 6 & 4 & 2 & 1 &   &   & 30\\
+\hline
+\end{tabular}
+
 \subsection{Half-edge datová struktura}
 \subsection{Winged-edge datová struktura}
 \subsection{Dart-based datová struktura}
@@ -515,6 +603,13 @@ Tato třída slouží pro vektorová vstupní data a je dědičná z rodičovsk�
 
 \paragraph{Třída Nnbathy\_file}
 Tato třída slouží pro vstupní data v podobě ASCII souboru a je dědičná z rodičovské třídy Nnbathy.
+
+\newpage
+\section{Srovnání GRASSu a ostatních softwarů}
+
+
+
+
 \begin{comment}
 \newpage
 \section{Interpolace přirozeným sousedem}
