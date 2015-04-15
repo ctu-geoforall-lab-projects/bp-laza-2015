@@ -11,6 +11,7 @@
 \usepackage{comment}
 \usepackage{todonotes}
 \usepackage{floatrow}
+\usepackage{multirow}
 
 \usepackage{listings}			%vkladani kodu
 \lstset{basicstyle=\scriptsize,
@@ -335,62 +336,74 @@ Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovs
 \newpage
 \section{Datové struktury}
 
-Existuje mnoho různých datových struktur pro uložení topologických informací o triangulační síti. Každá nabízí nějaké výhody a uživatel většinou musí řešit dva problémy. Jednak požadavky na uložení dat a pak dostatečnou efektivitu při získávání informací ze struktury.
+Existuje mnoho různých datových struktur pro uložení topologických informací o triangulační síti. Každá nabízí nějaké výhody a uživatel většinou musí řešit dva problémy. Jednak požadavky na dostatečnou kapacitu pro uložení dat a pak dostatečnou efektivitu při získávání informací ze struktury.
 
 \todo[inline]{Obrázek menší triangulace}
 
-\subsection{Jednoduchá trojúhelníková struktura}
-Tato struktura ukládá informace v nejjednodušší podobě. Pracuje pouze s trojicemi id jednotlivých vrcholů trojúhelníků v seznamu nebo v poli.
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{../img/struct_triangulace.png}
+\label{fig:struct_triangulace}
+\end{figure}
 
+\subsection{Jednoduchá trojúhelníková struktura}
+Tato struktura ukládá informace v nejjednodušší podobě. Pracuje pouze s trojicemi id jednotlivých vrcholů trojúhelníků v seznamu nebo v poli. Trojúhelníky jsou seřazeny vzestupně podle id, zatímco na pořadí uložených vrcholů nezáleží. Struktura je velmi nenáročná, co se požadavků na kapacitu týče, nicméně toto je vykoupené tím, že nemáme k dispozici žádnou informaci, který trojúhelník sousedí s kterým.
+
+\begin{table}[h]
+\catcode`\-=12
 \begin{tabular}{|c||c|c|c|}
 \hline
-Trojúhelník & i & j & k\\
-\hline
-1 & 1 & 7 & 2\\
-2 & 2 & 7 & 4\\
-3 & 2 & 4 & 3\\
-4 & 7 & 6 & 4\\
-5 & 6 & 6 & 5\\
-5 & 5 & 1 & 6\\
-\hline
+\multirow{2}{*}{Trojúhelník} & \multicolumn{3}{c|}{Vrcholy} \\ \cline{2-4} 
+                             & i        & j       & k       \\ \hline \hline
+1                            & 4        & 6       & 5       \\ \hline
+2                            & 7        & 6       & 4       \\ \hline
+3                            & 1        & 6       & 7       \\ \hline
+4                            & 2        & 7       & 4       \\ \hline
+5                            & 2        & 4       & 3       \\ \hline
+6                            & 2        & 1       & 7       \\ \hline
 \end{tabular}
+\end{table}
+
 
 
 \subsection{Trojúhelníková struktura se sousedy}
 
 Tato struktura přináší rozšíření o informaci, s kterými trojúhelníky daný trojúhelník sousedí. K zapotřebí je tedy další seznam, který obsahuje id trojúhelníku.
 
+\begin{table}[h]
+\catcode`\-=12
 \begin{tabular}{|c||c|c|c||c|c|c|}
 \hline
-Trojúhelník & i & j & k & $t_{j,k}$ & $t_{k,i}$ & $t_{i,j}$\\
-\hline
-1 & 1 & 7 & 2 & 2 & - & 6\\
-2 & 2 & 7 & 4 & 4 & 3 & 1\\
-3 & 2 & 4 & 3 & - & - & 2\\
-4 & 7 & 6 & 4 & 5 & 2 & 6\\
-5 & 6 & 6 & 5 & - & - & 4\\
-5 & 5 & 1 & 6 & - & 4 & 1\\
-\hline
+\multirow{2}{*}{Trojúhelník} & \multicolumn{3}{|c|}{Vrcholy} & \multicolumn{3}{|c|}{Sousedé}      \\ \cline{2-7} 
+                             & i        & j       & k       & $t_{j,k}$ & $t_{k,i}$ & $t_{i,j}$ \\ \hline \hline
+1                            & 4        & 6       & 5       & -         & -         & 2         \\ \hline
+2                            & 7        & 6       & 4       & 1         & 4         & 3         \\ \hline
+3                            & 1        & 6       & 7       & 2         & 6         & -         \\ \hline
+4                            & 2        & 7       & 4       & 2         & 5         & 6         \\ \hline
+5                            & 2        & 4       & 3       & -         & -         & 4         \\ \hline
+6                            & 2        & 1       & 7       & 3         & 4         & -         \\ \hline
 \end{tabular}
+\end{table}
 
 
 \subsection{Vertex-based struktura se sousedy}
 
 Vertex-based struktura se sousedy je poměrně úsporná struktura, co se objemu dat týče. Ke každému vrcholu $v_i$ v síti jsou uloženy do seznamu sousedů vrcholy, které jsou s ním spojené. V případě že $v_i$ leží na konvexním obalu je seznam sousedů ukončen 'pseudovrcholem'. 
 
+\begin{table}[h]
+\catcode`\-=12
 \begin{tabular}{|c||c|c|c|c|c|c||c|}
 \hline
-Vrchol & \multicolumn{6}{|c||}{Sousedé} & Suma sousedů\\
-\hline
-1 & 6 & 7 & 2 & 0 &   &   & 4\\
-2 & 1 & 7 & 4 & 3 & 0 &   & 9\\
-3 & 2 & 4 & 0 &   &   &   & 12\\
-4 & 3 & 2 & 7 & 6 & 5 & 0 & 18\\
-5 & 4 & 6 & 0 &   &   &   & 21\\
-6 & 5 & 4 & 7 & 1 & 0 &   & 26\\
-7 & 6 & 4 & 2 & 1 &   &   & 30\\
-\hline
+Vrchol & \multicolumn{6}{|c|}{Sousední vrcholy} & Suma vrcholů \\ \hline \hline
+1      & 6    & 7    & 2    & 0    &     &     & 4            \\ \hline
+2      & 1    & 7    & 4    & 3    & 0   &     & 9            \\ \hline
+3      & 2    & 4    & 0    &      &     &     & 12           \\ \hline
+4      & 3    & 2    & 7    & 6    & 5   & 0   & 18           \\ \hline
+5      & 4    & 6    & 0    &      &     &     & 21           \\ \hline
+6      & 5    & 4    & 7    & 1    & 0   &     & 26           \\ \hline
+7      & 6    & 4    & 2    & 1    &     &     & 30           \\ \hline
 \end{tabular}
+\end{table}
 
 \subsection{Half-edge datová struktura}
 \subsection{Winged-edge datová struktura}
