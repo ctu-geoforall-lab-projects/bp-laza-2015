@@ -123,14 +123,14 @@ Triangulace $\Delta$ nad množinou bodu $P$ představuje takové planární rozd
 
 Libovolné dva trojúhelníky $t_i$,$t_j \in \Delta, (i \neq j)$, mají společnou nejvýše hranu.
 
-Sjednocení všech trojúhelníků $t \in \Delta$ tvoří $\Omega$.
+Sjednocení všech trojúhelníků $t \in \Delta$ tvoří doménu $\Omega$.
 
 Uvnitř žádného trojúhelníku neleží žádný další bod z P.
 
 \bigskip
 Triangulace má širokou škálu aklikací. V kartografii a GISech se využívá pro tvorbu DMT. V DPZ lze využít pro tvorbu prostorových modelů, své uplatnění najde také v počítačové grafice a vizualizaci prostorových dat a mnoho dalších.
 
-V našem případě budeme triangulaci provádět uvnitř takzvaného \textit{konvexního obalu}. Konvexní obal množiny bodů P je takový obal, který obsahuje všechny body množiny bodů P, má co nejmenší plochu a ve kterém zároveň spojnice mezi kterýmikoliv body množiny bodů P leží uvnitř obalu.
+V našem případě budeme triangulaci provádět uvnitř takzvaného \textit{konvexního obalu}. Konvexní obal množiny bodů $P$ představuje takový konvexní mnohoúhelník, který obsahuje všechny body množiny bodů P, má co nejmenší plochu a ve kterém zároveň spojnice mezi kterýmikoliv body množiny bodů $P$ leží uvnitř obalu.
 \todo[inline]{obrazek konvex hullu, domeny}
 
 \begin{figure}[h!]
@@ -191,20 +191,26 @@ Na Obrázku \ref{fig:triangulace} už můžeme vidět validní a regulérní tri
 \newpage
 \subsection{Optimální triangulace}
 
-Nad doménou $\Omega$ neexistuje pouze jediná trojúhelníková síť, v závislosti na počtu bodů v množině a jejich konfiguraci existuje poměrně velké množství možností, jak bude trojúhelníková síť vypadat. Ne všechny sítě jsou však vhodné k dalšímu zpracovávání, a právě proto je snaha najít \textit{optimální} triangulaci.
+Nad doménou $\Omega$ neexistuje pouze jediná trojúhelníková síť, v závislosti na počtu bodů v množině a jejich konfiguraci existuje poměrně velké množství možností, jak může trojúhelníková síť vypadat. Ne všechny sítě jsou však vhodné k dalšímu zpracovávání, a právě proto je snaha najít \textit{optimální} triangulaci.
 
 Při řešení otázky, jak vypadá optimální triangulace, je zásadní zamyslet se nad tvarem trojúhelníků. V ideálním případě by byly všechny trojúhelníky rovnostranné, leč tento případ se v případě náhodně roztroušených dat nevyskytuje.
 
 Při tvorbě optimální triangulace se tedy problém řeší z opačného konce. Zásadní snahou při tvorbě sítě by mělo být vyhýbání se podlouhlým, štíhlým nebo téměř degenerovaným trojúhelníkům, tedy trojúhelníkům s příliš ostrými nebo s příliš tupými úhly. 
 
+\paragraph{Kruhová podmínka}
+Definice:
+Nechť hrana $\overline{p_ip_j}$ inciduje s trojúhelníkem $t_1$ tvořeným vrcholy $p_i,p_j,p_k$ a trojúhelníkem $t_2$ tvořeným vrcholy $p_i,p_j,p_l$ a kružnice $k$ procházející body $p_i,p_j,p_k$. Hrana $\overline{p_ip_j}$ je nelegální tehdy a právě jen tehdy, jestliže bod $p_l$ leží uvnitř $k$.
+
+Pokud tedy bod $p_l$ leží uvnitř kružnice $k$, je hrana $\overline{p_ip_j}$ a tedy diagonála čtyřúhelníku nelegální, stejně tak jako oba trojúhelníky $t_1$ a $t_2$. K jejich legalizaci je provést tzv. \textit{Edge swaping}.
+
 \paragraph{MaxMin a MinMax úhlová podmínka}
 
-Pokud nad množinou bodů P provedeme všechny možné triangulace, můžeme nejoptimálnější triangulaci určit pomocí MaxMin popř. MinMax podmínky. V případě MaxMin podmínky je pro každou možnou triangulaci nalezen největší minimální vnitřní úhel trojúhelníku a ten je porovnán s největším minimálním úhel ostatních triangulací. U MinMax podmínky se postupuje obdobně, pouze se porovnávají nejmenší maximální vnitřní úhly trojúhelníků.
+Pokud nad množinou bodů P provedeme všechny možné triangulace, můžeme nejoptimálnější triangulaci určit pomocí MaxMin popř. MinMax podmínky. V případě MaxMin podmínky je pro každou možnou triangulaci nalezen největší minimální vnitřní úhel trojúhelníku a ten je porovnán s největším minimálním úhel ostatních triangulací, což vede k eliminaci trojúhelníků s velmi tupými úhly. U MinMax podmínky se postupuje obdobně, pouze se porovnávají nejmenší maximální vnitřní úhly trojúhelníků a eliminují se tak trojúhelníky s velmi ostrými úhly.
 
 \todo[inline]{Vložit definici?}
 \todo[inline]{úhel alfa a triangulace s čarou}
 MinMax podmínka:
-Eliminace trojúhelníku s příliš tupými úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl od triangulace $\Delta^{'}(P)$ optimální, je–li největší úhel $\alpha$ generovaný triangulací $\Delta(P)$ menší než největší úhel $\alpha^{'}$ generovaný triangulací $\Delta^{'}(P)$.
+Eliminace trojúhelníků s příliš tupými úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl od triangulace $\Delta^{'}(P)$ optimální, je–li největší úhel $\alpha$ generovaný triangulací $\Delta(P)$ menší než největší úhel $\alpha^{'}$ generovaný triangulací $\Delta^{'}(P)$.
 
 $\alpha_{max} = max(\alpha_i(\Delta))$
 
@@ -214,7 +220,7 @@ $\alpha_{max} < \alpha^{'}_{max}$
 
 \bigskip
 MaxMin podmínka:
-Eliminace trojúhelníku s příliš ostrými úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl od triangulace $\Delta^{'}(P)$ optimální, je–li nejmenší úhel $\alpha$ generovaný triangulací $\Delta(P)$ větší než nejmenší úhel $\alpha^{'}$ generovaný triangulací $\Delta^{'}(P)$.
+Eliminace trojúhelníků s příliš ostrými úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl od triangulace $\Delta^{'}(P)$ optimální, je–li nejmenší úhel $\alpha$ generovaný triangulací $\Delta(P)$ větší než nejmenší úhel $\alpha^{'}$ generovaný triangulací $\Delta^{'}(P)$.
 
 $\alpha_{min} = min(\alpha_i(\Delta))$
 
@@ -222,22 +228,22 @@ $\alpha^{'}_{min} = min(\alpha_i^{'}(\Delta))$
 
 $\alpha_{min} > \alpha^{'}_{min}$
 
-\paragraph{Neutrální případ pro jednu z úhlových podmínek}
+\paragraph{Neutrální případ pro MaxMin podmínku}
 
 Problém nastává ve chvíli, kdy některé body, mezi kterými chceme triangulaci provést, leží na kružnici nebo se tomu limitně blíží. v takových chvílí nastává takzvaný neutrální případ pro MaxMin podmínku. V některých případech to může vést k nejednoznačnému určení, která z triangulací je optimální a musíme si pomoci hodnocením na základě nejen MaxMin ale i MinMax podmínky.
 
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{../img/minmax1.png}}{\caption{Případ1}}{\label{fig:neutral_case_1}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{../img/minmax2.png}}{\caption{Případ2}}{\label{fig:neutral_case_2}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{../img/minmax2.png}}{\caption{Případ1}}{\label{fig:neutral_case_1}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{../img/minmax1.png}}{\caption{Případ2}}{\label{fig:neutral_case_2}}
 \end{floatrow}
 \end{figure}
 \todo[inline]{Obrázky z GRASSu, jak udělat skutečnou kružnici, označení úhlů}
-Nejčastěji tento jev nastává u čtyřúhelníků, jejichž všechny vrcholy leží na kružnici. Jak můžeme vidět na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} v obou případech je maximální minimální úhel triangulace obvodový úhel nejkratší strany čtyřúhelníku. V tomto případě se tedy jedná o neutrální případ pro MaxMin podmínku. Pokud bychom tedy triangulaci vyhodnocovali pouze na základě MaxMin podmínky mohly bychom obě triangulace prohlásit za optimální. Už od pohledu je ale zřejmé, že lepší tvar trojúhelníků poskytujeme triangulace nalevo. Pokud ale triangulace hodnotíme i s ohledem na MinMax podmínknu, můžeme prokázat, že triangulace nalevo je optimální.
+Nejčastěji tento jev nastává u čtyřúhelníků, jejichž všechny vrcholy leží na kružnici. Jak můžeme vidět na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} v obou případech je maximální minimální úhel triangulace obvodový úhel nejkratší strany čtyřúhelníku. V tomto případě se tedy jedná o neutrální případ pro MaxMin podmínku. Pokud bychom tedy triangulaci vyhodnocovali pouze na základě MaxMin podmínky mohly bychom obě triangulace prohlásit za optimální. Už od pohledu je ale zřejmé, že lepší tvar trojúhelníků poskytujeme triangulace nalevo. Pokud ale triangulace hodnotíme i s ohledem na MinMax podmínknu, můžeme prokázat, že triangulace na Obrázku \ref{fig:neutral_case_2} je optimální.
 
 \paragraph{Edge swaping, legalizace}
-
+Na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} jsme si ukázali případ neutrálního případu pro MinMax podmínku. Proces, při kterém jsme zaměnili diagonálu čtyřúhelníku tak, aby byli oba trojúhelníky lokálně optimální, se nazýva \textit{Edge swaping.} Pokud budeme tento proces aplikovat pro celou triangulaci dojde k takzvané \textit{legalizaci} triangulace.
 
 \newpage
 \section{Voronoiovy diagramy}
@@ -246,7 +252,7 @@ Voronoiovy diagramy úzce souvisí s Delaunayovou triangulací. Představme si o
 
 $V(p_i) = \{ x: d(x, p_i) < d(x, p_j), j = 1,...,N\}$.
 
-Pro každou takovouto oblast přiřazenou bodu $p_i$ po té platí, že všechny body uvnitř této oblasti jsou k bodu $p_i$ blíž než ke kterémukoliv jinému bodu z množiny $P$. Toto rozdělení roviny se nazývá \textit{Voronoiův diagram (VD)} množiny bodů
+Pro každou takovouto oblast přiřazenou bodu $p_i$ po té platí, že všechny body uvnitř této oblasti jsou k bodu $p_i$ blíž než ke kterémukoliv jinému bodu z množiny $P$. Toto rozdělení roviny se nazývá \textit{Voronoiův diagram (VD)} množiny bodů a každá uzavřená buňka se nazývá \textit{Voronoiova buňka.}
 
 \bigskip
 Voronoiův diagram má následující vlastnosti: 
@@ -277,7 +283,7 @@ Občas se můžeme setkat i s označením \textit{Thiessenovy polygony} podle kl
 \newpage
 \subsection{Voronoiovy diagramy a Delaunayova triangulace}
 
-Konstrukce VD a DT jsou vzájemně duální, to znamená, že jedna může bát odvezena od druhé a naopak. 
+DT je planární graf, který je duální k VD. Jedna konstrukce tedy může být odvozena od druhé a naopak. 
 Pokud pro množinu bodů v rovině provedeme rozdělení do Voronoiových diagramů a následně spojíme úsečkami všechny Voronoiovi sousedy získáme Delaunayovu triangulaci.
 
 \begin{figure}[h!]
@@ -292,7 +298,6 @@ Na Obrázku \ref{fig:vd_vor} můžeme vidět Voronoiův diagram pro množinu bod
 
 Trojúhelníky této sítě se nazývají \textit{Delaunayovi trojúhelníky}, které jsou tvořeny spojnicemi tzv. \textit{Delaunayvými hranami}. Dále je také zřejmé, že Voronoiovy hrany leží na ose Delaunayových hran.
 
-\todo[inline]{Circle criterion}
 
 \newpage
 \section{Algoritmy pro tvorbu DT}
@@ -442,11 +447,11 @@ Základní vlastnost toho postupu je, že se v každém kroku ke stávající tr
 
 Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovské triangulaci nabízí nejlepší výsledky, co se výkonnosti týče. Tento přístup je založený na jednoduchých krocích:
 
-1. Rekurzivní dělení množiny bodů $P$ až do stavu, kdy se pro podmnožinu nabízí jednoduché geometrické řešení.
+1. Rekurzivní dělení množiny bodů $P$ až do stavu, kdy se pro podmnožinu nabízí jednoduché geometrické řešení. Při postupném dělení množiny $P$ se nakonec dostaneme do stavu, kdy nám zbudou buď tři body, v tom případě vytvoříme trojúhelník, nebo dva body, kdy vytvoříme hranu.
 
 2. Vytvoření prozatimní triangulace, která nemusí být Delaunayovská.
 
-3. Připojení ke stávající triangulaci a její legalizace na Delaunayovskou.
+3. Připojení ke stávající triangulaci a její legalizace na Delaunayovskou. Právě propojování podmnožin na jednotlivých vrstvách je nejnáročnější část tohoto algoritmu.
 
 
 \newpage
@@ -524,6 +529,9 @@ Vrchol & \multicolumn{6}{|c|}{Sousední vrcholy} & Suma vrcholů \\ \hline \hlin
 \subsection{Half-edge datová struktura}
 \subsection{Winged-edge datová struktura}
 \subsection{Dart-based datová struktura}
+
+\newpage
+\section{Interpolace metodou přirozeného souseda}
 
 
 \newpage
