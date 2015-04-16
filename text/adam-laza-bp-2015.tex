@@ -308,13 +308,13 @@ Triangulační algoritmy jsou poměrně dobře matematicky prozkoumaná oblast, 
 Vhodný algoritmus je třeba vybírat na základe datových struktur a konkrétním případu. Ne vždy lze dokonale splnit všechny požadavky, např. jednoduché implementace mají delší výpočetní čas. Naopak algoritmy s kratším výpočetním časem jsou dost náročné na implementaci.
 
 \subsection{Lokální optimalizace}
-\textit{Lokální optimalizace (LO)} je proces přetvoření libovolné triangulace DT. Proces je prováděn pomocí prohazování nelegálních hran v dvojicích trojúhelníků tvořících konvexní čtzřúhelník na základě Kruhové nebo MaxMin podmínky.
+\textit{Lokální optimalizace (LO)} je proces přetvoření libovolné triangulace DT. Proces je prováděn pomocí prohazování nelegálních hran v dvojicích trojúhelníků tvořících konvexní čtyřúhelník na základě Kruhové nebo MaxMin podmínky.
 
 Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čtyřúhelník tvořený dvěma trojúhelníky se společnou hranou $e_i$. Pomineme možnost, že čtyřúhelník je nekonvexní nebo že všechny body leží na kružnici. Po té za použití MaxMin nebo Kruhové podmínky rozhodněme, zda je třeba prohodit hranu $e_i$. V případě, že po použití Lokální optimalizace není potřeba prohodit hranu, můžeme ji prohlásit za lokálně optimální. V případě, že  budeme lokální optimalizaci používat opakovaně pro všechny hrany v triangulaci, dokud nebudou všechny hrany lokálně optimální, získáme optimální triangulaci.
 
 \todo[inline]{Jak psát pseudokód??}
 \begin{comment}
-1. proveď náhodnou regulérni triangulaci $\Delta$ množiny bodů $P$
+1. proveď náhodnou regulérní triangulaci $\Delta$ množiny bodů $P$
 2. if je $\Delta$ lokálně optimální
 	stop
 3. zvol vnitřní hranu $e_i$ trinagulace $\Delta$
@@ -346,30 +346,59 @@ Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čty�
 
 10.\indent \indent \indent legal=false;
 
-\subsection{Jednoduchý algoritmus}
-Tento algoritmus je poměrně jednoduchý a snadný na implementaci, obzvlášť pokud je zvolena vhodná datová struktura. Nicméně není příliš optimální, co se týče času běhu a v kroku 3 může kumulovat podlouhlé čí téměř degenerované trojúhelníky, což vede k nestabilitě. 
-
-
-1. vytvoř konvexní obal množiny bodů $P$
-
-2. vlož jeden z vnitřních bodů množiny $P$ a vytvoř počáteční triangulaci $\Delta_1$
-
-3. opakovaně vkládej vnitřní body množiny $P$ a pokaždé vytvoř novou triangulaci $\Delta$
-
-4. použij LO dokud nebudou všechny hrany lokálně optimální
-
 
 \subsection{Paprskovitý algoritmus}
 
-Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný postup, jak nalézt počáteční triangulaci $\Delta_1$.
+Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný postup, jak nalézt počáteční triangulaci $\Delta$. Na začátku se nalezne bod $p$ z množiny $P$, takový který je nejbližší jejímu středu. Po té jej paprskovitě spojíme se všemi zbývajícími body množiny $P$. Tyto body se následně seřadí podle orientace a vzdálenosti od bodu $p$ a v tomto pořadí se spojí hranami. Potom se vytvoří hrany na hranici triangulace. Vzniklá triangulace se dále postupně po jednotlivých hranách legalizuje stejně jako v předchozím případě.
 
-1. Najdi bod $p$ poblíž středu množiny $P$ a paprskovitě ho spoj s ostatními body.
 
-2. Seřaď body {P/p} podle orientace a vzdálenosti od bodu $p$ a v tomto pořadí je spoj hranami. 
+\subsection{Algoritmus inkrementálního vkládání}
 
-3. Vytvoř trojúhelník mezi třemi body ($p_{i-1}$,$p_i$,$p_{i+1}$) na hranici triangulace. Opakuj tak dlouho dokud nemůže být přídán další trojúhelník. Vznikne triangulace mezi všemi body a s konvexním obalem.
+Tento algoritmus je poměrně jednoduchý a snadný na implementaci, obzvlášť pokud je zvolena vhodná datová struktura. Jeho složitost je $0.(n^2)$, kterou lze úpravami zlepšit až na $0.(n.log(n))$. Tato metoda je tvořena třemi kroky. Na začátku je vytvořen konvexní obal množiny bodů $P$ a pro jeho lomové body se provede triangulace. Do vzniklé triangulace se postupně vkládají body z množiny $P$. Tato nově vzniklá triangulace nemusí být nutně DT a proto se provede ještě její legalizace.
 
-4. použij LO dokud nebudou všechny hrany lokálně optimální.
+\bigskip
+1.  Vytvoření konvexního obalu $\Omega$ nad množinou bodů $P$.
+
+2.  Vytvoř DT pro lomové body konvexního obalu.
+
+3.  Opakuj pro $i \in 1,...,n$
+
+4.\indent  Přidej p do DT.
+
+5.\indent  Najdi trojúhelník $t$ s vrcholy $p_i, p_j, p_k$ takový, že $p \in t$
+
+6.\indent  Jestliže $p$ leží uvnitř $t$:
+
+7.\indent \indent Přidání hrany $\overline{p,p_i}$.
+
+8.\indent \indent Přidání hrany $\overline{p,p_j}$.
+
+9.\indent \indent Přidání hrany $\overline{p,p_k}$.
+
+10.\indent \indent Legalizace hrany $p,\overline{p_i,p_j},t$.
+
+11.\indent \indent Legalizace hrany $p,\overline{p_j,p_k},t$.
+
+12.\indent \indent Legalizace hrany $p,\overline{p_k,p_l},t$.
+
+13.\indent Jinak jestliže $p$ leží na hraně $p_i, p_j$ trojúhelníků $t_1, t_2$:
+
+14.\indent \indent Přidání hrany $\overline{p,p_i}$.
+
+15.\indent \indent Přidání hrany $\overline{p,p_j}$.
+
+16.\indent \indent Přidání hrany $\overline{p,p_k}$.
+
+17.\indent \indent Přidání hrany $\overline{p,p_l}$.
+
+18.\indent \indent Legalizace hrany $p,\overline{p_j,p_k},t$.
+
+19.\indent \indent Legalizace hrany $p,\overline{p_k,p_i},t$.
+
+20.\indent \indent Legalizace hrany $p,\overline{p_i,p_l},t$.
+
+21.\indent \indent Legalizace hrany $p,\overline{p_l,p_j},t$.
+
 
 \subsection{Algoritmus inkrementální konstrukce (Step-by-Step)}
 
@@ -408,9 +437,6 @@ Základní vlastnost toho postupu je, že se v každém kroku ke stávající tr
 
 16.\indent pop(e)
 
-\subsection{Inkrementální algoritmus}
-
-Tento postup na rozdíl od těch předchozích není statický. Nepotřebuje tedy na vstupu znát všechny body z množiny $P$. V tomto postupu si na vstupu vystačíme s počáteční triangulací, což může být jeden čí více trojúhelníků nebo triangulace konvexního obalu. Do počáteční triangulace postupně vkládáme jednotlivé body z množiny $P$. Na pořadí vkládání bodů záleží pouze z hlediska operačního času, na samotnou tvorbu triangulace nemá pořadí vliv. Pro nově vložený bod přetvoříme triangulaci a upravíme ji tak, aby byla Delaunayovská. 
 
 \subsection{Algoritmus Rozděl a panuj}
 
