@@ -14,7 +14,7 @@
 \usepackage{multirow}
 
 \usepackage{listings}			%vkladani kodu
-\lstset{basicstyle=\scriptsize,
+\lstset{basicstyle=\ttfamily,
   showstringspaces=false,
   commentstyle=\color{red},
   keywordstyle=\color{blue},
@@ -131,8 +131,8 @@ Uvnitř žádného trojúhelníku neleží žádný další bod z P.
 Triangulace má širokou škálu aklikací. V kartografii a GISech se využívá pro tvorbu DMT. V DPZ lze využít pro tvorbu prostorových modelů, své uplatnění najde také v počítačové grafice a vizualizaci prostorových dat a mnoho dalších.
 
 V našem případě budeme triangulaci provádět uvnitř takzvaného \textit{konvexního obalu}. Konvexní obal množiny bodů $P$ představuje takový konvexní mnohoúhelník, který obsahuje všechny body množiny bodů P, má co nejmenší plochu a ve kterém zároveň spojnice mezi kterýmikoliv body množiny bodů $P$ leží uvnitř obalu.
-\todo[inline]{obrazek konvex hullu, domeny}
 
+\newpage
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
@@ -157,7 +157,6 @@ V podstatě by se dalo říct, že triangulace je jakákoliv trojúhelníkoví s
 \end{enumerate}
 
 Pokud jsou naplněny první čtyři podmínky, může se triangulace nazvat \textit{validní}. V případě, že naplníme všech sedm podmínek, dá se mluvit o \textit{regulérní} triangulaci.
-\todo[inline]{obrazek validni/regulerni triangulaci}
 
 \newpage
 \begin{figure}[h!]
@@ -207,8 +206,8 @@ Pokud tedy bod $p_l$ leží uvnitř kružnice $k$, je hrana $\overline{p_ip_j}$ 
 
 Pokud nad množinou bodů P provedeme všechny možné triangulace, můžeme nejoptimálnější triangulaci určit pomocí MaxMin popř. MinMax podmínky. V případě MaxMin podmínky je pro každou možnou triangulaci nalezen největší minimální vnitřní úhel trojúhelníku a ten je porovnán s největším minimálním úhel ostatních triangulací, což vede k eliminaci trojúhelníků s velmi tupými úhly. U MinMax podmínky se postupuje obdobně, pouze se porovnávají nejmenší maximální vnitřní úhly trojúhelníků a eliminují se tak trojúhelníky s velmi ostrými úhly.
 
+\newpage
 \todo[inline]{Vložit definici?}
-\todo[inline]{úhel alfa a triangulace s čarou}
 MinMax podmínka:
 Eliminace trojúhelníků s příliš tupými úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl od triangulace $\Delta^{'}(P)$ optimální, je–li největší úhel $\alpha$ generovaný triangulací $\Delta(P)$ menší než největší úhel $\alpha^{'}$ generovaný triangulací $\Delta^{'}(P)$.
 
@@ -239,8 +238,11 @@ Problém nastává ve chvíli, kdy některé body, mezi kterými chceme triangul
 \ffigbox{\includegraphics[width=0.48\textwidth]{../img/minmax1.png}}{\caption{Případ2}}{\label{fig:neutral_case_2}}
 \end{floatrow}
 \end{figure}
-\todo[inline]{Obrázky z GRASSu, jak udělat skutečnou kružnici, označení úhlů}
+
+
 Nejčastěji tento jev nastává u čtyřúhelníků, jejichž všechny vrcholy leží na kružnici. Jak můžeme vidět na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} v obou případech je maximální minimální úhel triangulace obvodový úhel nejkratší strany čtyřúhelníku. V tomto případě se tedy jedná o neutrální případ pro MaxMin podmínku. Pokud bychom tedy triangulaci vyhodnocovali pouze na základě MaxMin podmínky mohly bychom obě triangulace prohlásit za optimální. Už od pohledu je ale zřejmé, že lepší tvar trojúhelníků poskytujeme triangulace nalevo. Pokud ale triangulace hodnotíme i s ohledem na MinMax podmínknu, můžeme prokázat, že triangulace na Obrázku \ref{fig:neutral_case_2} je optimální.
+
+\todo[inline]{Obrázky z GRASSu, jak udělat skutečnou kružnici, označení úhlů}
 
 \paragraph{Edge swaping, legalizace}
 Na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} jsme si ukázali případ neutrálního případu pro MinMax podmínku. Proces, při kterém jsme zaměnili diagonálu čtyřúhelníku tak, aby byli oba trojúhelníky lokálně optimální, se nazýva \textit{Edge swaping.} Pokud budeme tento proces aplikovat pro celou triangulaci dojde k takzvané \textit{legalizaci} triangulace.
@@ -404,7 +406,7 @@ Tento algoritmus je poměrně jednoduchý a snadný na implementaci, obzvlášť
 
 21.\indent \indent Legalizace hrany $p,\overline{p_l,p_j},t$.
 
-
+\newpage
 \subsection{Algoritmus inkrementální konstrukce (Step-by-Step)}
 
 Tento postup je založen na postupném přidávání bodů do již vytvořené DT, tvoří triangulaci postupně, trojúhelník po trojúhelníku. Na začátku jsou vybrány dva body$p_1, p_2$, které jsou sami sobě Voronoiovými sousedy a mezi nimi je vytvořena základní Delaunayova hrana $e$. K této hraně $e$ se hledá další bod 	$p$, tak aby vyhovoval kruhové podmínce a který společně s hranou $e$ vytvoří Delaunayův trojúhelník s vrcholy $p_1, p_2$ a $p$, který se zapíše do DT. Každá Delaunayovská hrana je orientována, bod $p$ hledáme pouze vlevo od ní.Pro konstrukci se používá modifikovaná datová struktura AEL (Active Edge List).Obsahuje hrany $e$, ke kterým hledáme body $p$, do struktury se neukládá topologický model (viz kapitola \ref{sec:data_struct}).
@@ -442,7 +444,7 @@ Základní vlastnost toho postupu je, že se v každém kroku ke stávající tr
 
 16.\indent pop(e)
 
-
+\newpage
 \subsection{Algoritmus Rozděl a panuj}
 
 Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovské triangulaci nabízí nejlepší výsledky, co se výkonnosti týče. Tento přístup je založený na jednoduchých krocích:
@@ -452,14 +454,12 @@ Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovs
 2. Vytvoření prozatimní triangulace, která nemusí být Delaunayovská.
 
 3. Připojení ke stávající triangulaci a její legalizace na Delaunayovskou. Právě propojování podmnožin na jednotlivých vrstvách je nejnáročnější část tohoto algoritmu.
-
+\todo[inline]{Obrázek dělení na podmnožiny}
 
 \newpage
 \section{Datové struktury}\label{sec:data_struct}
 
 Existuje mnoho různých datových struktur pro uložení topologických informací o triangulační síti. Každá nabízí nějaké výhody a uživatel většinou musí řešit dva problémy. Jednak požadavky na dostatečnou kapacitu pro uložení dat a pak dostatečnou efektivitu při získávání informací ze struktury.
-
-\todo[inline]{Obrázek menší triangulace}
 
 \begin{figure}[h!]
 \centering
@@ -467,6 +467,7 @@ Existuje mnoho různých datových struktur pro uložení topologických informa
 \label{fig:struct_triangulace}
 \end{figure}
 
+\newpage
 \subsection{Jednoduchá trojúhelníková struktura}
 Tato struktura ukládá informace v nejjednodušší podobě. Pracuje pouze s trojicemi id jednotlivých vrcholů trojúhelníků v seznamu nebo v poli. Trojúhelníky jsou seřazeny vzestupně podle id, zatímco na pořadí uložených vrcholů nezáleží. Struktura je velmi nenáročná, co se požadavků na kapacitu týče, nicméně toto je vykoupené tím, že nemáme k dispozici žádnou informaci, který trojúhelník sousedí s kterým.
 
@@ -526,9 +527,83 @@ Vrchol & \multicolumn{6}{|c|}{Sousední vrcholy} & Suma vrcholů \\ \hline \hlin
 \end{tabular}
 \end{table}
 
+\newpage
 \subsection{Half-edge datová struktura}
-\subsection{Winged-edge datová struktura}
+
+Tato struktura uchovává topologický model na základě orientovaných polovičních hran. Princip je rozdělit každou hranu na dvě orientované \textit{půl-hrany}, z nichž každá směřuje opačným směrem. Každému trojúhelníku můžeme tak přiřadit tři půl-hrany, které jsou orientované v protisměru hodinových ručiček. Každá půl-hrana začíná ve \textit{startovním vrcholu} a směřuje do \textit{cílového vrcholu}. V half-edge struktuře si každá půl-hrana uchovává pointer na svůj startovní bod, na následující půl-hranu, patřící stejnému trojúhelníku a nakonec pointer na opačně orientovanou hranu, tzv. \textit{twin-edge}. Pointer na twin-edge hranu nemají pouze půl-hrany ležící na konvexním obalu triangulace.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{../img/half_edge.png}
+\caption{Half-edge struktura}
+\label{fig:half_edge}
+\end{figure}
+
+Z half-edge struktury je možné odvodit mnohé jiné příbuzné struktury obsahující další informace o topologii, které ulehčují procházení celou sítí při vyhledávání, ale zároveň zvyšují nároky na kapacitu. Mezi tyto příbuzné struktury patří například \textit{vertex-edge}, \textit{face-edge} nebo \textit{winged edge} datová struktura, kterou používá například modul \textit{v.delaunay} v GRASS GISu.
+
+\newpage
+\begin{table}[h]
+\catcode`\-=12
+\begin{tabular}{|c||c||c|c|}
+\hline
+\multirow{2}{*}{Půl-hrana} & \multirow{2}{*}{Startovní vrchol} & \multicolumn{2}{c|}{Half-edge pointry} \\ \cline{3-4} 
+                           &                                   & Další hrana v trojúhelníku & Twin-edge \\ \hline
+1                          & 2                                 & 2                          & -         \\ \hline
+2                          & 1                                 & 3                          & 18        \\ \hline
+3                          & 7                                 & 1                          & 4         \\ \hline
+4                          & 2                                 & 5                          & 3         \\ \hline
+5                          & 7                                 & 6                          & 12        \\ \hline
+6                          & 4                                 & 4                          & 7         \\ \hline
+7                          & 2                                 & 8                          & 6         \\ \hline
+8                          & 4                                 & 9                          & -         \\ \hline
+9                          & 3                                 & 7                          & -         \\ \hline
+10                         & 7                                 & 11                         & 17        \\ \hline
+11                         & 6                                 & 12                         & 13        \\ \hline
+12                         & 4                                 & 10                         & 5         \\ \hline
+13                         & 4                                 & 14                         & 11        \\ \hline
+14                         & 6                                 & 15                         & -         \\ \hline
+15                         & 5                                 & 13                         & -         \\ \hline
+16                         & 1                                 & 17                         & -         \\ \hline
+17                         & 6                                 & 18                         & 10        \\ \hline
+18                         & 7                                 & 16                         & 2         \\ \hline
+\end{tabular}
+\end{table}
+
+\bigskip
+\begin{lstlisting}[caption={Definice datové struktury}]
+class Half-edge
+{
+	Point *originating_vertex
+	Half-edge *edge *next_edge *twin_edge
+	
+};
+\end{lstlisting}
+
+\newpage
 \subsection{Dart-based datová struktura}
+\todo[inline]{Vložit oskenovanou strukturu}
+
+
+\begin{table}[h]
+\catcode`\-=12
+\begin{tabular}{|c||c|c|c|c|}
+\hline
+\multirow{2}{*}{Šipka d} & \multicolumn{4}{c|}{Šipkové pointery} \\ \cline{2-5} 
+                         & Vrchol &$\alpha_0$ & $\alpha_1$ & $\alpha_2$      \\ \hline
+1                        & 1          & 2      & 6      & 1      \\ \hline
+2                        & 6          & 1      & 3      & 2      \\ \hline
+3                        & 6          & 4      & 2      & 12     \\ \hline
+4                        & 7          & 3      & 5      & 11     \\ \hline
+5                        & 7          & 6      & 4      & 17     \\ \hline
+6                        & 1          & 5      & 1      & 18     \\ \hline
+7                        & 6          & 8      & 12     & 13     \\ \hline
+8                        & 4          & 7      & 9      & 14     \\ \hline
+9                        & 4          & 10     & 8      & 15     \\ \hline
+10                       & 7          & 9      & 11     & 16     \\ \hline
+11                       & 7          & 12     & 10     & 4      \\ \hline
+12                       & 6          & 11     & 7      & 3      \\ \hline
+\end{tabular}
+\end{table}
 
 \newpage
 \section{Interpolace metodou přirozeného souseda}
