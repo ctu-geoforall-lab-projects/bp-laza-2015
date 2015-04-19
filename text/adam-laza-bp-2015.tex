@@ -533,6 +533,51 @@ Vrchol & \multicolumn{6}{|c|}{Sousední vrcholy} & Suma vrcholů \\ \hline \hlin
 \newpage
 \section{Interpolace metodou přirozeného souseda}
 
+Interpolace metodou přirozeného souseda je deterministická interpolační metoda pro prostorová data. Poskytuje spojitý, vyhlazený výstup, bez extrapolovaných hodnot. 
+
+Pro výpočet vah využívá Voronoiových diagramů. Do VD pro měřené body vkládá body určené k interpolaci. Vložením nového bodu dojde v jeho okolí k přetvoření VD. K vypočtení váhy se používá jak VD před vložením bodu, tak VD po vložení bodu. Voronoiova buňka nově vloženého bodu překrývá několik buněk z původního VD. Právě tento překryv, který nově vložený bod "ukradne" z plochy původních buněk slouží k výpočtu váhy pro interpolaci.
+
+\bigskip
+Matematicky tedy můžeme zapsat:
+\newline
+$$V(p)=\sum_{i=1}^n V_i$$
+
+kde $V(p)$ je plocha nově vloženého bodu a $V_i$ je část plochy původních buněk, o kterou byly vložením buňky "okradeny".
+
+\bigskip
+Váha pro jednotlivé sousedy se vypočte:
+\newline
+$$\lambda_i = \frac{V_i}{\sum_{i=1}^n V_i}$$
+
+\bigskip
+A konečně samotná hodnota pro interpolovaný bod není nic jiného než vážený průměr:
+\newline
+$$G(x,y) = \sum_{i=1}^{n} \lambda_i  f(x_i, y_i)$$
+
+\newpage
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{../img/canvas_0.png}
+\caption{Původní VD}
+\label{fig:fig:canvas0}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{../img/canvas_1.png}
+\caption{Ukradené plochy}
+\label{fig:fig:canvas1}
+\end{figure}
+
+\newpage
+Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka "ukradla" nejvíce plochy ze žlutého polygonu, nejméně ze zeleného. Při výpočtu funkční hodnoty vloženého bodu bude mít tedy hodnota žlutého polygonu největší váhu, zatímco hodnota zeleného bodu váhu nejmenší.\footnote{Vytvořeno pomocí http://alexbeutel.com/webgl/voronoi.html}
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{../img/canvas_2.png}
+\caption{Nově vzniklý VD}
+\label{fig:fig:canvas2}
+\end{figure}
+
 
 \newpage
 \section{Postup řešení}
@@ -551,13 +596,11 @@ Při řešení otázky, jak implementovat metodu přirozeného souseda pro GRASS
 \item[[alg]] Proměnná typu \textit{string}, název použitého algoritmu.
 \end{description}
 
-Z výše uvedeného seznamu, lze vidět, že jako vstupní data je možné použít vektorovou mapu nebo textový soubor.
-
-\todo[inline]{TODO Vlozit obrazek vstupni mapy a priklad vstupniho souboru}
-\todo[inline]{Vkladat kod do vlastni prace??, nastaveni listing}
+\bigskip
+\todo[inline]{nastaveni listing}
 
 Volání v příkazové řádce pak může vypadata například takto:
-\begin{lstlisting}[language=bash,caption={bash version}]
+\begin{lstlisting}[caption={bash version}]
 user@my_comp:~$ v.surf.nnbathy input=elevation_lid792_randpts@PERMANENT output=raster_map zcolumn=value alg=nn
 \end{lstlisting}
 
@@ -582,44 +625,50 @@ user@my_comp:~$ v.surf.nnbathy input=elevation_lid792_randpts@PERMANENT output=r
 Jako první krok pro implementaci interpolace přirozeného souseda pro GRASS GIS 7 bylo potřeba stávající modul v bashi přepsat do podporovaného programovacího jazyka. Pro verzi 7 bylo možné napsat moduly buďto v jazyce C nebo Python. Z důvodu nepříliš velké zkušenosti v programování byl pro začátek zvolen jazyk Python, který je pro méně zkušené programátory vice přívětivý. 
 
 \subsubsection{v.surf.nnbathy.py}
-\todo[inline]{Z gitu stahnout kod bez objektu}
-\begin{lstlisting}
-\end{lstlisting}
 
 V následující části této práce bude popsáno jak pythoní modul funguje, jaká jsou vstupní a výstupní data, jaké vytváří dočasné soubory.
 
 \paragraph{Vstupní data}
-Stejně jako původní bashový modul, i tento modul pracuje se vstupními daty buď v podobě textového ASCII souboru nebo vektorové mapy. Textový ASCII s \textit{n} body musí obsahovat \textit{n} řádků a 3 sloupce. V prvních dvou sloupcích je uložen údaj o poloze v podobě x a y souřadnice. Ve třetím sloupci jsou pak uloženy hodnoty veličiny, kterou chceme interpolovat.
+Stejně jako původní bashový modul, i tento modul pracuje se vstupními daty buď v podobě textového ASCII souboru nebo vektorové mapy. 
+
+V případě použití vstupní vektorové mapy s body je pak při volání modulu použit parametr \textit{zcolumn}, který určuje z jakého sloupce atributové tabulky se budou brát hodnoty k interpolaci.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{../img/vstup_vect_map.png}
+\caption{Vektorová mapa na vstupu}
+\label{fig:vstup_vect_map}
+\end{figure}
+
+\newpage
+Druhou možností je použít textový ASCII soubor, který musí obsahovat \textit{n} bodů na \textit{n} řádcích ve 3 sloupcích. V prvních dvou sloupcích je uložen údaj o poloze v podobě x a y souřadnice. Ve třetím sloupci jsou pak uloženy hodnoty veličiny, kterou chceme interpolovat.
 
 %ukazka TMPXYZ
-\begin{lstlisting}
-638234.122902785427868 221198.4894384436775 62.817782000000001
-638755.665974545176141 220976.783764891704777 9.190488000000000
-638729.530741120455787 219988.669646041787928 91.799952000000005
-638088.941303733270615 220228.186909802345326 76.839046999999994
-638158.578729554312304 220794.514421981060877 2.037001000000000
-637781.724264170858078 219988.193243810994318 8.298977000000001
-638359.847223712014966 220692.375897407706361 15.550326000000000
-639137.670258715632372 221096.622500944242347 16.613054999999999
-637783.077698686625808 219603.568831721117022 38.046551000000001
-639157.228799516917206 219692.376464909117203 82.820330999999996
+\begin{lstlisting}[caption={Příklad vstupního souboru}]
+639524.309 221227.596 112.191 101960
+639529.088 221223.045 112.225 101961
+639529.152 221219.826 112.029 102115
+639524.303 221224.435 112.212 102116
+639519.444 221229.043 111.752 102117
+639513.546 221229.699 111.472 102440
+639518.307 221225.172 111.874 102441
+639523.114 221220.597 112.243 102442
 \end{lstlisting}
 
-Druhou možností vstupních dat je pak vektorová mapa s body. V tomto případě je pak při volání modulu použít parametr \textit{zcolumn}, který určuje z jakého sloupce atributové tabulky se budou brát hodnoty k interpolaci.
-
-
+\bigskip
 \paragraph{Funkce region()}
 Každá operace prováděná v GRASS GISu je prováděna pouze na určitém rozsahu území, tzv. \textit{výpočetním regionu}. \textit{Výpočetní region} je určen jako obdélník daný mezními kartografickými souřadnicemi a počtem řádků a sloupců. 
 Funkce \textit{region()} všechna nastavení uloží do proměných. Dále vypočte plochu výpočetního regionu. Na rozdíl od GRASS GISu, který jako mezní kartografické souřadnice bere vnější rohy rohových buněk obdélníku, knihovna \textit{nn-c} používá středy rohových buněk, a proto je třeba nastavení výpočetního regionu opravit o rozlišení buněk.
 
-
+\bigskip
 \paragraph{Funkce initials\_controls()}
 Ve chvíli, kdy je nastavený výpočetní region,můžeme provést úvodní kontroly a přípravy před samotným výpočtem. Zejména zda plocha výpočetního regionu není nulová a je kde provádět interpolaci. Dále je třeba zajistit jednoznačné určení vstupních dat, tedy zda se bude pracovat s ASCII souborem nebo vektorovou mapou, a jejich kontrolu, popřípadě SQL podmínku. Také kontrolujeme zda z knihovny \textit{nn-c} máme nainstalovaný program \textit{nnbathy}, který interpolaci provádí. Také je třeba vytvořit dočasné pomocné soubory, které využijeme při práci s daty. 
 
 V případě, že pracujeme s vektorovou mapu, uložíme informace o bodových datech do dočasného proměnné \textit{TMPcat} pomocí modulu \textit{v.out.ascii}. Výstupem toho modulu je ASCII soubor o \textit{n} řádcích a čtyřech sloupcích. V prvních dvou sloupcích je uložená poloha bodu, ve třetím jeho id a ve čtvrtém hodnota k interpolaci. 
 
+\bigskip
 %ukazka souboru TMPcat
-\begin{lstlisting}
+\begin{lstlisting}[caption={Pomocný soubor TMPcat}]
 638234.122902785427868 221198.4894384436775 1 62.817782000000001
 638755.665974545176141 220976.783764891704777 2 9.190488000000000
 638729.530741120455787 219988.669646041787928 3 91.799952000000005
@@ -628,14 +677,24 @@ V případě, že pracujeme s vektorovou mapu, uložíme informace o bodových d
 637781.724264170858078 219988.193243810994318 6 8.298977000000001
 638359.847223712014966 220692.375897407706361 7 15.550326000000000
 639137.670258715632372 221096.622500944242347 8 16.613054999999999
-637783.077698686625808 219603.568831721117022 9 38.046551000000001
-639157.228799516917206 219692.376464909117203 10 82.820330999999996
 \end{lstlisting}
 
 Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné \textit{TMPYZ} si uložíme pouze informace o poloze a hodnotu k interpolaci. V případě, že nepracujeme s vektorovou mapou, ale ASCII souborem, tak tento soubor rovnou uložíme do proměnné \textit{TMPXYZ}.
 
+\bigskip
+%ukazka souboru TMPxyz
+\begin{lstlisting}[caption={Pomocný soubor TMPXYZ}]
+638234.122902785427868 221198.489438443677543 62.817782000000001
+638755.665974545176141 220976.783764891704777 9.190488000000000
+638729.530741120455787 219988.669646041787928 91.799952000000005
+638088.941303733270615 220228.186909802345326 76.839046999999994
+638158.578729554312304 220794.514421981060877 2.037001000000000
+637781.724264170858078 219988.193243810994318 8.298977000000001
+638359.847223712014966 220692.375897407706361 15.550326000000000
+639137.670258715632372 221096.622500944242347 16.613054999999999
+\end{lstlisting}
 
-
+\bigskip
 \paragraph{Funkce compute()}
 V této části kódu je volán program \textit{nnbathy} s následujícími vstupními paramatry:
 \begin{description}
@@ -647,8 +706,11 @@ V této části kódu je volán program \textit{nnbathy} s následujícími vstu
 \item[-n]{dvojice double x double, rozlišení výstupní mřížky}
 \end{description}
 
+Výstupem z \textit{nnbathy} je soubor \textit{XYZout}. Obsahuje data o výstupní mřížce buňku po buňce ve třech sloupcích. V prvních dvou jsou x a y souřadnice, ve třetím vyinterpolovaná hodnota. V případě buňek mimo oblast, kde probíhala interpolace, je ve třetím sloupci uložena hodnota NaN.
+
+\bigskip
 %ukazka XYZout
-\begin{lstlisting}
+\begin{lstlisting}[caption={XYZout}]
 637725 221045 NaN
 637735 221045 NaN
 637745 221045 NaN
@@ -657,19 +719,15 @@ V této části kódu je volán program \textit{nnbathy} s následujícími vstu
 637775 221045 23.2274425578696
 637785 221045 20.3234644594092
 637795 221045 23.6841650075168
-637805 221045 27.1014688330494
-637815 221045 30.5774260647664
 \end{lstlisting}
 
-Výstupem z \textit{nnbathy} je soubor \textit{XYZout}. Obsahuje data o výstupní mřížce buňku po buňce ve třech sloupcích. V prvních dvou jsou x a y souřadnice, ve třetím vyinterpolovaná hodnota. V případě buňek mimo oblast, kde probíhala interpolace, je ve třetím sloupci uložena hodnota NaN.
-
-
-
+\bigskip
 \paragraph{Funkce convert()}
 Výstupní textový soubor z \textit{nnbathy} je třeba upravit, aby s ním bylo možné dále pracovat v GRASS GISu. Pro další práci slouží dočasný soubor \textit{TMP}. Při vytváření na začátku tohoto souboru vznikne hlavička, která obsahuje data o hranicích, rozlišení, typu a hodnotě null.
 
+\bigskip
 %Ukázka hlavičky
-\begin{lstlisting}
+\begin{lstlisting}[caption={Hlavička souboru TMP}]
 north: 228495.0
 south: 215005.0
 east: 644995.0
@@ -687,12 +745,17 @@ Dále je potřeba vybrat vyinterpolované hodnoty jednotlivých buněk ze soubor
 \end{lstlisting}
 
 \paragraph{Funkce import\_to\_raster()}
-Soubor \textit{TMP}, ve kterém máme uložené vyinterpolované hodnoty v pravidelné mřížce, slouží jako vstupní soubor pro modul \textit{r.in.ascii}, který tyto hodnoty převedu do rastru. Dále je použit modul \textit{r.support}, který uloží příkazy do rastrových metadat. Na závěr je vytištěna zpráva o, že byla vytvořena rastrová mapa.
+Soubor \textit{TMP}, ve kterém máme uložené vyinterpolované hodnoty v pravidelné mřížce, slouží jako vstupní soubor pro modul \textit{r.in.ascii}, který tyto hodnoty převedu do rastru. Dále je použit modul \textit{r.support}, který uloží příkazy do rastrových metadat. Na závěr je vytištěna zpráva, že byla vytvořena rastrová mapa.
 
 
 \paragraph{Výstupní data}
 Výstupem modulu \textit{v.surf.nnbathy} je rastrová mapa.
-\todo[inline]{Vložit výstupní rastrovou mapu}
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{../img/vystup_rast_map.png}
+\caption{Výstupní rastrová mapa}
+\label{fig:vystup_rast_map}
+\end{figure}
 
 \newpage
 \subsection{OOP}
@@ -711,15 +774,10 @@ Modul \textit{r.surf.nnbathy} pracuje na podobném principu jako modul \textit{v
 \item[[alg]] Proměnná typu \textit{string}, název použitého algoritmu.
 \end{description}
 
-Volání v příkazové řádce pak může vypadata například takto:
-\begin{lstlisting}[language=bash,caption={bash version}]
-user@my_comp:~$ v.surf.nnbathy input=elevation_lid792_randpts@PERMANENT output=raster_map zcolumn=value alg=nn
-\end{lstlisting}
 
-I v tomto modulu zůstala část, která vytváří GUI. Protože ale modul pracuje s daty pouze v podobě rastrové mapy nebyly potřeba žádně vstupní kontroly ani if podmínka.
+I v tomto modulu zůstala část, která vytváří GUI. Protože ale modul pracuje s daty pouze v podobě rastrové mapy, nebyly potřeba žádně vstupní kontroly ani if podmínka.
 
-
-
+\newpage
 \subsubsection{nnbathy}
 V knihovně nnbathy, které oba moduly volají tedy zůstala hlavní výpočetní část kódu. 
 
@@ -727,7 +785,6 @@ V knihovně nnbathy, které oba moduly volají tedy zůstala hlavní výpočetn�
 
 \paragraph{Objekt \_\_init\_\_}
 V tomto objektu se inicializují dočasné soubory a volá objekt region().
-
 
 \paragraph{Objekt \_\_del\_\_}
 Tento objekt slouží k odstranění dočasných souborů.
@@ -742,7 +799,12 @@ Tato třída slouží pro vektorová vstupní data a je dědičná z rodičovsk�
 Tato třída slouží pro vstupní data v podobě ASCII souboru a je dědičná z rodičovské třídy Nnbathy.
 
 \newpage
+\section{Možnosti budoucí implementace}
+
+\newpage
 \section{Srovnání GRASSu a ostatních softwarů}
+
+
 
 
 
