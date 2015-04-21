@@ -743,8 +743,9 @@ V případě, že pracujeme s vektorovou mapu, uložíme informace o bodových d
 
 \bigskip
 %ukazka souboru TMPcat
+\lstset{basicstyle=\footnotesize}
 \begin{lstlisting}[caption={Pomocný soubor TMPcat}]
-638234.122902785427868 221198.4894384436775 1 62.817782000000001
+638234.122902785427868 221198.4894384436775   1 62.817782000000001
 638755.665974545176141 220976.783764891704777 2 9.190488000000000
 638729.530741120455787 219988.669646041787928 3 91.799952000000005
 638088.941303733270615 220228.186909802345326 4 76.839046999999994
@@ -758,6 +759,7 @@ Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné \
 
 \bigskip
 %ukazka souboru TMPxyz
+\lstset{basicstyle=\footnotesize}
 \begin{lstlisting}[caption={Pomocný soubor TMPXYZ}]
 638234.122902785427868 221198.489438443677543 62.817782000000001
 638755.665974545176141 220976.783764891704777 9.190488000000000
@@ -785,6 +787,7 @@ Výstupem z \textit{nnbathy} je soubor \textit{XYZout}. Obsahuje data o výstupn
 
 \bigskip
 %ukazka XYZout
+\lstset{basicstyle=\footnotesize}
 \begin{lstlisting}[caption={XYZout}]
 637725 221045 NaN
 637735 221045 NaN
@@ -802,6 +805,7 @@ Výstupní textový soubor z \textit{nnbathy} je třeba upravit, aby s ním bylo
 
 \bigskip
 %Ukázka hlavičky
+\lstset{basicstyle=\ttfamily}
 \begin{lstlisting}[caption={Hlavička souboru TMP}]
 north: 228495.0
 south: 215005.0
@@ -875,6 +879,26 @@ Tato třída slouží pro vstupní data v podobě ASCII souboru a je dědičná 
 
 \newpage
 \section{Možnosti budoucí implementace}
+V současné době jsou oba moduly k dispozici v rámci balíčků Add-Ons\footnote{http://grass.osgeo.org/download/addons/}. V adresáři \textit{GRASS7/vector/v.surf.nnbathy} můžeme  naleznout hlavní knihovnu \textit{nnbathy.py}, modul \textit{v.surf.nnbathy.py} a dokumentaci \textit{v.surf.nnbathy.html}. 
+
+V adresáři \textit{GRASS7/raster/r.surf.nnbathy} naopak nalezneme modul \textit{r.surf.nnbathy.py} a jeho dokumentaci \textit{v.surf.nnbathy.html}. Oba moduly je možné instalovat do GRASS GISu 7, pomocí modulu \textit{g.extention} nebo pomocí GUI.
+
+\bigskip
+\begin{lstlisting}[caption={Stáhnutí modulu v.surf.nnbathy pomocí g.extention}]
+g.extension extension=v.surf.nnbathy
+\end{lstlisting}
+
+\bigskip
+Cílem do budoucna však není nechat tyto moduly pouze v rámci Add-Ons. Jelikož interpolace metodou přirozeného souseda poskytuje spojité, hladké výstupy bez extrapolovaných hodnot může být její použití v praxi poměrně využívané. Právě proto je snaha dostat tento interpolační nástroj do základní distribuce GRASS GISu. Tomu však brání vnitřní závislost na knihovně Triangle, která nespadá pod volně šiřitelnou licenci GNU GPL. V následujících kapitolách rozebereme možnosti vyhnutí se této knihovně a možnostem, které se do budoucna nabízejí.
+
+\newpage
+\subsection{Knihovna Triangle}
+Knihovna Triangle verze 1.4\footnote{http://www.cs.cmu.edu/~quake/triangle.html} byla napsaná Jonathanem Richardem Shewchuk v roce 2002. Je distribuována pod licencí MIT, která nedovoluje začlenění do oficiální distribuce GRASS GISu. V programu \textit{nnbathy} má na starosti Delaunayovu trinagulaci. Je tedy třeba najít vhodný způsob, jak tuto knihovnu nahradit.
+
+\subsection{Knihovna CGAL}
+Knihovna CGAL (The Computational Geometry Algorithms Library) je projekt, který poskytuje snadný přístup k efektivním a spolehlivým geometrickým algoritmům ve formě C++ knihovny. CGAL se používá v různých oblastech, které potřebují geometrické výpočty, jako např. v GISech, CADu, molekulární biologii, počítačové grafice a robotice. Jeden z jeho balíčků se přímo zabývá interpolací a nabízí funkce pro výpočet souřadnic přirozeného souseda. Tato knihovna je třeba ještě dále prozkoumat a zjistit její možnosti, neboť možnost její budoucí implementace do GRASS GISu se nejeví nereálně.
+
+
 
 \newpage
 \section{Srovnání GRASSu a ostatních softwarů}
