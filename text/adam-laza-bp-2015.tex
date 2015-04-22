@@ -110,7 +110,7 @@ Historie\footnote{Praktická rukověť ke geografickému informačnímu systému
 GRASS je jeden z nejznámějších open-source GIS softwarů, jehož vývoj trvá déle než třicet let. Jádro softwaru je napsáno v jazyce C. Avšak snahou vývojářů je rozšíření GRASSu mezi širší odbornou veřejnost a proto v rámci snadnějšího použití jsou do programu začleněny moduly napsané v jazyce Python nebo C. Aktuálně je k dispozici verze 7, na jejímž vývoji se podílí několik vývojářů z řad dobrovolníků po celém světe.
 
 \subsection{GRASS GIS Add-Ons}
-GRASS GIS je od roku 1982 v neustálem vývoji. Síla a úspěch GRASS GISu je založená hlavně na komunitě uživatelů. S ohledem na to, je filozofií vývojového týmu GRASS GISu vést uživatele k tvorbě jejich vlastních nástrojů a aplikaci pro GRASS GIS. Pokud uživatel vyvine nějaký nástroj, který by mohl být užitečný ostatním uživatelům má možnost svůj kód zveřejnit a zpřístupnit ostatním uživatelům.
+GRASS GIS je od roku 1982 v neustálem vývoji. Síla a úspěch GRASS GISu je založená hlavně na komunitě uživatelů. S ohledem na to, je filozofií vývojového týmu GRASS GISu vést uživatele k tvorbě jejich vlastních nástrojů a aplikaci pro GRASS GIS. Pokud uživatel vyvine nějaký nástroj, který by mohl být užitečný ostatním uživatelům má možnost svůj kód zveřejnit a zpřístupnit ostatním uživatelům pomocí Add-Ons\footnote{http://grass.osgeo.org/download/addons/}.
 
 \newpage
 \section{Delaunayova triangulace}
@@ -146,15 +146,40 @@ V našem případě budeme triangulaci provádět uvnitř takzvaného \textit{ko
 V podstatě by se dalo říct, že triangulace je jakákoliv trojúhelníkoví síť mezi body v prostoru. Tato práce se však bude zabývat triangulační sítí se specifickými vlastnostmi.
 
 \todo[inline]{pridat obrazky pro jednotlive podminky}
-\begin{enumerate}
-\item Žádný z trojúhelníků $t_{ijk}$ není zdegenerovaný, tzn. že vrcholy \textit{i,j,k} neleží na přímce.
-\item Žádná dvojice trojúhelníků se nepřekrývá, tzn $Int(t_{ijk}) \cap Int(t_{lmn}) = \emptyset$
-\item Hranice dvou trojúhelníků se setkávají pouze na jejich hranách nebo v jejich vrcholech.
-\item Sjednocení všech trojúhelníků v celé triangulační síti se rovná celé doméně $\Omega$, nad kterou triangulaci provádíme.
-\item Doména $\Omega$ musí být spojitá.
-\item Triangulační síť nesmí obsahovat díry.
-\item Jestliže vrchol $v_i$ leží na hranici konvexního obalu, pak musí existovat právě dvě hraniční hrany, které mají vrchol $v_i$ jako společný vrchol. To mimo jiné znamená, že počet hraničních vrcholů je roven počtu hraničních hran.
-\end{enumerate}
+1. Žádný z trojúhelníků $t_{ijk}$ není zdegenerovaný, tzn. že vrcholy \textit{i,j,k} neleží na přímce.
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{../img/podm_1.png}
+\caption{Degenerace trojúhelníku}
+\label{fig:podm_1}
+\end{figure}
+
+2. Žádná dvojice trojúhelníků se nepřekrývá, tzn $Int(t_{ijk}) \cap Int(t_{lmn}) = \emptyset$
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.25\textwidth]{../img/podm_2.png}
+\caption{Překrývající se trojúhelníky}
+\label{fig:podm_1}
+\end{figure}
+
+3. Hranice dvou trojúhelníků se setkávají pouze na jejich hranách nebo v jejich vrcholech.
+
+4. Sjednocení všech trojúhelníků v celé triangulační síti se rovná celé doméně $\Omega$, nad kterou triangulaci provádíme.
+
+5. Doména $\Omega$ musí být spojitá.
+\begin{comment}
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{../img/podm_3.png}
+\caption{Spojitá doména $\Omega$}
+\label{fig:podm_1}
+\end{figure}
+\end{comment}
+
+6. Triangulační síť nesmí obsahovat díry.
+
+7. Jestliže vrchol $v_i$ leží na hranici konvexního obalu, pak musí existovat právě dvě hraniční hrany, které mají vrchol $v_i$ jako společný vrchol. To mimo jiné znamená, že počet hraničních vrcholů je roven počtu hraničních hran.
+
 
 Pokud jsou naplněny první čtyři podmínky, může se triangulace nazvat \textit{validní}. V případě, že naplníme všech sedm podmínek, dá se mluvit o \textit{regulérní} triangulaci.
 
@@ -895,9 +920,42 @@ Cílem do budoucna však není nechat tyto moduly pouze v rámci Add-Ons. Jeliko
 \subsection{Knihovna Triangle}
 Knihovna Triangle verze 1.4\footnote{http://www.cs.cmu.edu/~quake/triangle.html} byla napsaná Jonathanem Richardem Shewchuk v roce 2002. Je distribuována pod licencí MIT, která nedovoluje začlenění do oficiální distribuce GRASS GISu. V programu \textit{nnbathy} má na starosti Delaunayovu trinagulaci. Je tedy třeba najít vhodný způsob, jak tuto knihovnu nahradit.
 
+Triangle pro tvorbu triangulace využívá Divide and Conquer algoritmu v kombinaci Inkrementálním algoritmem. Pro ukládání dat využívá svoji vlastní, poměrně obsáhlou datovou strukturu \textit{delaunay}, do které si ukládá hraniční body regionu, všechny body triangulace, všechny trojúhelníky s hranami a jejich opsanými kružnicemi, včetně jejich sousedů. 
+
+Tuto datovou strukturu delaunay dále využívá i samotný program \textit{nnbathy}, který provádí interpolaci metodou přirozeného souseda. Právě převod na tuto datovou strukturu bude v budoucnosti klíčový v případě, že se podaří najít vhodný triangulační nástroj, který nahradí knihovnu Triangle.
+
 \subsection{Knihovna CGAL}
 Knihovna CGAL (The Computational Geometry Algorithms Library) je projekt, který poskytuje snadný přístup k efektivním a spolehlivým geometrickým algoritmům ve formě C++ knihovny. CGAL se používá v různých oblastech, které potřebují geometrické výpočty, jako např. v GISech, CADu, molekulární biologii, počítačové grafice a robotice. Jeden z jeho balíčků se přímo zabývá interpolací a nabízí funkce pro výpočet souřadnic přirozeného souseda. Tato knihovna je třeba ještě dále prozkoumat a zjistit její možnosti, neboť možnost její budoucí implementace do GRASS GISu se nejeví nereálně.
 
+\newpage
+\subsection{Modul \textit{v.delaunay}}
+Modul \textit{v.delaunay}\footnote{http://grass.osgeo.org/grass71/manuals/v.delaunay.html} je součást oficiální distribuce GRASS GISu. Tento modul poskytuje Delaunayovu triangulaci nad vektorovou mapou s body nebo centroidy. 
+
+Ovládání modulu je velmi jednoduché na výběr máme pouze z několika flagů a několika paramatrů:
+
+\bigskip
+Flagy:
+\begin{description}
+\item[-r] Počítej pouze s body v aktuálním regionu.
+\item[-l] Vytvoř výstupní triangulaci pomocí linií, ne ploch.
+\end{description}
+\bigskip
+Parametry:
+\begin{description}
+\item[[input]] Povinný parametr. Název vstupní vektorové mapy.
+\item[layer] Název nebo číslo vrstvy. Slouží k připojení do databáze.
+\item[[output]] Povinný parametr. Název výstupní vektorové mapy.
+\end{description}
+
+\begin{lstlisting}[caption={Volání modulu v.delaunay z příkazové řádky}]
+v.delaunay input=elev_lid792_randpts output=elev_lid792_randpts_delaunay
+\end{lstlisting}
+
+\todo[inline]{Vložit obrázek bodů a triangulace}
+
+Pro vytvoření triangulace používá modul algoritmus Rozděl a panuj. Data ukládá do datové struktury half-edge. Z hlediska rychlosti se tento modul jeví jako adekvátní náhrada za knihovnu Triangle. Při testech bylo dokázáno, že pro náhodné konfigurace miliónu bodů dokáže triangulaci provést za méně než 15 s, což se jeví jako dostatečně efektivní.
+
+Zbývající otázkou pro jeho použití do budoucnosti je tedy převod datové struktury half-edge na datovou strukturu, kterou využívá program nnbathy, tedy strukturu delaunay.
 
 
 \newpage
