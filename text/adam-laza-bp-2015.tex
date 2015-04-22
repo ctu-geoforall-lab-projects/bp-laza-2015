@@ -41,9 +41,9 @@ bottom=35mm]
 \phantomsection
 \addcontentsline{toc}{section}{#1}
 
-\newcommand{\exedout}{%
-  \rule{0.8\textwidth}{0.5\textwidth}%
-}
+%\newcommand{\exedout}{%
+%  \rule{0.8\textwidth}{0.5\textwidth}%
+%}
 
 
 \section*{#1}
@@ -100,6 +100,8 @@ Obvykle ovšem potřebujeme znát hodnotu daného jevu i mimo měřené body, ne
 
 V této práci se budu zabývat interpolací přirozeného souseda a její implementací do GRASS GISu 7\footnote{\url{http://grass.osgeo.org}}. 
 
+\newpage
+\part{Teoretická část}
 
 \newpage
 \section{GRASS GIS}
@@ -273,7 +275,7 @@ Nejčastěji tento jev nastává u čtyřúhelníků, jejichž všechny vrcholy 
 Na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} jsme si ukázali případ neutrálního případu pro MinMax podmínku. Proces, při kterém jsme zaměnili diagonálu čtyřúhelníku tak, aby byli oba trojúhelníky lokálně optimální, se nazýva \textit{Edge swaping.} Pokud budeme tento proces aplikovat pro celou triangulaci dojde k takzvané \textit{legalizaci} triangulace.
 
 \newpage
-\section{Voronoiovy diagramy}
+\subsection{Voronoiovy diagramy}
 
 Voronoiovy diagramy úzce souvisí s Delaunayovou triangulací. Představme si opět množinu bodů $P = \{p_1,...p_N\} $ v rovině $E^2$ a nechť je $d(p_i,p_j) $ Eukleidovská vzdálenost mezi body $p_i$ a $p_j$. Rovinu po té rozdělíme na oblasti $V(p_i,...,p_N)$, kde každému bodu $p_i$ z množiny $P$ přiřadíme takovou oblast, která splňuje následující podmínku: 
 
@@ -679,6 +681,9 @@ Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka "ukradla" n
 \end{figure}
 
 
+\newpage	
+\part{Praktická část}
+
 \newpage
 \section{Postup řešení}
 \subsection{Bash}
@@ -962,660 +967,104 @@ Zbývající otázkou pro jeho použití do budoucnosti je tedy převod datové 
 \section{Srovnání GRASSu a ostatních softwarů}
 
 
-
-
-
-
-\begin{comment}
 \newpage
-\section{Interpolace přirozeným sousedem}
-
-\todo[inline]{Prostudovat a probrat s T. Bayerem, po te opravit a doplnit!}
-
-\subsection{Thiessenovy polygony}
-\textit{Thiessenovy polygony} jsou sice samostatnou interpolační metodou, \textit{metoda přirozeného souseda} (MPS) je však využívá jako základ pro výpočet vah a proto bude jejich výpočet zmíněn i zde.
-
-\textit{Thiessenovy polygony} známé taky jako \textit{Voronoiovy diagramy} jsou definovány takto: Nechť V je množina \textit{n} bodů v rovině. Rovinu rozdělíme na \textit{n} oblastí \textit{R} takových, že $R_i$ obsahuje všechny body z $E^2$, pro něž je bod $p_i  \in V$ nejbližší soused. Toto rozdělení roviny se nazývá Voronoiův diagram (VD) množiny bodů.
-
-Nechť \textbf{A} = {$A_1,...,A_n$} je množina \textit{n} bodů. Voronoiův diagram $A_i$ je:\newline
-$V(A_i)={X \in R^d : |X-A_i| \le |X-A_j| \forall _j = 1,...,n},$\newline kde $|X-A|$ vyjadřuje Eukleidovskou vzdálenost mezi body $X,A$ v prostoru $R^d$
-
-VD má následující vlastnosti. Všechny oblasti jsou konvexní a oblast $R_i$ obsahuje jediný bod $p_i \in V$. Některé oblasti jsou neohraničené. Tyto obsahují body $p_i \in CH(V)$. Počet hran a uzlů VD je přímo úměrný počtu bodů v množině \textit{V}. Pokud žádné 4 body neleží na kružnici, uzly mají stupeň 3. Uzel VD leží ve středu kružnice určené 3 body z \textit{V}, které leží v přilehlých oblastech VD a neleží na přímce.
-\bigskip
-\textbf{Algoritmus konstrukce Voronoiova diagramu}
-
-Množinu \textit{n} bodů v rovině rozdělíme svislou přímkou na dvě stejně velké podmnožiny \textit{V1} a \textit{V2}. Při dosažení malého počtu bodů zkonstruujeme VD1 a VD2 rozdělených množin , jinak dělení rekurzivně opakujeme. Po vyřešení dílčích VD spojujeme dvojice VD následujícím způsobem:
-
-Nechť VD1 a VD2 kspi dva vypočítáné Voronoiovy diagramy množin oddělených hraniční svislou přímkou. Pro jejich spojení využijeme skutečnosti, že hrany výsledného VD patří buď zcela do VD1 nebo VD2, nebo leží na osách úseček, spojujících body z V1 a V2 (tzv. bisektory). Tyto hrany tvoří řetěz, který je monotónní ve směru osy \textit{y}.
-
-Nalezneme konvexní obal sjednocených množin \textit{V1} a \textit{V2}. Nový konvexní obal obsahuje úsečky tečné k původním konvexním obalům. Sestrojíme bisektory těchto tečných úseček.
-
-Nechť \textit{l} je bisektor horní úsečky, určené vrcholykonvexního obalu. Přímka \textit{l} leží současně v oblastech $R_i \subset VD1$ a $R_j \subset VD2$. Určíme místo, ve kterém \textit{l} opustí buď oblast $R_i$ nebo $R_j$  a vstoupí do oblasti $R_k$. Oblast $R_k$ patří buď k VD1, nebo k VD2 a obsahuje bod $p_k$. Na hranici ukončíme hranu \textit{l} a vytvoříme novou hranu, která leží na bisektoru bodů $p_k$ a zbývajícího bodu $p_i$ nebo $p_j$ (pokud opustíme oblast $R_j$ nebo $R_i$). 
-
-Směrem dolů vytváříme další hrany VD a algoritmus ukončíme, pokud dosáhneme spodní polopřímkové hrany.
-
-\textbf{Delaunayova triangulace}
-
-Nechť \textit{V} je množina \textit{n} bodů. Předpokládáme, že žádné 4 body z \textit{V} neleží na kružnici. Pokud propojíme všechny sousední body určené Voronoiovým diagramem úsečkami, dostaneme triangulační síť, kterou studoval Delaunay v roce 1935. Tato triangulace je výhodná např. pro interpolaci, neboť minimalizuje délky hran trojúhelníků a zpřesňuje tak výpočty přírůstků. 
-
-\subsection{Samotná interpolace}
-MPS může být použita i pro bod \textit{x}, který není součástí množiny \textit{A}. V tomto případě přirození sousedé bodu \textit{A} jsou body z množiny \textit{A},jejichž Voronoiovy diagramy by byly pozměneny v případě, že by bod \textit{A} byl vložen do VD(\textit{S}).
-
-Průnik \textit{x} vytvoří nový VD, který "ukrade" plochu VD, které by byly jeho přirozenými sousedy. 
-
-\section{Skripty}
-%r.surf.nnbathy v bashi kod
-\begin{lstlisting}[language=bash,caption={bash version}]
-#!/bin/sh
-
-############################################################################
-#
-# MODULE:     v.surf.nnbathy
-#
-# AUTHOR(S):  Hamish Bowman, Otago University, New Zealand
-#		Based on r.surf.nnbathy by Maciej Sieczka
-#
-# PURPOSE:    Interpolate raster surface using the "nnbathy" natural
-#             neighbor interpolation program.
-#
-# COPYRIGHT:  (c) 2014 Hamish Bowman, Maciej Sieczka, and the GRASS Development Team
-#
-# LICENSE:    This program is free software under the GNU General Public
-#             License (>=v2). Read the file COPYING that comes with GRASS
-#             for details.
-#
-#############################################################################
-
-# NOTES:
-#
-# 1. Requires nnbathy executable v 1.75 or later. Follow the instruction in
-#    html manual page to obtain it.
-#
-# 2. When creating the input raster map, make sure it's extents cover
-#    your whole region of interest, the cells you wish to interplate on are
-#    NULL, and the resolution is correct. Same as most GRASS raster modules
-#    this one is region sensitive too.
-
-
-#%Module
-#% description: Interpolates a raster map using the nnbathy natural neighbor interpolation program.
-#%End
-#%Option
-#% key: input
-#% type: string
-#% gisprompt: old,vector,vector
-#% description: Name of input vector points map
-#% guisection: Selection
-#% required : no
-#%End
-#%Option
-#% key: output
-#% gisprompt: new,cell,raster
-#% type: string
-#% description: Name for output raster map
-#% required : yes
-#%End
-#%Option
-#% key: zcolumn
-#% type: string
-#% required: no
-#% multiple: no
-#% description: Name of the attribute column with values to be used for approximation (if layer>0)
-#% guisection: Selection
-#%End
-#%Option
-#% key: layer
-#% type: integer
-#% required: no
-#% multiple: no
-#% label: Layer number
-#% description: If set to 0, z coordinates are used. (3D vector only)
-#% answer: 1
-#% gisprompt: old_layer,layer,layer_zero
-#% guisection: Selection
-#%End
-#%Option
-#% key: where
-#% type: string
-#% required: no
-#% multiple: no
-#% key_desc: sql_query
-#% label: WHERE conditions of SQL statement without 'where' keyword
-#% description: Example: income < 1000 and inhab >= 10000
-#% guisection: Selection
-#%End
-#%option
-#% key: alg
-#% type: string
-#% options: l,nn,ns
-#% answer: nn
-#% descriptions: l;Linear;nn;Sibson natural neighbor;ns;Non-Sibsonian natural neighbor
-#% description: Interpolation algorithm
-#%End
-#%Option
-#% key: file
-#% type: string
-#% gisprompt: old_file,file,input
-#% label: Name of input text file
-#% description: Containing x,y,z data as three space separated columns
-#% required : no
-#%End
-
-
-if [ -z "$GISBASE" ]; then
-  echo "ERROR: You must be in GRASS GIS to run this program." 1>&2
-  exit 1
-fi
-
-if [ "$1" != "@ARGS_PARSED@" ]; then
-  exec g.parser "$0" "$@"
-fi
-
-if [ -n "$GIS_OPT_INPUT" ] && [ -n "$GIS_OPT_FILE" ] ; then
-  g.message -e "Please specify either the 'input' or 'file' option, not both."
-  exit 1
-fi
-
-if [ -z "$GIS_OPT_INPUT" ] && [ -z "$GIS_OPT_FILE" ] ; then
-  g.message -e "Please specify either the 'input' or 'file' option."
-  exit 1
-fi
-
-if [ -n "$GIS_OPT_FILE" ] && [ ! -e "$GIS_OPT_FILE" ] ; then
-  g.message -e "File '$GIS_OPT_FILE' does not exist."
-  exit 1
-fi
-
-# check if we have awk
-if [ ! -x "`which awk`" ]; then
-  g.message -e '"awk" executable required but not found.'
-  exit 1
-fi
-
-# check if we have nnbathy
-if [ ! -x "`which nnbathy`" ]; then
-  g.message -e '"nnbathy" executable required but not found. Follow the instructions in v.surf.nnbathy manual to install.'
-  exit 1
-fi
-
-# check nnbathy version
-nnv=`nnbathy -v | sed 's/ /\n/g' | sort -nr | head -n1`
-nnv_ok=`echo $nnv | awk '{ if ($0<1.76) {print 0} else {print 1} }'`
-
-if [ $nnv_ok -eq 0 ]; then
-  g.message -e '"nnbathy" version >= 1.76 is required.'
-  exit 1
-fi
-
-# set up temporary files
-TMP="`g.tempfile pid=$$`"
-if [ $? -ne 0 ] || [ -z "$TMP" ]; then
-  g.message -e 'Unable to create temporary files.' 1>&2
-  exit 1
-fi
-
-# set environment so that awk works properly in all languages
-unset LC_ALL
-LC_NUMERIC=C
-export LC_NUMERIC
-
-PROG=`basename $0`
-
-# define cleanup procedure
-proc_cleanup() {
-  # Reset traps before normal script termination to avoid bogus ERROR message, as
-  # we put a trap on signal 0.
-  trap - 0 2 3 15 
-  rm -f "$TMP" "$TMP.$PROG.input_xyz" "$TMP.$PROG.output_xyz" "$TMP.$PROG.output_grd"
-}
-
-# define run-time error handling procedure
-proc_runtime_error() {
-  g.message -e "There was an error at the script's run time. Please try to debug the problem if you can and let the GRASS developers know."
-  exit 1
-}
-
-# define user-break procedure
-proc_user_break() {
-  g.message -e "User break!"
-  proc_cleanup
-  exit 1
-}
-
-# set trap for when script terminates
-trap "proc_runtime_error" 0
-
-# trap user break
-trap "proc_user_break" 2 3 15
-
-
-# assign main variables from user's input
-INPUT="$GIS_OPT_INPUT"
-OUTPUT="$GIS_OPT_OUTPUT"
-ALG="$GIS_OPT_ALG"
-
-
-### DO IT ###
-
-# Make script terminate (ie. emit signal 0) if any statement returns a
-# non-0 value. Then we trap signal 0, which lets handle such errors.
-# However, the trap on signal 0 must be reset before normal script
-# termination to avoid a bogus ERROR message then - this is done in the
-# cleanup procedure.
-set -e
-
-# grab the current region settings
-eval `g.region -gu`
-
-if [ -n "$GIS_OPT_INPUT" ] ; then
-  # spit out coords + values to be interpolated
-  ## FIXME: check if data is 3D or use output column
-  # column=  (slow!!)
-  TMPXYZ="$TMP.$PROG.input_xyz"
-  
-  if [ "$GIS_OPT_LAYER" -eq 0 ] ; then
-    # 3D vector points
-    LAYER=""
-    COLUMN=""
-  else
-    LAYER="layer=$GIS_OPT_LAYER"
-    if [ -n "$GIS_OPT_ZCOLUMN" ] ; then
-      COLUMN="columns=$GIS_OPT_ZCOLUMN"
-    else
-      g.message -e "Name of z column required for 2D vector maps."
-      exit 1
-    fi
-  fi
-
-  if [ -n "$GIS_OPT_WHERE" ] ; then
-    v.out.ascii -r input="$INPUT" output="$TMPXYZ" format=point fs=space \
-       dp=15 where="$GIS_OPT_WHERE" $LAYER $COLUMN
-  else
-    v.out.ascii -r input="$INPUT" output="$TMPXYZ" format=point fs=space \
-       dp=15 $LAYER $COLUMN
-  fi
-
-  if [ "$GIS_OPT_LAYER" -gt 0 ] ; then
-    # crop away the cat column
-    mv "$TMPXYZ" "$TMPXYZ.cat"
-    cut -f1,2,4 -d' ' "$TMPXYZ.cat" > "$TMPXYZ"
-    rm "$TMPXYZ.cat"
-  fi
-
-else
-  TMPXYZ="$GIS_OPT_FILE"
-fi
-
-
-# set the working region for nnbathy (it's cell-center oriented)
-nn_n=`echo $n | awk -v res="$nsres" '{printf "%.8f", $1 - res/2.0}'`
-nn_s=`echo $s | awk -v res="$nsres" '{printf "%.8f", $1 + res/2.0}'`
-nn_w=`echo $w | awk -v res="$ewres" '{printf "%.8f", $1 + res/2.0}'`
-nn_e=`echo $e | awk -v res="$ewres" '{printf "%.8f", $1 - res/2.0}'`
-
-null="NaN"
-type="double"
-
-
-#### interpolate
-g.message '"nnbathy" is performing the interpolation now. This may take some time.'
-g.message "Once it completes an 'All done.' message will be printed."
-
-
-nnbathy -W 0 -P alg="$ALG" -n "${cols}x${rows}" \
-	-x "$nn_w" "$nn_e" -y "$nn_n" "$nn_s" \
-	-i "$TMPXYZ" \
-       > "$TMP.$PROG.output_xyz"
-
-
-# Y in "r.stats -1gn" output is in descending order, thus -y must be in
-# MAX MIN order, not MIN MAX, for nnbathy not to produce a grid upside-down
-
-# convert the X,Y,Z nnbathy output into a GRASS ASCII grid, then import with r.in.ascii:
-
-# 1 create header
-cat << EOF > "$TMP.$PROG.output_grd"
-north: $n
-south: $s
-east: $e
-west: $w
-rows: $rows
-cols: $cols
-null: $null
-type: $type
-EOF
-
-# 2 do the conversion
-g.message "Converting nnbathy output to GRASS raster ..."
-
-awk -v cols="$cols" '
-BEGIN {col_cur=1; ORS=" "}
-{
- if (col_cur==cols) {ORS="\n"; col_cur=0; print $3; ORS=" "}
-		    else {print $3}
- col_cur++
-}' "$TMP.$PROG.output_xyz" >> "$TMP.$PROG.output_grd"
-
-# 3 import
-r.in.ascii input="$TMP.$PROG.output_grd" output="$OUTPUT" --quiet
-
-# store comand history in raster's metadata
-
-if [ -n "$GIS_OPT_INPUT" ] ; then
-  r.support map="$OUTPUT" history="v.surf.nnbathy alg=$ALG input=$INPUT output=$OUTPUT"
-  #TODO: layer= where= zcolumn=
-else
-  r.support map="$OUTPUT" history="v.surf.nnbathy alg=$ALG input=$FILE output=$OUTPUT"
-fi
-r.support map="$OUTPUT" history=""
-r.support map="$OUTPUT" history="nnbathy run syntax:"
-r.support map="$OUTPUT" history=""
-r.support map="$OUTPUT" history="nnbathy -W 0 -P alg=$ALG -n ${cols}x$rows "
-r.support map="$OUTPUT" history="-x $nn_w $nn_e "
-r.support map="$OUTPUT" history="-y $nn_n $nn_s "
-r.support map="$OUTPUT" history="-i tmp_in > tmp_out"
-r.support map="$OUTPUT" history=""
-
-### ALL DONE ###
-
-proc_cleanup
-
-g.message "Done. <$GIS_OPT_OUTPUT> created."
-
-\end{lstlisting}
-
-\begin{lstlisting}[language=python, caption={python version}]
-    def region():
-        # set the region
-        global area, ALG, nn_n, nn_s, nn_w, nn_e, null, ctype, cols, rows
-        reg = grass.read_command("g.region", flags='p')
-        kv = grass.parse_key_val(reg, sep=':')
-        reg_N = float(kv['north'])
-        reg_W = float(kv['west'])
-        reg_S = float(kv['south'])
-        reg_E = float(kv['east'])
-        cols = int(kv['cols'])
-        rows = int(kv['rows'])
-        nsres = float(kv['nsres'])
-        ewres = float(kv['ewres'])
-        reg = (reg_N, reg_W, reg_S, reg_E)
-        area = (reg_N-reg_S)*(reg_E-reg_W)
-        ALG = options['algorithm']
-
-        # set the working region for nnbathy (it's cell-center oriented)
-        nn_n = reg_N - nsres/2
-        nn_s = reg_S + nsres/2
-        nn_w = reg_W + ewres/2
-        nn_e = reg_E - ewres/2
-        null = "NaN"
-        ctype = "double"
-\end{lstlisting}
-
-%kod initial_controls()
-\begin{lstlisting}[language=python, caption={python version}]
-    def initial_controls():
-        # setup temporary files
-        global TMP, TMPcat, XYZout, TMPXYZ
-        TMPXYZ = 'tmpxyz.txt'
-        TMPcat = 'TMPcat.txt'
-        TMP = grass.tempfile()
-        #TMPcat = grass.tempfile()
-        #TMPXYZ = grass.tempfile()
-        XYZout = grass.tempfile()
-
-        if (TMPcat or TMPXYZ or XYZout or TMP) is None:
-            grass.fatal("Unable to create temporary files.")
-
-        # other controls
-        if not grass.find_program('nnbathy'):
-            grass.fatal('nnbathy is not available')
-
-        if (options['input'] and options['file']):
-            grass.message("Please specify either the 'input' or 'file' option, not both.")
-
-        if not(options['input'] or options['file']):
-            grass.message("Please specify either the 'input' or 'file' option.")
-
-        if (options['file'] and os.path.isfile(options['file'])):
-            grass.message("File "+options['file']+" does not exist.")
-
-        if area == 0:
-            grass.fatal(_("xy-locations are not supported"))
-            grass.fatal(_("Need projected data with grids in meters"))
-
-        if not options['file']:
-            if int(options['layer']) == 0:
-                LAYER = ''
-                COLUMN = ''
-            else:
-                LAYER = int(options['layer'])
-                if options['zcolumn']:
-                    COLUMN = options['zcolumn']
-                else:
-                    grass.message('Name of z column required for 2D vector maps.')
-
-            if options['kwhere']:
-                grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=TMPcat, format="point", separator="space", precision=15, where=options['kwhere'], layer=LAYER, columns=COLUMN)
-            else:
-                grass.run_command("v.out.ascii", flags='r', overwrite=1, input=options['input'], output=TMPcat, format="point", separator="space", precision=15, layer=LAYER, columns=COLUMN)
-
-            if int(options['layer']) > 0:
-                fin = open(TMPcat, 'r')
-                fout = open(TMPXYZ, 'w')
-                try:
-                    for line in fin:
-                        parts = line.split(" ")
-                        fout.write(parts[0]+' '+parts[1]+' '+parts[3])
-                except:
-                    grass.message("Invalid input!")
-                fin.close()
-                fout.close()
-            else:
-                grass.message("Z coordinates are used.")
-        else:
-            TMPXYZ = options['file']
-\end{lstlisting}
-
-%kod compute()
-\begin{lstlisting}[language=python, caption={python version}]
-def compute():
-        grass.message('"nnbathy" is performing the interpolation now. This may take some time...')
-        grass.verbose("Once it completes an 'All done.' message will be printed.")
-
-        #nnbathy calling
-        fsock = open(XYZout, 'w')
-        #TODO zkontrolovat zarovnani
-        grass.call(['nnbathy',
-                         '-W', '%d' % 0,
-                         '-i', '%s' % TMPXYZ,
-                         '-x', '%d' % nn_w, '%d' % nn_e,
-                         '-y', '%d' % nn_n, '%d' % nn_s,
-                         '-P', '%s' % ALG,
-                         '-n', '%dx%d' % (cols, rows)],
-                         stdout=fsock)
-        fsock.close()
-\end{lstlisting}
-
-\begin{lstlisting}[language=python, caption={python version}]
-        grass.run_command('r.in.ascii', input=TMP, output=options['output'], quiet=True)
-
-        # store comand history in raster's metadata
-        if options['input']:
-            grass.run_command('r.support', map=options['output'],
-                              history="v.surf.nnbathy alg=%s input=%s output=%s" % (options['algorithm'], options['input'], options['output']))
-        else:
-            grass.run_command('r.support', map=options['output'],
-                              history="v.surf.nnbathy alg=%s input=%s output=%s" % (options['algorithm'], options['file'], options['output']))
-
-        grass.run_command('r.support', map=options['output'], history="\nnnbathy run syntax:\nnbathy -W %d -i %s -x '%d %d' -y '%d %d' -P %s -n %dx%d" % \
-                              (0, TMPXYZ, nn_w, nn_e, nn_n, nn_s, ALG, cols,rows))
-        grass.message("Done. Raster map <%s> created." % options['output'])
-\end{lstlisting}
-
-%ukazka v.surf.nnbathy
-\begin{lstlisting}[language=python, caption={python version}]
-import sys
-import os
-
-from grass.script.core import parser
-import grass.script as grass
-
-from nnbathy import Nnbathy_vector, Nnbathy_file
-
-
-def main():
-    # initial controls
-    if (options['input'] and options['file']):
-        grass.fatal("Please specify either the 'input' \
-                    or 'file' option, not both.")
-
-    if not(options['input'] or options['file']):
-        grass.message("Please specify either the 'input' or 'file' option.")
-
-    if (options['file'] and os.path.isfile(options['file'])):
-        grass.message("File "+options['file']+" does not exist.")
-
-    # vector or file input?
-    if (options['input']):
-        obj = Nnbathy_vector(options)
-    else:
-        obj = Nnbathy_file(options)
-
-    obj.compute()
-    obj.create_output()
-
-if __name__ == "__main__":
-    options, flags = parser()
-    main()
-
-\end{lstlisting}
-
-%Kod r.surf.nnbathy
-\begin{lstlisting}[language=python,caption={python version}]
-import os
-import sys
-
-from grass.script.core import parser
-import grass.script as grass
-
-from nnbathy import Nnbathy_raster
-
-
-def main():
-    obj = Nnbathy_raster(options)
-    obj.compute()
-    obj.create_output()
-
-if __name__ == "__main__":
-    options, flags = parser()
-    main()
-\end{lstlisting}
-
-%Ukazka __init__
-\begin{lstlisting}[language=python,caption={python version}]
-
-%Ukazka __del__
-\begin{lstlisting}[language=python,caption={python version}]
-
-
-    def __del__(self):
-        # cleanup
-        if self._tmp:
-            os.remove(self._tmp)
-        if self._tmpxyz:
-            os.remove(self._tmpxyz)
-        if self._xyzout:
-            os.remove(self._xyzout)
-        if self._tmpcat:
-            os.remove(self._tmpcat)
-\end{lstlisting}
-def __init__(self, options):
-        self._tmpxyz = grass.tempfile()
-        self._xyzout = grass.tempfile()
-        self._tmp = grass.tempfile()
-        self._tmpcat = grass.tempfile()
-        self.options = options
-        self.region()
-        pass
-\end{lstlisting}
-
-%Ukazka Nnbathy_raster
-\begin{lstlisting}[language=python,caption={python version}]
-class Nnbathy_raster(Nnbathy):
-    # class for raster input
-    def __init__(self, options):
-        Nnbathy.__init__(self, options)
-        self._load(options)
-
-    def _load(self, options):
-        # load input raster
-        grass.run_command('r.stats', flags='1gn', input=options['input'],
-                          output=self._tmpxyz, quiet=True, overwrite=True)
-\end{lstlisting}
-
-%Ukazka Nnbathy_vector
-\begin{lstlisting}[language=python,caption={python version}]
-class Nnbathy_vector(Nnbathy):
-    # class for vector input
-    def __init__(self, options):
-        Nnbathy.__init__(self, options)
-        self._load(options)
-
-    def _load(self, options):
-        # load input vector, initial controls
-        if int(options['layer']) == 0:
-            _layer = ''
-            _column = ''
-        else:
-            _layer = int(options['layer'])
-            if options['zcolumn']:
-                _column = options['zcolumn']
-            else:
-                grass.message('Name of z column required for 2D vector maps.')
-
-        # convert vector to ASCII
-        if options['kwhere']:
-            grass.run_command("v.out.ascii", flags='r', overwrite=1,
-                              input=options['input'], output=self._tmpcat,
-                              format="point", separator="space", dp=15,
-                              where=options['kwhere'], layer=_layer,
-                              columns=_column)
-        else:
-            grass.run_command("v.out.ascii", flags='r', overwrite=1,
-                              input=options['input'], output=self._tmpcat,
-                              format="point", separator="space", dp=15,
-                              layer=_layer, columns=_column)
-
-        # edit ASCII file, crop out one column
-        if int(options['layer']) > 0:
-            fin = open(self._tmpcat, 'r')
-            fout = open(self._tmpxyz, 'w')
-            try:
-                for line in fin:
-                    parts = line.split(" ")
-                    fout.write(parts[0]+' '+parts[1]+' '+parts[3])
-            except StandardError, e:
-                grass.fatal_error("Invalid input: %s" % e)
-            fin.close()
-            fout.close()
-        else:
-            grass.message("Z coordinates are used.")
-\end{lstlisting}
-
-%Ukazka Nnbathy_file
-\begin{lstlisting}[language=python, caption={python version}]
-class Nnbathy_file:
-    # class for file input
-    def __init__(self, options):
-        self.options = options
-        self._load(options)
-
-    def _load(self, options):
-        # load input file
-        self._tmpxyz = options['file']
-\end{lstlisting}
-
-
-\end{comment}
+\necislovana{Seznam použitých zkratek}
+
+\begin{tabular}{ll}
+\textbf{GIS}& Geographic Information System (Geografický informační systém)\\
+\textbf{GRASS}& Geographical Resources Analysis Support System\\
+\textbf{QGIS}& Quantum GIS\\
+\textbf{GUI}& Graphical User Interface (Grafické uživatelské rozhraní)\\
+\textbf{USA-CERL}& US Army Construction Engineering Research Laboratories\\
+\end{tabular}
+
+
+\newpage
+\renewcommand\baselinestretch{1.2}
+\selectfont
+\renewcommand{\refname}{Použité zdroje}
+\phantomsection
+\addcontentsline{toc}{section}{\refname}
+
+\begin{thebibliography}{99}
+\label{literatura}
+
+
+\bibitem{grass_gis}
+NETELER, Markus; MITASOVA, Helena. \textit{Open Source GIS:
+A~GRASS GIS Approach}. 3rd Ed. New York: Springer, 2008. 406 s. URL:
+\textless\url{http://www.grassbook.org}\textgreater. ISBN 978-0-387-35767-6.
+
+
+\bibitem{bloopers}
+JOHNSON, Jeff. \textit{GUI Bloopers 2.0: Common User Interface Design
+Dont's and Dos}. Burlington: Morgan Kaufman Publishers, 2008. 407 s. ISBN
+978-0-12-370643-0.
+
+
+\bibitem{wxPythonInAction}
+RAPPIN, Noel; DUNN, Robin. \emph{WxPython in Action}. Greenwich, USA: Manning
+Publications Co., 2006. 552 s. ISBN 1-932394-62-1.
+
+
+\bibitem{manual}
+GRASS Development Team. \textit{GRASS GIS 7.0.svn Reference
+Manual} [online]. c2003-2011, Last modified: Fri, 04 Feb 2011 [cit.
+2011-04-18]. URL:
+\textless\url{http://grass.osgeo.org/grass70/manuals/html70_user/ps.map.html}%
+\textgreater
+
+
+\bibitem{script}
+GRASS Development Team. \textit{GRASS 7 Programmer's Manual} [online].
+c2000-2011, generated on Sat Apr 16 2011 [cit. 2011-03-19].
+URL: \textless\url{http://grass.osgeo.org/programming7}\textgreater
+
+\bibitem{demo}
+Robin Dunn and Total Control Software. \textit{wxPython
+demo} [program]. c1997-2006, last modified 2009-05-17 [cit. 2011-03-19]. URL:
+\textless
+\url{http://downloads.sourceforge.net/wxpython/wxPython-demo-2.8.10.1.tar.bz2}%
+\textgreater
+
+
+\bibitem{wxGUI_clanek}
+LANDA, Martin; MORETTO, Cristina; ZANOLLI, Michele; MANGANELLI, Luca; NETELER, Markus.
+\textit{wxPython GUI for GRASS} [online]. In IX Meeting degli Utenti Italiani di GRASS - GFOSS, Perugia, Italy, February 21-22 2008.
+URL:\textless\url{http://gama.fsv.cvut.cz/~landa/publications/2008/gfoss-it-08/paper/grass-gfoss-tn.pdf}\textgreater
+
+
+% LANDA, Martin. \textit{New GUI for GRASS GIS based on wxPython} [online].
+% Last modified 07-Oct-2010 [cit. 2011-04-18]. URL: \textless
+% \url{http://geo.fsv.cvut.cz/~landa/publications/2008/gis-ostrava-08/paper/%
+% landa-grass-gui-wxpython.pdf}\textgreater
+
+
+\bibitem{wiki_wxpsmap}
+GRASS-Wiki. \textit{GUI for ps.map} [online]. Last modified
+16 April 2011 [cit. 2011-04-18]. URL: \textless
+\url{http://grass.osgeo.org/wiki/GUI_for_ps.map\#Installation}\textgreater
+
+
+\bibitem{trac}
+\textit{GRASS GIS Tracker and Wiki} [online]. Last modified 12 April 2011
+[cit. 2011-04-20].
+URL: \textless\url{http://trac.osgeo.org/grass}\textgreater
+
+
+
+\bibitem{ArcCR500}
+ARCDATA PRAHA, s.r.o. \textit{ARCDATA PRAHA - ArcČR 500} [online].
+c1992–2006 ARCDATA PRAHA, s.r.o., poslední změna: 7. 12. 2007 [cit. 2011-04-23].
+URL: \textless
+\url{http://old.arcdata.cz/data/arccr} \textgreater
+
+
+
+\end{thebibliography}
+
+
+
+
 
 \end{document}
