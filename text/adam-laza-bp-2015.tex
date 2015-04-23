@@ -18,7 +18,8 @@
   showstringspaces=false,
   commentstyle=\color{red},
   keywordstyle=\color{blue},
-  breaklines=true
+  breaklines=true,
+  frame=lines,
 }
 
 %okraje
@@ -66,9 +67,9 @@ bottom=35mm]
 \newpage
 \begin{abstract}
 \bigskip
-Cílem této bakalářské práce je návrh a implementace nástroje pro interpolaci metodou přirozeného souseda pro GRASS GIS 7. Starší verze GRASS GIS 6 sice tuto metodu nabízí v rámci volitelně doinstalovatelných balíčků Add-Ons, ale jako modul napsaný v Bashi a s vnitřní závislostí na knihovně \textit{nn-c}. Tato knihovna obsahuje knihovnu \textit{Triangle}, která nedovoluje zařazení tohoto nástroje do oficiální distribuce GRASS GISu.
+Cílem této bakalářské práce je návrh a implementace nástroje pro interpolaci metodou přirozeného souseda pro GRASS GIS 7. Starší verze GRASS GIS 6 sice tuto metodu nabízí v rámci volitelně doinstalovatelných balíčků Add-Ons, ale jako modul napsaný v Bashi a s vnitřní závislostí na knihovně \emph{nn-c}. Tato knihovna obsahuje knihovnu \emph{Triangle}, která nedovoluje zařazení tohoto nástroje do oficiální distribuce GRASS GISu.
 
-V rámci této bakalářské práce byl modul přepsán do jazyka Python, tak aby vyhovoval verzi 7. Práce se dále zabývá možnostmi budoucí implementace knihovny v jazyce C bez závislosti na knihovně \textit{Triangle}, tak aby mohl tento interpolační nástroj zařazen do oficiální distribude GRASS GISu.
+V rámci této bakalářské práce byl modul přepsán do jazyka Python, tak aby vyhovoval verzi 7. Práce se dále zabývá možnostmi budoucí implementace knihovny v jazyce C bez závislosti na knihovně \emph{Triangle}, tak aby mohl tento interpolační nástroj zařazen do oficiální distribude GRASS GISu.
 Část textu této práce se dále zabývá porovnání rychlosti a kvality výstupu mezi GRASS GISem a ostatními gisovými softwary.
 
 \bigskip
@@ -79,7 +80,7 @@ V rámci této bakalářské práce byl modul přepsán do jazyka Python, tak ab
 \selectlanguage{english}
 \begin{abstract}
 \bigskip
-The aim of this bachelor thesis is the project and the implementation of a tool for a natural neighbour interpolation pro GRASS GIS 7. Previous version GRASS GIS 6 contains such a tool as a optional package of Add-Ons, but this modul is written in Bash and with inner dependency on \textit{nn-c} library. Due to this library contains \textit{Triangle} library which is not under the GNU GPL licence it is not possible to add the interpolation tool into official GRASS GIS distribution.
+The aim of this bachelor thesis is the project and the implementation of a tool for a natural neighbour interpolation pro GRASS GIS 7. Previous version GRASS GIS 6 contains such a tool as a optional package of Add-Ons, but this modul is written in Bash and with inner dependency on \emph{nn-c} library. Due to this library contains \emph{Triangle} library which is not under the GNU GPL licence it is not possible to add the interpolation tool into official GRASS GIS distribution.
 
 \bigskip
 \keywords{Keywords}{GIS, GRASS GIS, natural neighbour interpolation, Delaunay triangulation, Voronoi's polygons}
@@ -105,9 +106,9 @@ V této práci se budu zabývat interpolací přirozeného souseda a její imple
 
 \newpage
 \section{GRASS GIS}
-GRASS (Geographic Resources Analysis Support System) GIS je geografický informační systém pro správu a analýzu prostorových dat, obrazových záznamů, produkci map a grafických výstupů, prostorové modelování a 3D vizualizaci. Na mnoha platformách (GNU/Linux, MS Windows, MAC OS) umožňuje práci s rastrovými i vektorovými daty a to buď pomocí příkazové řádky nebo grafického uživatelského rozhraní. GRASS GIS je otevřený a volně šiřitelný software pod licencí GNU GPL.
+GRASS (Geographic Resources Analysis Support System) GIS\footnote{http://grass.osgeo.org/} je geografický informační systém pro správu a analýzu prostorových dat, obrazových záznamů, produkci map a grafických výstupů, prostorové modelování a 3D vizualizaci. Na mnoha platformách (GNU/Linux, MS Windows, MAC OS) umožňuje práci s rastrovými i vektorovými daty a to buď pomocí příkazové řádky nebo grafického uživatelského rozhraní. GRASS GIS je otevřený a volně šiřitelný software pod licencí GNU GPL.
 
-Historie\footnote{Praktická rukověť ke geografickému informačnímu systému GRASS \url{http://geo.fsv.cvut.cz/data/grasswikicz/grass_prirucka/grass_prirucka_0.4.pdf}} GRASS GISu začíná v roce 1982, kdy začal být vyvíjen U.S. Army Corps of Enginneer/CERL (Construction Engineering Research Lab) pro vojenské účely. Nicméně koncem osmdesátých let byly veškeré zdrojové kódy dány k dispozici veřejnosti. Na začátku devadesátých let se začal pomocí internetu celosvětově rozšiřovat. V roce 1995 CERL odstoupil od projektu a vývoje se ujal GRASS Development Team, který zahrnoval odborníky z celého světa.
+Historie\cite{rukovet} GRASS GISu začíná v roce 1982, kdy začal být vyvíjen U.S. Army Corps of Enginneer/CERL (Construction Engineering Research Lab) pro vojenské účely. Nicméně koncem osmdesátých let byly veškeré zdrojové kódy dány k dispozici veřejnosti. Na začátku devadesátých let se začal pomocí internetu celosvětově rozšiřovat. V roce 1995 CERL odstoupil od projektu a vývoje se ujal GRASS Development Team, který zahrnoval odborníky z celého světa.
 
 GRASS je jeden z nejznámějších open-source GIS softwarů, jehož vývoj trvá déle než třicet let. Jádro softwaru je napsáno v jazyce C. Avšak snahou vývojářů je rozšíření GRASSu mezi širší odbornou veřejnost a proto v rámci snadnějšího použití jsou do programu začleněny moduly napsané v jazyce Python nebo C. Aktuálně je k dispozici verze 7, na jejímž vývoji se podílí několik vývojářů z řad dobrovolníků po celém světe.
 
@@ -132,7 +133,7 @@ Uvnitř žádného trojúhelníku neleží žádný další bod z P.
 \bigskip
 Triangulace má širokou škálu aklikací. V kartografii a GISech se využívá pro tvorbu DMT. V DPZ lze využít pro tvorbu prostorových modelů, své uplatnění najde také v počítačové grafice a vizualizaci prostorových dat a mnoho dalších.
 
-V našem případě budeme triangulaci provádět uvnitř takzvaného \textit{konvexního obalu}. Konvexní obal množiny bodů $P$ představuje takový konvexní mnohoúhelník, který obsahuje všechny body množiny bodů P, má co nejmenší plochu a ve kterém zároveň spojnice mezi kterýmikoliv body množiny bodů $P$ leží uvnitř obalu.
+V našem případě budeme triangulaci provádět uvnitř takzvaného \emph{konvexního obalu}. Konvexní obal množiny bodů $P$ představuje takový konvexní mnohoúhelník, který obsahuje všechny body množiny bodů P, má co nejmenší plochu a ve kterém zároveň spojnice mezi kterýmikoliv body množiny bodů $P$ leží uvnitř obalu.
 
 \newpage
 \begin{figure}[h!]
@@ -148,7 +149,7 @@ V našem případě budeme triangulaci provádět uvnitř takzvaného \textit{ko
 V podstatě by se dalo říct, že triangulace je jakákoliv trojúhelníkoví síť mezi body v prostoru. Tato práce se však bude zabývat triangulační sítí se specifickými vlastnostmi.
 
 \todo[inline]{pridat obrazky pro jednotlive podminky}
-1. Žádný z trojúhelníků $t_{ijk}$ není zdegenerovaný, tzn. že vrcholy \textit{i,j,k} neleží na přímce.
+1. Žádný z trojúhelníků $t_{ijk}$ není zdegenerovaný, tzn. že vrcholy $i, j, k$ neleží na přímce.
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{../img/podm_1.png}
@@ -183,7 +184,7 @@ V podstatě by se dalo říct, že triangulace je jakákoliv trojúhelníkoví s
 7. Jestliže vrchol $v_i$ leží na hranici konvexního obalu, pak musí existovat právě dvě hraniční hrany, které mají vrchol $v_i$ jako společný vrchol. To mimo jiné znamená, že počet hraničních vrcholů je roven počtu hraničních hran.
 
 
-Pokud jsou naplněny první čtyři podmínky, může se triangulace nazvat \textit{validní}. V případě, že naplníme všech sedm podmínek, dá se mluvit o \textit{regulérní} triangulaci.
+Pokud jsou naplněny první čtyři podmínky, může se triangulace nazvat \emph{validní}. V případě, že naplníme všech sedm podmínek, dá se mluvit o \emph{regulérní} triangulaci.
 
 \newpage
 \begin{figure}[h!]
@@ -212,12 +213,12 @@ Triangulace na Obrázku \ref{fig:train_not_valid} není validní, protože nespl
 \label{fig:triangulace}
 \end{figure}
 
-Na Obrázku \ref{fig:triangulace} už můžeme vidět validní a regulérní triangulaci. Jedná se též o triangulaci \textit{optimální}, což je termín, kterým se budeme zabývat v další kapitole.
+Na Obrázku \ref{fig:triangulace} už můžeme vidět validní a regulérní triangulaci. Jedná se též o triangulaci \emph{optimální}, což je termín, kterým se budeme zabývat v další kapitole.
 
 \newpage
 \subsection{Optimální triangulace}
 
-Nad doménou $\Omega$ neexistuje pouze jediná trojúhelníková síť, v závislosti na počtu bodů v množině a jejich konfiguraci existuje poměrně velké množství možností, jak může trojúhelníková síť vypadat. Ne všechny sítě jsou však vhodné k dalšímu zpracovávání, a právě proto je snaha najít \textit{optimální} triangulaci.
+Nad doménou $\Omega$ neexistuje pouze jediná trojúhelníková síť, v závislosti na počtu bodů v množině a jejich konfiguraci existuje poměrně velké množství možností, jak může trojúhelníková síť vypadat. Ne všechny sítě jsou však vhodné k dalšímu zpracovávání, a právě proto je snaha najít \emph{optimální} triangulaci.
 
 Při řešení otázky, jak vypadá optimální triangulace, je zásadní zamyslet se nad tvarem trojúhelníků. V ideálním případě by byly všechny trojúhelníky rovnostranné, leč tento případ se v případě náhodně roztroušených dat nevyskytuje.
 
@@ -227,7 +228,7 @@ Při tvorbě optimální triangulace se tedy problém řeší z opačného konce
 Definice:
 Nechť hrana $\overline{p_ip_j}$ inciduje s trojúhelníkem $t_1$ tvořeným vrcholy $p_i,p_j,p_k$ a trojúhelníkem $t_2$ tvořeným vrcholy $p_i,p_j,p_l$ a kružnice $k$ procházející body $p_i,p_j,p_k$. Hrana $\overline{p_ip_j}$ je nelegální tehdy a právě jen tehdy, jestliže bod $p_l$ leží uvnitř $k$.
 
-Pokud tedy bod $p_l$ leží uvnitř kružnice $k$, je hrana $\overline{p_ip_j}$ a tedy diagonála čtyřúhelníku nelegální, stejně tak jako oba trojúhelníky $t_1$ a $t_2$. K jejich legalizaci je provést tzv. \textit{Edge swaping}.
+Pokud tedy bod $p_l$ leží uvnitř kružnice $k$, je hrana $\overline{p_ip_j}$ a tedy diagonála čtyřúhelníku nelegální, stejně tak jako oba trojúhelníky $t_1$ a $t_2$. K jejich legalizaci je provést tzv. \emph{Edge swaping}.
 
 \paragraph{MaxMin a MinMax úhlová podmínka}
 
@@ -272,7 +273,7 @@ Nejčastěji tento jev nastává u čtyřúhelníků, jejichž všechny vrcholy 
 \todo[inline]{Obrázky z GRASSu, jak udělat skutečnou kružnici, označení úhlů}
 
 \paragraph{Edge swaping, legalizace}
-Na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} jsme si ukázali případ neutrálního případu pro MinMax podmínku. Proces, při kterém jsme zaměnili diagonálu čtyřúhelníku tak, aby byli oba trojúhelníky lokálně optimální, se nazýva \textit{Edge swaping.} Pokud budeme tento proces aplikovat pro celou triangulaci dojde k takzvané \textit{legalizaci} triangulace.
+Na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} jsme si ukázali případ neutrálního případu pro MinMax podmínku. Proces, při kterém jsme zaměnili diagonálu čtyřúhelníku tak, aby byli oba trojúhelníky lokálně optimální, se nazýva \emph{Edge swaping.} Pokud budeme tento proces aplikovat pro celou triangulaci dojde k takzvané \emph{legalizaci} triangulace.
 
 \newpage
 \subsection{Voronoiovy diagramy}
@@ -281,7 +282,7 @@ Voronoiovy diagramy úzce souvisí s Delaunayovou triangulací. Představme si o
 
 $V(p_i) = \{ x: d(x, p_i) < d(x, p_j), j = 1,...,N\}$.
 
-Pro každou takovouto oblast přiřazenou bodu $p_i$ po té platí, že všechny body uvnitř této oblasti jsou k bodu $p_i$ blíž než ke kterémukoliv jinému bodu z množiny $P$. Toto rozdělení roviny se nazývá \textit{Voronoiův diagram (VD)} množiny bodů a každá uzavřená buňka se nazývá \textit{Voronoiova buňka.}
+Pro každou takovouto oblast přiřazenou bodu $p_i$ po té platí, že všechny body uvnitř této oblasti jsou k bodu $p_i$ blíž než ke kterémukoliv jinému bodu z množiny $P$. Toto rozdělení roviny se nazývá \emph{Voronoiův diagram (VD)} množiny bodů a každá uzavřená buňka se nazývá \emph{Voronoiova buňka.}
 
 \bigskip
 Voronoiův diagram má následující vlastnosti: 
@@ -305,9 +306,9 @@ Voronoiův diagram má následující vlastnosti:
 Nechť $H(p_i,P_j)$ je polorovina obsahující všechny body v rovině, jejichž vzdálenost od bodu $p_i$ je menší než od bodu $p_j$. Potom Voronoiova oblast $V(p_i)$ je průnikem N-1 polorovin,
 $V(p_i)= \bigcap\limits_{\substack{j=1,...,N \\ i\not=j}}H(p_i,p_j)$, kde každá oblast má maximálně N-1 stran.
 
-Z Obrázku \ref{fig:vor_pol} je vidět, že oblasti přiřazené pro body na okraji konvexního obalu nejsou zcela ohraničené a uzavřené. Jednotlivé hranice oblastí nazýváme \textit{Voronoiovi polygony}, které jsou složeny z takzvaných \textit{Voronoiových hran a bodů}. O dvou bodech $p_j$ a $p_k$ můžeme tvrdit, že jsou \textit{Voronoiovi sousedé}, pokud oblasti, kterým náleží, sdílí společnou \textit{Voronoiovu hranu}. 
+Z Obrázku \ref{fig:vor_pol} je vidět, že oblasti přiřazené pro body na okraji konvexního obalu nejsou zcela ohraničené a uzavřené. Jednotlivé hranice oblastí nazýváme \emph{Voronoiovi polygony}, které jsou složeny z takzvaných \emph{Voronoiových hran a bodů}. O dvou bodech $p_j$ a $p_k$ můžeme tvrdit, že jsou \emph{Voronoiovi sousedé}, pokud oblasti, kterým náleží, sdílí společnou \emph{Voronoiovu hranu}. 
 
-Občas se můžeme setkat i s označením \textit{Thiessenovy polygony} podle klimatologa Thiessena, který Voronoiovi diagramy používal k interpolaci klimatických dat z náhodně distribuovaných meteorologických stanic.
+Občas se můžeme setkat i s označením \emph{Thiessenovy polygony} podle klimatologa Thiessena, který Voronoiovi diagramy používal k interpolaci klimatických dat z náhodně distribuovaných meteorologických stanic.
 
 \newpage
 \subsection{Voronoiovy diagramy a Delaunayova triangulace}
@@ -325,7 +326,7 @@ Pokud pro množinu bodů v rovině provedeme rozdělení do Voronoiových diagra
 
 Na Obrázku \ref{fig:vd_vor} můžeme vidět Voronoiův diagram pro množinu bodů. Pokud každou dvojici Voronoiových sousedů spojíme spojnicí, jak je vidět na Obrázku \ref{fig:vd_del} získáme několik trojúhelníků, které se nepřekrývají a tvoří trojúhelníkovou síť. Spojnice mezi body, které jsou přiřazeny k neuzavřeným oblastím, tvoří konvexní obal. Pro trojúhelníkovou síť uvnitř tohoto konvexního obalu se jedná o Delaunayovu triangulaci.
 
-Trojúhelníky této sítě se nazývají \textit{Delaunayovi trojúhelníky}, které jsou tvořeny spojnicemi tzv. \textit{Delaunayvými hranami}. Dále je také zřejmé, že Voronoiovy hrany leží na ose Delaunayových hran.
+Trojúhelníky této sítě se nazývají \emph{Delaunayovi trojúhelníky}, které jsou tvořeny spojnicemi tzv. \emph{Delaunayvými hranami}. Dále je také zřejmé, že Voronoiovy hrany leží na ose Delaunayových hran.
 
 
 \newpage
@@ -342,24 +343,14 @@ Triangulační algoritmy jsou poměrně dobře matematicky prozkoumaná oblast, 
 Vhodný algoritmus je třeba vybírat na základe datových struktur a konkrétním případu. Ne vždy lze dokonale splnit všechny požadavky, např. jednoduché implementace mají delší výpočetní čas. Naopak algoritmy s kratším výpočetním časem jsou dost náročné na implementaci.
 
 \subsection{Lokální optimalizace}
-\textit{Lokální optimalizace (LO)} je proces přetvoření libovolné triangulace DT. Proces je prováděn pomocí prohazování nelegálních hran v dvojicích trojúhelníků tvořících konvexní čtyřúhelník na základě Kruhové nebo MaxMin podmínky.
+\emph{Lokální optimalizace (LO)} je proces přetvoření libovolné triangulace DT. Proces je prováděn pomocí prohazování nelegálních hran v dvojicích trojúhelníků tvořících konvexní čtyřúhelník na základě Kruhové nebo MaxMin podmínky.
 
 Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čtyřúhelník tvořený dvěma trojúhelníky se společnou hranou $e_i$. Pomineme možnost, že čtyřúhelník je nekonvexní nebo že všechny body leží na kružnici. Po té za použití MaxMin nebo Kruhové podmínky rozhodněme, zda je třeba prohodit hranu $e_i$. V případě, že po použití Lokální optimalizace není potřeba prohodit hranu, můžeme ji prohlásit za lokálně optimální. V případě, že  budeme lokální optimalizaci používat opakovaně pro všechny hrany v triangulaci, dokud nebudou všechny hrany lokálně optimální, získáme optimální triangulaci.
 
 \todo[inline]{Jak psát pseudokód??}
-\begin{comment}
-1. proveď náhodnou regulérní triangulaci $\Delta$ množiny bodů $P$
-2. if je $\Delta$ lokálně optimální
-	stop
-3. zvol vnitřní hranu $e_i$ trinagulace $\Delta$
-4. pokud je $e_i$ lokálně optimální
-	goto 3.
-5. prohoď $e_i$ za $e_i^1$ (přetvoř triangulaci $\Delta$ v triangulaci $\Delta^1$)
-6. přiřaď $\Delta$:=$\Delta$
-7. goto 2
-\end{comment}
 
 
+\hrule
 1. Vytvoř pomocnou triangulaci $\Delta(P)$.
 
 2. legal=false
@@ -379,6 +370,8 @@ Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čty�
 9.\indent \indent \indent  Legalize $(t_1,t_2)$
 
 10.\indent \indent \indent legal=false;
+\newline
+\hrule
 
 
 \subsection{Paprskovitý algoritmus}
@@ -391,6 +384,7 @@ Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný postup, 
 Tento algoritmus je poměrně jednoduchý a snadný na implementaci, obzvlášť pokud je zvolena vhodná datová struktura. Jeho složitost je $0.(n^2)$, kterou lze úpravami zlepšit až na $0.(n.log(n))$. Tato metoda je tvořena třemi kroky. Na začátku je vytvořen konvexní obal množiny bodů $P$ a pro jeho lomové body se provede triangulace. Do vzniklé triangulace se postupně vkládají body z množiny $P$. Tato nově vzniklá triangulace nemusí být nutně DT a proto se provede ještě její legalizace.
 
 \bigskip
+\hrule
 1.  Vytvoření konvexního obalu $\Omega$ nad množinou bodů $P$.
 
 2.  Vytvoř DT pro lomové body konvexního obalu.
@@ -432,6 +426,8 @@ Tento algoritmus je poměrně jednoduchý a snadný na implementaci, obzvlášť
 20.\indent \indent Legalizace hrany $p,\overline{p_i,p_l},t$.
 
 21.\indent \indent Legalizace hrany $p,\overline{p_l,p_j},t$.
+\newline
+\hrule
 
 \newpage
 \subsection{Algoritmus inkrementální konstrukce (Step-by-Step)}
@@ -441,6 +437,7 @@ Tento postup je založen na postupném přidávání bodů do již vytvořené D
 Základní vlastnost toho postupu je, že se v každém kroku ke stávající triangulaci připojí další bod a triangulaci tak rozšíří. Vznikající triangulace je už v procesu tvoření Delaunayova a není tedy třeba žádné následující optimalizace.
 
 \bigskip
+\hrule
 1. $p_1$=náhodný bod z $P$, $p_2$=nejbližší bod k $p_1$.
 
 2. Vytvoř hranu $\overline{e=p_1p_2}$
@@ -470,6 +467,8 @@ Základní vlastnost toho postupu je, že se v každém kroku ke stávající tr
 15.\indent \indent Add $e$ do DT.
 
 16.\indent pop(e)
+\newline
+\hrule
 
 \newpage
 \subsection{Algoritmus Rozděl a panuj}
@@ -491,6 +490,7 @@ Existuje mnoho různých datových struktur pro uložení topologických informa
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{../img/struct_triangulace.png}
+\caption{Příklad jednoduché triangulace}
 \label{fig:struct_triangulace}
 \end{figure}
 
@@ -511,6 +511,8 @@ Tato struktura ukládá informace v nejjednodušší podobě. Pracuje pouze s tr
 5                            & 2        & 4       & 3       \\ \hline
 6                            & 2        & 1       & 7       \\ \hline
 \end{tabular}
+\caption{Jednoduchá trojúhelníková struktura}
+\label{tab:troj_struktura_simple}
 \end{table}
 
 
@@ -532,6 +534,8 @@ Tato struktura přináší rozšíření o informaci, s kterými trojúhelníky 
 5                            & 2        & 4       & 3       & -         & -         & 4         \\ \hline
 6                            & 2        & 1       & 7       & 3         & 4         & -         \\ \hline
 \end{tabular}
+\caption{Trojúhelníková struktura se sousedy}
+\label{tab:troj_strukt_sous}
 \end{table}
 
 
@@ -552,21 +556,23 @@ Vrchol & \multicolumn{6}{|c|}{Sousední vrcholy} & Suma vrcholů \\ \hline \hlin
 6      & 5    & 4    & 7    & 1    & 0   &     & 26           \\ \hline
 7      & 6    & 4    & 2    & 1    &     &     & 30           \\ \hline
 \end{tabular}
+\caption{Vertex based struktura}
+\label{tab:vertex_based}
 \end{table}
 
 \newpage
 \subsection{Half-edge datová struktura}
 
-Tato struktura uchovává topologický model na základě orientovaných polovičních hran. Princip je rozdělit každou hranu na dvě orientované \textit{půl-hrany}, z nichž každá směřuje opačným směrem. Každému trojúhelníku můžeme tak přiřadit tři půl-hrany, které jsou orientované v protisměru hodinových ručiček. Každá půl-hrana začíná ve \textit{startovním vrcholu} a směřuje do \textit{cílového vrcholu}. V half-edge struktuře si každá půl-hrana uchovává pointer na svůj startovní bod, na následující půl-hranu, patřící stejnému trojúhelníku a nakonec pointer na opačně orientovanou hranu, tzv. \textit{twin-edge}. Pointer na twin-edge hranu nemají pouze půl-hrany ležící na konvexním obalu triangulace.
+Tato struktura uchovává topologický model na základě orientovaných polovičních hran. Princip je rozdělit každou hranu na dvě orientované \emph{půl-hrany}, z nichž každá směřuje opačným směrem. Každému trojúhelníku můžeme tak přiřadit tři půl-hrany, které jsou orientované v protisměru hodinových ručiček. Každá půl-hrana začíná ve \emph{startovním vrcholu} a směřuje do \emph{cílového vrcholu}. V half-edge struktuře si každá půl-hrana uchovává pointer na svůj startovní bod, na následující půl-hranu, patřící stejnému trojúhelníku a nakonec pointer na opačně orientovanou hranu, tzv. \emph{twin-edge}. Pointer na twin-edge hranu nemají pouze půl-hrany ležící na konvexním obalu triangulace.
 
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{../img/half_edge.png}
-\caption{Half-edge struktura}
+\caption{Half-edge struktura (Zdroj: http://pointclouds.org/blog/nvcs/martin/index.php)}
 \label{fig:half_edge}
 \end{figure}
 
-Z half-edge struktury je možné odvodit mnohé jiné příbuzné struktury obsahující další informace o topologii, které ulehčují procházení celou sítí při vyhledávání, ale zároveň zvyšují nároky na kapacitu. Mezi tyto příbuzné struktury patří například \textit{vertex-edge}, \textit{face-edge} nebo \textit{winged edge} datová struktura, kterou používá například modul \textit{v.delaunay} v GRASS GISu.
+Z half-edge struktury je možné odvodit mnohé jiné příbuzné struktury obsahující další informace o topologii, které ulehčují procházení celou sítí při vyhledávání, ale zároveň zvyšují nároky na kapacitu. Mezi tyto příbuzné struktury patří například \emph{vertex-edge}, \emph{face-edge} nebo \emph{winged edge} datová struktura, kterou používá například modul \emph{v.delaunay} v GRASS GISu.
 
 \newpage
 \begin{table}[h]
@@ -594,6 +600,8 @@ Z half-edge struktury je možné odvodit mnohé jiné příbuzné struktury obsa
 17                         & 6                                 & 18                         & 10        \\ \hline
 18                         & 7                                 & 16                         & 2         \\ \hline
 \end{tabular}
+\caption{Half-edge struktura}
+\label{tab:half_edge}
 \end{table}
 
 \bigskip
@@ -630,6 +638,8 @@ class Half-edge
 11                       & 7          & 12     & 10     & 4      \\ \hline
 12                       & 6          & 11     & 7      & 3      \\ \hline
 \end{tabular}
+\caption{Dart based struktura}
+\label{tab:dart_based}
 \end{table}
 
 \newpage
@@ -687,18 +697,18 @@ Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka "ukradla" n
 \newpage
 \section{Postup řešení}
 \subsection{Bash}
-Při řešení otázky, jak implementovat metodu přirozeného souseda pro GRASS 7, jsem vycházel z modulu napsaného pro GRASS GIS 6, který jsem měl k dispozici. Jednalo se o modul \textit{v.surf.nnbathy} pro vektorová data. Tento modul byl napsán v Bashi. Pro novou verzi GRASS GISu 7, ve které si vývojáři kladou za cíl zpřístupnit tento software širší veřejnosti, tento modul v Bashi ovšem nebylo možno použít, neboť do nové verze se počítá pouze s moduly v jazyce Python a C.
+Při řešení otázky, jak implementovat metodu přirozeného souseda pro GRASS 7, jsem vycházel z modulu napsaného pro GRASS GIS 6, který jsem měl k dispozici. Jednalo se o modul \emph{v.surf.nnbathy} pro vektorová data. Tento modul byl napsán v Bashi. Pro novou verzi GRASS GISu 7, ve které si vývojáři kladou za cíl zpřístupnit tento software širší veřejnosti, tento modul v Bashi ovšem nebylo možno použít, neboť do nové verze se počítá pouze s moduly v jazyce Python a C.
 
 \subsubsection{v.surf.nnbathy}\footnote{\url{http://svn.osgeo.org/grass/grass-addons/grass6/raster/v.surf.nnbathy/description.html}}
-\textit{v.surf.nnbathy} je modul napsaný v bashi. Slouží jako interface mezi \textit{nnbathy} z externí knihovny \textit{nn-c} a GRASS GISem. \textit{v.surf.nnbathy} nabízí celkem tři algoritmy interpolace. Defaultně je nastaven \textit{Watsonův algoritmus 	pro Sibsonovu interpolaci}. Další možností je \textit{Delaunayova triangulace} a poslední \textit{Bělikovův a Semenovův algoritmus pro nesibsonovu interpolaci}. Pro Delaunayvou triangulaci, která je základem pro všechny tři algoritmy, se využívá knihovny \textit{Triangle} napsanou Jonathanem Richardem Schewchukem. Parametry pro spuštění modulu jsou tyto (nepovinné v hranatých závorkách):
+\emph{v.surf.nnbathy} je modul napsaný v bashi. Slouží jako interface mezi \emph{nnbathy} z externí knihovny \emph{nn-c} a GRASS GISem. \emph{v.surf.nnbathy} nabízí celkem tři algoritmy interpolace. Defaultně je nastaven \emph{Watsonův algoritmus 	pro Sibsonovu interpolaci}. Další možností je \emph{Delaunayova triangulace} a poslední \emph{Bělikovův a Semenovův algoritmus pro nesibsonovu interpolaci}. Pro Delaunayvou triangulaci, která je základem pro všechny tři algoritmy, se využívá knihovny \emph{Triangle} napsanou Jonathanem Richardem Schewchukem. Parametry pro spuštění modulu jsou tyto (nepovinné v hranatých závorkách):
 \begin{description}
-\item[output] Proměnná typu \textit{string}, název výstupní rastrové mapy, jediný povinný parametr.
-\item[input] Proměnná typu \textit{string}, název vstupní vektorové mapy.
-\item[[file]] Proměnná typu \textit{string}, název vstupního souboru.
-\item[[zcolumn]] Proměnná typu \textit{string}, název sloupce z atributové tabulky, jehož data budou použity pro interpolaci.
-\item[[layer]] Proměnná typu \textit{integer}, nastavení, zda se jedná od 2D nebo 3D vektorová data.
-\item[[where]] Proměnná typu \textit{string}, SQL where podmínka.
-\item[[alg]] Proměnná typu \textit{string}, název použitého algoritmu.
+\item[output] Proměnná typu \emph{string}, název výstupní rastrové mapy, jediný povinný parametr.
+\item[input] Proměnná typu \emph{string}, název vstupní vektorové mapy.
+\item[[file]] Proměnná typu \emph{string}, název vstupního souboru.
+\item[[zcolumn]] Proměnná typu \emph{string}, název sloupce z atributové tabulky, jehož data budou použity pro interpolaci.
+\item[[layer]] Proměnná typu \emph{integer}, nastavení, zda se jedná od 2D nebo 3D vektorová data.
+\item[[where]] Proměnná typu \emph{string}, SQL where podmínka.
+\item[[alg]] Proměnná typu \emph{string}, název použitého algoritmu.
 \end{description}
 
 \bigskip
@@ -712,11 +722,11 @@ user@my_comp:~$ v.surf.nnbathy input=elevation_lid792_randpts@PERMANENT output=r
 %r.surf v bashi
 \begin{comment}
 \subsubsection{r.surf.nnbathy}\footnote{\url{http://svn.osgeo.org/grass/grass-addons/grass6/vector/r.surf.nnbathy/description.html}}
-Modul \textit{r.surf.nnbathy} pracuje na podobném principu jako modul \textit{v.surf.nnbathy}, jen pro rastrová data. Při volání je možnost použít méně parametrů.
+Modul \emph{r.surf.nnbathy} pracuje na podobném principu jako modul \emph{v.surf.nnbathy}, jen pro rastrová data. Při volání je možnost použít méně parametrů.
 \begin{description}
-\item[output] Proměnná typu \textit{string}, název výstupní rastrové mapy, jediný povinný parametr.
-\item[input] Proměnná typu \textit{string}, název vstupní vektorové mapy.
-\item[[alg]] Proměnná typu \textit{string}, název použitého algoritmu.
+\item[output] Proměnná typu \emph{string}, název výstupní rastrové mapy, jediný povinný parametr.
+\item[input] Proměnná typu \emph{string}, název vstupní vektorové mapy.
+\item[[alg]] Proměnná typu \emph{string}, název použitého algoritmu.
 \end{description}
 
 Volání v příkazové řádce pak může vypadata například takto:
@@ -736,7 +746,7 @@ V následující části této práce bude popsáno jak pythoní modul funguje, 
 \paragraph{Vstupní data}
 Stejně jako původní bashový modul, i tento modul pracuje se vstupními daty buď v podobě textového ASCII souboru nebo vektorové mapy. 
 
-V případě použití vstupní vektorové mapy s body je pak při volání modulu použit parametr \textit{zcolumn}, který určuje z jakého sloupce atributové tabulky se budou brát hodnoty k interpolaci.
+V případě použití vstupní vektorové mapy s body je pak při volání modulu použit parametr \emph{zcolumn}, který určuje z jakého sloupce atributové tabulky se budou brát hodnoty k interpolaci.
 
 \begin{figure}[h!]
 \centering
@@ -746,7 +756,7 @@ V případě použití vstupní vektorové mapy s body je pak při volání modu
 \end{figure}
 
 \newpage
-Druhou možností je použít textový ASCII soubor, který musí obsahovat \textit{n} bodů na \textit{n} řádcích ve 3 sloupcích. V prvních dvou sloupcích je uložen údaj o poloze v podobě x a y souřadnice. Ve třetím sloupci jsou pak uloženy hodnoty veličiny, kterou chceme interpolovat.
+Druhou možností je použít textový ASCII soubor, který musí obsahovat $n$ bodů na $n$ řádcích ve třech sloupcích. V prvních dvou sloupcích je uložen údaj o poloze v podobě x a y souřadnice. Ve třetím sloupci jsou pak uloženy hodnoty veličiny, kterou chceme interpolovat.
 
 %ukazka TMPXYZ
 \begin{lstlisting}[caption={Příklad vstupního souboru}]
@@ -762,14 +772,14 @@ Druhou možností je použít textový ASCII soubor, který musí obsahovat \tex
 
 \bigskip
 \paragraph{Funkce region()}
-Každá operace prováděná v GRASS GISu je prováděna pouze na určitém rozsahu území, tzv. \textit{výpočetním regionu}. \textit{Výpočetní region} je určen jako obdélník daný mezními kartografickými souřadnicemi a počtem řádků a sloupců. 
-Funkce \textit{region()} všechna nastavení uloží do proměných. Dále vypočte plochu výpočetního regionu. Na rozdíl od GRASS GISu, který jako mezní kartografické souřadnice bere vnější rohy rohových buněk obdélníku, knihovna \textit{nn-c} používá středy rohových buněk, a proto je třeba nastavení výpočetního regionu opravit o rozlišení buněk.
+Každá operace prováděná v GRASS GISu je prováděna pouze na určitém rozsahu území, tzv. \emph{výpočetním regionu}. \emph{Výpočetní region} je určen jako obdélník daný mezními kartografickými souřadnicemi a počtem řádků a sloupců. 
+Funkce \emph{region()} všechna nastavení uloží do proměných. Dále vypočte plochu výpočetního regionu. Na rozdíl od GRASS GISu, který jako mezní kartografické souřadnice bere vnější rohy rohových buněk obdélníku, knihovna \emph{nn-c} používá středy rohových buněk, a proto je třeba nastavení výpočetního regionu opravit o rozlišení buněk.
 
 \bigskip
 \paragraph{Funkce initials\_controls()}
-Ve chvíli, kdy je nastavený výpočetní region,můžeme provést úvodní kontroly a přípravy před samotným výpočtem. Zejména zda plocha výpočetního regionu není nulová a je kde provádět interpolaci. Dále je třeba zajistit jednoznačné určení vstupních dat, tedy zda se bude pracovat s ASCII souborem nebo vektorovou mapou, a jejich kontrolu, popřípadě SQL podmínku. Také kontrolujeme zda z knihovny \textit{nn-c} máme nainstalovaný program \textit{nnbathy}, který interpolaci provádí. Také je třeba vytvořit dočasné pomocné soubory, které využijeme při práci s daty. 
+Ve chvíli, kdy je nastavený výpočetní region,můžeme provést úvodní kontroly a přípravy před samotným výpočtem. Zejména zda plocha výpočetního regionu není nulová a je kde provádět interpolaci. Dále je třeba zajistit jednoznačné určení vstupních dat, tedy zda se bude pracovat s ASCII souborem nebo vektorovou mapou, a jejich kontrolu, popřípadě SQL podmínku. Také kontrolujeme zda z knihovny \emph{nn-c} máme nainstalovaný program \emph{nnbathy}, který interpolaci provádí. Také je třeba vytvořit dočasné pomocné soubory, které využijeme při práci s daty. 
 
-V případě, že pracujeme s vektorovou mapu, uložíme informace o bodových datech do dočasného proměnné \textit{TMPcat} pomocí modulu \textit{v.out.ascii}. Výstupem toho modulu je ASCII soubor o \textit{n} řádcích a čtyřech sloupcích. V prvních dvou sloupcích je uložená poloha bodu, ve třetím jeho id a ve čtvrtém hodnota k interpolaci. 
+V případě, že pracujeme s vektorovou mapu, uložíme informace o bodových datech do dočasného proměnné \emph{TMPcat} pomocí modulu \emph{v.out.ascii}. Výstupem toho modulu je ASCII soubor o $n$ řádcích a čtyřech sloupcích. V prvních dvou sloupcích je uložená poloha bodu, ve třetím jeho id a ve čtvrtém hodnota k interpolaci. 
 
 \bigskip
 %ukazka souboru TMPcat
@@ -785,7 +795,7 @@ V případě, že pracujeme s vektorovou mapu, uložíme informace o bodových d
 639137.670258715632372 221096.622500944242347 8 16.613054999999999
 \end{lstlisting}
 
-Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné \textit{TMPYZ} si uložíme pouze informace o poloze a hodnotu k interpolaci. V případě, že nepracujeme s vektorovou mapou, ale ASCII souborem, tak tento soubor rovnou uložíme do proměnné \textit{TMPXYZ}.
+Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné \emph{TMPYZ} si uložíme pouze informace o poloze a hodnotu k interpolaci. V případě, že nepracujeme s vektorovou mapou, ale ASCII souborem, tak tento soubor rovnou uložíme do proměnné \emph{TMPXYZ}.
 
 \bigskip
 %ukazka souboru TMPxyz
@@ -803,17 +813,17 @@ Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné \
 
 \bigskip
 \paragraph{Funkce compute()}
-V této části kódu je volán program \textit{nnbathy} s následujícími vstupními paramatry:
+V této části kódu je volán program \emph{nnbathy} s následujícími vstupními paramatry:
 \begin{description}
 \item[-w]{proměnná typu double, omezuje extrapolaci přiřezením minimální váhy pro vrchol Delaunayovi sítě. V našem případě nastavena nula, což zamezuje extrapolaci.}
-\item[-i]{proměnná typu string, název vstupního souboru o \textit{n} řádcích, se třemi sloupci, x a y souřadnicí a hodnotou k interpolaci}
+\item[-i]{proměnná typu string, název vstupního souboru o $n$ řádcích, se třemi sloupci, x a y souřadnicí a hodnotou k interpolaci}
 \item[-x]{dvojice $x_min$, $x^max$ typu double, mezní hodnoty výstupní mřížky}
 \item[-y]{dvojice $x_min$, $x^max$ typu double, mezní hodnoty výstupní mřížky}
 \item[-P]{proměnná typu string, použitá metoda interpolace}
 \item[-n]{dvojice double x double, rozlišení výstupní mřížky}
 \end{description}
 
-Výstupem z \textit{nnbathy} je soubor \textit{XYZout}. Obsahuje data o výstupní mřížce buňku po buňce ve třech sloupcích. V prvních dvou jsou x a y souřadnice, ve třetím vyinterpolovaná hodnota. V případě buňek mimo oblast, kde probíhala interpolace, je ve třetím sloupci uložena hodnota NaN.
+Výstupem z \emph{nnbathy} je soubor \emph{XYZout}. Obsahuje data o výstupní mřížce buňku po buňce ve třech sloupcích. V prvních dvou jsou x a y souřadnice, ve třetím vyinterpolovaná hodnota. V případě buňek mimo oblast, kde probíhala interpolace, je ve třetím sloupci uložena hodnota NaN.
 
 \bigskip
 %ukazka XYZout
@@ -831,7 +841,7 @@ Výstupem z \textit{nnbathy} je soubor \textit{XYZout}. Obsahuje data o výstupn
 
 \bigskip
 \paragraph{Funkce convert()}
-Výstupní textový soubor z \textit{nnbathy} je třeba upravit, aby s ním bylo možné dále pracovat v GRASS GISu. Pro další práci slouží dočasný soubor \textit{TMP}. Při vytváření na začátku tohoto souboru vznikne hlavička, která obsahuje data o hranicích, rozlišení, typu a hodnotě null.
+Výstupní textový soubor z \emph{nnbathy} je třeba upravit, aby s ním bylo možné dále pracovat v GRASS GISu. Pro další práci slouží dočasný soubor \emph{TMP}. Při vytváření na začátku tohoto souboru vznikne hlavička, která obsahuje data o hranicích, rozlišení, typu a hodnotě null.
 
 \bigskip
 %Ukázka hlavičky
@@ -847,18 +857,20 @@ type: double
 null: NaN
 \end{lstlisting}
 
-Dále je potřeba vybrat vyinterpolované hodnoty jednotlivých buněk ze souboru \textit{XYZout}, kde jsou uloženy ve třetím sloupci na samostatných řádcích, a vložit je do souboru \textit{TMP} v pravidelné mřížce.
+Dále je potřeba vybrat vyinterpolované hodnoty jednotlivých buněk ze souboru \emph{XYZout}, kde jsou uloženy ve třetím sloupci na samostatných řádcích, a vložit je do souboru \emph{TMP} v pravidelné mřížce.
 
 %ukázka souboru TMP
+\todo[inline]{Vložit TMP soubor ukázku}
+\lstset{basicstyle=\footnotesize}
 \begin{lstlisting}
 \end{lstlisting}
 
 \paragraph{Funkce import\_to\_raster()}
-Soubor \textit{TMP}, ve kterém máme uložené vyinterpolované hodnoty v pravidelné mřížce, slouží jako vstupní soubor pro modul \textit{r.in.ascii}, který tyto hodnoty převedu do rastru. Dále je použit modul \textit{r.support}, který uloží příkazy do rastrových metadat. Na závěr je vytištěna zpráva, že byla vytvořena rastrová mapa.
+Soubor \emph{TMP}, ve kterém máme uložené vyinterpolované hodnoty v pravidelné mřížce, slouží jako vstupní soubor pro modul \emph{r.in.ascii}, který tyto hodnoty převedu do rastru. Dále je použit modul \emph{r.support}, který uloží příkazy do rastrových metadat. Na závěr je vytištěna zpráva, že byla vytvořena rastrová mapa.
 
 
 \paragraph{Výstupní data}
-Výstupem modulu \textit{v.surf.nnbathy} je rastrová mapa.
+Výstupem modulu \emph{v.surf.nnbathy} je rastrová mapa.
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{../img/vystup_rast_map.png}
@@ -868,7 +880,7 @@ Výstupem modulu \textit{v.surf.nnbathy} je rastrová mapa.
 
 \newpage
 \subsection{OOP}
-V průběhu práce na přidání pythoního modulu \textit{v.surf.nnbathy} jsem zjistil, že v GRASS GISu verze 6 je k dispozici také bash modul \textit{r.surf.nnbathy}, který pracuje s rastrovými daty. Jelikož větší část kódu byla pro moduly v.surf.nnbathy a r.surf.nnbathy společná, rozhodl jsem se hlavní výpočetní část spojit. Na místo dvou procedurálních modulů byla objektově vytvořena knihovna \textit{nnbathy.py} a dva moduly \textit{v.surf.nnabthy.py} pro vektorová data a \textit{r.surf.nnbathy.py} pro data rastrová, které knihovnu \textit{nnbathy} volají.
+V průběhu práce na přidání pythoního modulu \emph{v.surf.nnbathy} jsem zjistil, že v GRASS GISu verze 6 je k dispozici také bash modul \emph{r.surf.nnbathy}, který pracuje s rastrovými daty. Jelikož větší část kódu byla pro moduly v.surf.nnbathy a r.surf.nnbathy společná, rozhodl jsem se hlavní výpočetní část spojit. Na místo dvou procedurálních modulů byla objektově vytvořena knihovna \emph{nnbathy.py} a dva moduly \emph{v.surf.nnabthy.py} pro vektorová data a \emph{r.surf.nnbathy.py} pro data rastrová, které knihovnu \emph{nnbathy} volají.
 
 \subsubsection{v.surf.nnbathy}
 V objektově orientovaném modulu pro vektorová data, tak zůstaly úvodní část, která automaticky generuje GUI, úvodní vstupní kontroly a dále if podmínka, která vyhodnocovala, zda vstupují vektorová data v podobě vektorové mapy nebo ASCII souboru.
@@ -876,11 +888,11 @@ V objektově orientovaném modulu pro vektorová data, tak zůstaly úvodní č�
 
 
 \subsubsection{r.surf.nnbathy}
-Modul \textit{r.surf.nnbathy} pracuje na podobném principu jako modul \textit{v.surf.nnbathy}, jen pro rastrová data. Při volání je možnost použít méně parametrů.
+Modul \emph{r.surf.nnbathy} pracuje na podobném principu jako modul \emph{v.surf.nnbathy}, jen pro rastrová data. Při volání je možnost použít méně parametrů.
 \begin{description}
-\item[output] Proměnná typu \textit{string}, název výstupní rastrové mapy, jediný povinný parametr.
-\item[input] Proměnná typu \textit{string}, název vstupní vektorové mapy.
-\item[[alg]] Proměnná typu \textit{string}, název použitého algoritmu.
+\item[output] Proměnná typu \emph{string}, název výstupní rastrové mapy, jediný povinný parametr.
+\item[input] Proměnná typu \emph{string}, název vstupní vektorové mapy.
+\item[[alg]] Proměnná typu \emph{string}, název použitého algoritmu.
 \end{description}
 
 
@@ -909,9 +921,9 @@ Tato třída slouží pro vstupní data v podobě ASCII souboru a je dědičná 
 
 \newpage
 \section{Možnosti budoucí implementace}
-V současné době jsou oba moduly k dispozici v rámci balíčků Add-Ons\footnote{http://grass.osgeo.org/download/addons/}. V adresáři \textit{GRASS7/vector/v.surf.nnbathy} můžeme  naleznout hlavní knihovnu \textit{nnbathy.py}, modul \textit{v.surf.nnbathy.py} a dokumentaci \textit{v.surf.nnbathy.html}. 
+V současné době jsou oba moduly k dispozici v rámci balíčků Add-Ons\footnote{http://grass.osgeo.org/download/addons/}. V adresáři \emph{GRASS7/vector/v.surf.nnbathy} můžeme  naleznout hlavní knihovnu \emph{nnbathy.py}, modul \emph{v.surf.nnbathy.py} a dokumentaci \emph{v.surf.nnbathy.html}. 
 
-V adresáři \textit{GRASS7/raster/r.surf.nnbathy} naopak nalezneme modul \textit{r.surf.nnbathy.py} a jeho dokumentaci \textit{v.surf.nnbathy.html}. Oba moduly je možné instalovat do GRASS GISu 7, pomocí modulu \textit{g.extention} nebo pomocí GUI.
+V adresáři \emph{GRASS7/raster/r.surf.nnbathy} naopak nalezneme modul \emph{r.surf.nnbathy.py} a jeho dokumentaci \emph{v.surf.nnbathy.html}. Oba moduly je možné instalovat do GRASS GISu 7, pomocí modulu \emph{g.extention} nebo pomocí GUI.
 
 \bigskip
 \begin{lstlisting}[caption={Stáhnutí modulu v.surf.nnbathy pomocí g.extention}]
@@ -923,18 +935,18 @@ Cílem do budoucna však není nechat tyto moduly pouze v rámci Add-Ons. Jeliko
 
 \newpage
 \subsection{Knihovna Triangle}
-Knihovna Triangle verze 1.4\footnote{http://www.cs.cmu.edu/~quake/triangle.html} byla napsaná Jonathanem Richardem Shewchuk v roce 2002. Je distribuována pod licencí MIT, která nedovoluje začlenění do oficiální distribuce GRASS GISu. V programu \textit{nnbathy} má na starosti Delaunayovu trinagulaci. Je tedy třeba najít vhodný způsob, jak tuto knihovnu nahradit.
+Knihovna Triangle verze 1.4\footnote{http://www.cs.cmu.edu/~quake/triangle.html} byla napsaná Jonathanem Richardem Shewchuk v roce 2002. Je distribuována pod licencí MIT, která nedovoluje začlenění do oficiální distribuce GRASS GISu. V programu \emph{nnbathy} má na starosti Delaunayovu trinagulaci. Je tedy třeba najít vhodný způsob, jak tuto knihovnu nahradit.
 
-Triangle pro tvorbu triangulace využívá Divide and Conquer algoritmu v kombinaci Inkrementálním algoritmem. Pro ukládání dat využívá svoji vlastní, poměrně obsáhlou datovou strukturu \textit{delaunay}, do které si ukládá hraniční body regionu, všechny body triangulace, všechny trojúhelníky s hranami a jejich opsanými kružnicemi, včetně jejich sousedů. 
+Triangle pro tvorbu triangulace využívá Divide and Conquer algoritmu v kombinaci Inkrementálním algoritmem. Pro ukládání dat využívá svoji vlastní, poměrně obsáhlou datovou strukturu \emph{delaunay}, do které si ukládá hraniční body regionu, všechny body triangulace, všechny trojúhelníky s hranami a jejich opsanými kružnicemi, včetně jejich sousedů. 
 
-Tuto datovou strukturu delaunay dále využívá i samotný program \textit{nnbathy}, který provádí interpolaci metodou přirozeného souseda. Právě převod na tuto datovou strukturu bude v budoucnosti klíčový v případě, že se podaří najít vhodný triangulační nástroj, který nahradí knihovnu Triangle.
+Tuto datovou strukturu delaunay dále využívá i samotný program \emph{nnbathy}, který provádí interpolaci metodou přirozeného souseda. Právě převod na tuto datovou strukturu bude v budoucnosti klíčový v případě, že se podaří najít vhodný triangulační nástroj, který nahradí knihovnu Triangle.
 
 \subsection{Knihovna CGAL}
 Knihovna CGAL (The Computational Geometry Algorithms Library) je projekt, který poskytuje snadný přístup k efektivním a spolehlivým geometrickým algoritmům ve formě C++ knihovny. CGAL se používá v různých oblastech, které potřebují geometrické výpočty, jako např. v GISech, CADu, molekulární biologii, počítačové grafice a robotice. Jeden z jeho balíčků se přímo zabývá interpolací a nabízí funkce pro výpočet souřadnic přirozeného souseda. Tato knihovna je třeba ještě dále prozkoumat a zjistit její možnosti, neboť možnost její budoucí implementace do GRASS GISu se nejeví nereálně.
 
 \newpage
-\subsection{Modul \textit{v.delaunay}}
-Modul \textit{v.delaunay}\footnote{http://grass.osgeo.org/grass71/manuals/v.delaunay.html} je součást oficiální distribuce GRASS GISu. Tento modul poskytuje Delaunayovu triangulaci nad vektorovou mapou s body nebo centroidy. 
+\subsection{Modul \emph{v.delaunay}}
+Modul \emph{v.delaunay}\footnote{http://grass.osgeo.org/grass71/manuals/v.delaunay.html} je součást oficiální distribuce GRASS GISu. Tento modul poskytuje Delaunayovu triangulaci nad vektorovou mapou s body nebo centroidy. 
 
 Ovládání modulu je velmi jednoduché na výběr máme pouze z několika flagů a několika paramatrů:
 
@@ -990,60 +1002,18 @@ Zbývající otázkou pro jeho použití do budoucnosti je tedy převod datové 
 \label{literatura}
 
 
-\bibitem{grass_gis}
-NETELER, Markus; MITASOVA, Helena. \textit{Open Source GIS:
-A~GRASS GIS Approach}. 3rd Ed. New York: Springer, 2008. 406 s. URL:
-\textless\url{http://www.grassbook.org}\textgreater. ISBN 978-0-387-35767-6.
+\bibitem{triangulation}
+HJELLE, Øyvind; DÆHLEN, Morten. \textit{Triangulations and applications}. Berlin: Springer, 2010. 234 s. ISBN 978-3-642-06988-8.
 
 
-\bibitem{bloopers}
-JOHNSON, Jeff. \textit{GUI Bloopers 2.0: Common User Interface Design
-Dont's and Dos}. Burlington: Morgan Kaufman Publishers, 2008. 407 s. ISBN
-978-0-12-370643-0.
-
-
-\bibitem{wxPythonInAction}
-RAPPIN, Noel; DUNN, Robin. \emph{WxPython in Action}. Greenwich, USA: Manning
-Publications Co., 2006. 552 s. ISBN 1-932394-62-1.
-
-
-\bibitem{manual}
-GRASS Development Team. \textit{GRASS GIS 7.0.svn Reference
-Manual} [online]. c2003-2011, Last modified: Fri, 04 Feb 2011 [cit.
-2011-04-18]. URL:
-\textless\url{http://grass.osgeo.org/grass70/manuals/html70_user/ps.map.html}%
-\textgreater
+\bibitem{grafika}
+SOCHOR, Jiří; Žára, Jiří. \textit{Algoritmy počítačové grafiky}. Praha: České vysoké učení technické, 1994. 258 s. ISBN 978-8-001-00949-9.
 
 
 \bibitem{script}
 GRASS Development Team. \textit{GRASS 7 Programmer's Manual} [online].
 c2000-2011, generated on Sat Apr 16 2011 [cit. 2011-03-19].
 URL: \textless\url{http://grass.osgeo.org/programming7}\textgreater
-
-\bibitem{demo}
-Robin Dunn and Total Control Software. \textit{wxPython
-demo} [program]. c1997-2006, last modified 2009-05-17 [cit. 2011-03-19]. URL:
-\textless
-\url{http://downloads.sourceforge.net/wxpython/wxPython-demo-2.8.10.1.tar.bz2}%
-\textgreater
-
-
-\bibitem{wxGUI_clanek}
-LANDA, Martin; MORETTO, Cristina; ZANOLLI, Michele; MANGANELLI, Luca; NETELER, Markus.
-\textit{wxPython GUI for GRASS} [online]. In IX Meeting degli Utenti Italiani di GRASS - GFOSS, Perugia, Italy, February 21-22 2008.
-URL:\textless\url{http://gama.fsv.cvut.cz/~landa/publications/2008/gfoss-it-08/paper/grass-gfoss-tn.pdf}\textgreater
-
-
-% LANDA, Martin. \textit{New GUI for GRASS GIS based on wxPython} [online].
-% Last modified 07-Oct-2010 [cit. 2011-04-18]. URL: \textless
-% \url{http://geo.fsv.cvut.cz/~landa/publications/2008/gis-ostrava-08/paper/%
-% landa-grass-gui-wxpython.pdf}\textgreater
-
-
-\bibitem{wiki_wxpsmap}
-GRASS-Wiki. \textit{GUI for ps.map} [online]. Last modified
-16 April 2011 [cit. 2011-04-18]. URL: \textless
-\url{http://grass.osgeo.org/wiki/GUI_for_ps.map\#Installation}\textgreater
 
 
 \bibitem{trac}
@@ -1052,12 +1022,16 @@ GRASS-Wiki. \textit{GUI for ps.map} [online]. Last modified
 URL: \textless\url{http://trac.osgeo.org/grass}\textgreater
 
 
-
 \bibitem{ArcCR500}
 ARCDATA PRAHA, s.r.o. \textit{ARCDATA PRAHA - ArcČR 500} [online].
 c1992–2006 ARCDATA PRAHA, s.r.o., poslední změna: 7. 12. 2007 [cit. 2011-04-23].
 URL: \textless
 \url{http://old.arcdata.cz/data/arccr} \textgreater
+
+\bibitem{rukovet}
+NETELER, Markus. \textit{Praktická rukověť ke geografickému informačnímu systému GRASS} [online].
+URL: \textless\url{http://geo.fsv.cvut.cz/data/grasswikicz/grass_prirucka/grass_prirucka_0.4.pdf}
+\textgreater
 
 
 
