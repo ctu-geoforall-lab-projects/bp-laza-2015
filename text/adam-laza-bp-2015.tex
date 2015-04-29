@@ -99,7 +99,7 @@ V reálném životě se většinou nesetkáváme s případem, kdy pro naši obl
 
 Obvykle ovšem potřebujeme znát hodnotu daného jevu i mimo měřené body, nejčastěji pro celé zájmové území. V takovéto chvíli se musíme použít nějaký interpolační nástroj, který vypočte přibližnou hodnotu v území mezi měřenými body. Jako příklad může být uvedeno vytvoření výškopisu, či DMT pro území, kde máme k dispozici data o výšce v pravidelné mřížce nebo teplotní mapa na základě údajů z nepravidelně rozmístěných meteostanic.
 
-V této práci se budu zabývat interpolací přirozeného souseda a její implementací do GRASS GISu 7\footnote{\url{http://grass.osgeo.org}}. 
+V této práci se budu zabývat interpolací přirozeného souseda a její implementací do GRASS GISu 7.\footnote{\url{http://grass.osgeo.org}} Toto téma Bakalářské práce jsem si vybral z několika důvodů. Za prvé, mě zajímají geografické informační systémy, zejména pak open-source projekty. Dle mého názoru je to právě cesta open-source softwarů, kterou se budou v budoucnosti soukromé firmy, vývoj a věda ubírat, a je proto dobré s nimi získávat zkušenost už během studia. Za druhé, práce na tomto tématu mi umožnila proniknout do GISů nejen z pohledu uživatele, ale přiučit se alespoň elementární základy jako vývojář. A za třetí, interpolace metodou přirozeného souseda je interpolace, která poskytuje kvalitní výstupy, a její začlenění do standardní distribuce GRASS GISu by mohlo být hojně využito.
 
 \newpage
 \part{Teoretická část}
@@ -117,11 +117,10 @@ GRASS GIS je od roku 1982 v neustálem vývoji. Síla a úspěch GRASS GISu je z
 
 \newpage
 \section{Delaunayova triangulace}
-Interpolace metodou přirozeného souseda vychází z Delanayovi triangulace(DT) či Voronoiových diagramů(VD). Jak DT či VD jsou důležité konstrukce ve výpočetní geometrii. Delaunayova triangulace lze odvodit z Voronoiových diagramů a stejně tak Voronoivy diagramy se dají naopak odvodit z Dalunayovi triangulace.
+Interpolace metodou přirozeného souseda vychází z Delanayovi triangulace(DT) či Voronoiova diagramu(VD). Jak DT či VD jsou důležité konstrukce ve výpočetní geometrii. Delaunayova triangulace lze odvodit z Voronoiova diagramu a stejně tak Voronoiův diagram se dá naopak odvodit z Dalunayovi triangulace.
 
 \subsection{Triangulace obecně}
-\todo[inline]{Vkladat definici?}
-\textbf{Definice:}
+\textbf{Definice:}\cite{TB1}
 Triangulace $\Delta$ nad množinou bodu $P$ představuje takové planární rozdělení, které vytvoří soubor $m$ trojúhelníků $t = \{ t_1, t_2,...,t_m \}$ a hran tak, aby platilo:
 
 Libovolné dva trojúhelníky $t_i$,$t_j \in \Delta, (i \neq j)$, mají společnou nejvýše hranu.
@@ -976,18 +975,64 @@ Zbývající otázkou pro jeho použití do budoucnosti je tedy převod datové 
 
 
 \newpage
-\section{Srovnání GRASSu a ostatních softwarů}
+\section{Srovnání GRASS GIS a ArcGIS}
 
+V následující kapitole se budeme věnovat srovnání GRASS GISu a ArcGISu při interpolaci metodou přirozeného souseda. GRASS GIS bude zastupovat modul \emph{v.surf.nnbathy}, o kterém byla řeč v předchozích kapitolách. Za ArcGIS budeme zkoumat nástroj \emph{Natural Neighbour}, který se nachází v toolboxu Spatial Analyst. 
+
+Pro porovnání byly zvoleny tři situace. Na území o velikosti deset krát deset kilometrů, s rozlišením buňky deset metrů byly vygenerována bodová pole o počtu tisíc, sto tisíc a milion bodů. Nad těmito soubory byla po té provedena interpolace v obou softwarech. Interpolace byla pro každou datovou sadu provedena v deseti opakováních, výsledný čas je průměrem. Testy byly provedeny na notebooku HP Pavilion dv6000 s procesorem Intel\copyright  Core\texttrademark 2 Duo CPU T5550 @ 1.83GHz $\times$ 2 a RAM pamětí 4 GB. Výsledky jsou uvedeny v Tabulce \ref{tab:GRASSxArc}.
+
+\bigskip
+\begin{table}[h]
+\catcode`\-=12
+\begin{tabular}{|c|c|c|}
+\hline
+Počet bodů & GRASS GIS  & ArcGIS     \\ \hline
+1000       & 13,5 s     & 7,6 s      \\ \hline
+100000     & 58,9 s     & 14,1 s     \\ \hline
+1000000    & 8 min 25 s & 1 min 24 s \\ \hline
+\end{tabular}
+\caption{Porovnání časů}
+\label{tab:GRASSxArc}
+\end{table}
+
+\newpage
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000.png}}{\caption{ArcGIS: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_grass}}
+\end{floatrow}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000.png}}{\caption{ArcGIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_grass}}
+\end{floatrow}
+\end{figure}
+
+\newpage
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{ArcGIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_grass}}
+\end{floatrow}
+\end{figure}
 
 \newpage
 \necislovana{Seznam použitých zkratek}
 
 \begin{tabular}{ll}
+\textbf{DT}& Delaunayova triangulace\\
 \textbf{GIS}& Geographic Information System (Geografický informační systém)\\
 \textbf{GRASS}& Geographical Resources Analysis Support System\\
+\textbf{HW}& Hardware\\
 \textbf{QGIS}& Quantum GIS\\
 \textbf{GUI}& Graphical User Interface (Grafické uživatelské rozhraní)\\
 \textbf{USA-CERL}& US Army Construction Engineering Research Laboratories\\
+\textbf{VD}& Voronoiův diagram\\
 \end{tabular}
 
 
@@ -1033,6 +1078,15 @@ NETELER, Markus. \textit{Praktická rukověť ke geografickému informačnímu s
 URL: \textless\url{http://geo.fsv.cvut.cz/data/grasswikicz/grass_prirucka/grass_prirucka_0.4.pdf}
 \textgreater
 
+\bibitem{TB1}
+BAYER, Tomáš. \textit{Rovinné triangulace a jejich využití} [online].
+URL: \textless\url{https://web.natur.cuni.cz/~bayertom/Adk/adk5.pdf}
+\textgreater
+
+\bibitem{TB2}
+BAYER, Tomáš. \textit{Voronoi diagram} [online].
+URL: \textless\url{https://web.natur.cuni.cz/~bayertom/Adk/adk5.pdf}
+\textgreater
 
 
 \end{thebibliography}
