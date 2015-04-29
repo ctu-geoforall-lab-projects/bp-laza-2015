@@ -99,7 +99,10 @@ V reálném životě se většinou nesetkáváme s případem, kdy pro naši obl
 
 Obvykle ovšem potřebujeme znát hodnotu daného jevu i mimo měřené body, nejčastěji pro celé zájmové území. V takovéto chvíli se musíme použít nějaký interpolační nástroj, který vypočte přibližnou hodnotu v území mezi měřenými body. Jako příklad může být uvedeno vytvoření výškopisu, či DMT pro území, kde máme k dispozici data o výšce v pravidelné mřížce nebo teplotní mapa na základě údajů z nepravidelně rozmístěných meteostanic.
 
-V této práci se budu zabývat interpolací přirozeného souseda a její implementací do GRASS GISu 7.\footnote{\url{http://grass.osgeo.org}} Toto téma Bakalářské práce jsem si vybral z několika důvodů. Za prvé, mě zajímají geografické informační systémy, zejména pak open-source projekty. Dle mého názoru je to právě cesta open-source softwarů, kterou se budou v budoucnosti soukromé firmy, vývoj a věda ubírat, a je proto dobré s nimi získávat zkušenost už během studia. Za druhé, práce na tomto tématu mi umožnila proniknout do GISů nejen z pohledu uživatele, ale přiučit se alespoň elementární základy jako vývojář. A za třetí, interpolace metodou přirozeného souseda je interpolace, která poskytuje kvalitní výstupy, a její začlenění do standardní distribuce GRASS GISu by mohlo být hojně využito.
+\bigskip
+V této práci se budu zabývat interpolací přirozeného souseda a její implementací do GRASS GISu 7.\footnote{\url{http://grass.osgeo.org}} Toto téma Bakalářské práce jsem si vybral z několika důvodů. Za prvé, mě zajímají geografické informační systémy, zejména pak open-source projekty. Dle mého názoru je to právě cesta open-source softwarů, kterou se budou v~budoucnosti soukromé firmy, vývoj a věda ubírat, a je proto dobré s nimi získávat zkušenost už během studia. Za druhé, práce na tomto tématu mi umožnila proniknout do GISů nejen z pohledu uživatele, ale přiučit se alespoň elementární základy jako vývojář. A za třetí, interpolace metodou přirozeného souseda je nástroj, který poskytuje kvalitní výstupy, a jeho začlenění do standardní distribuce GRASS GISu by mohlo být hojně využito.
+
+V současné době je interpolace metodou přirozeného souseda prováděna pomocí modulů \emph{v.surf.nnbathy} a \emph{r.surf.nnbathy} z rozšíření Add-Ons, které jsou navíc napsané v Bashi. Tyto moduly jsou však podporované pouze pro GRASS GIS do verze 6. Od 22. února 2015 ovšem byla uvolněná verze 7, která nepodporuje moduly psané v Bashi. Jako první krok, je tedy nutné moduly přepsat do podporovaného jazyka- Pythonu. Dalším krokem bude zbavení závislosti knihovny \emph{nn-c}, která provádí samotnou interpolaci, na knihovně \emph{Triangle}, která konstruuje Delaunayovu triangulaci, ale kterou kvůli nevyhovující licenci není možné použít do standardní distribuce GRASS GISu.
 
 \newpage
 \part{Teoretická část}
@@ -120,7 +123,7 @@ GRASS GIS je od roku 1982 v neustálem vývoji. Síla a úspěch GRASS GISu je z
 Interpolace metodou přirozeného souseda vychází z Delanayovi triangulace(DT) či Voronoiova diagramu(VD). Jak DT či VD jsou důležité konstrukce ve výpočetní geometrii. Delaunayova triangulace lze odvodit z Voronoiova diagramu a stejně tak Voronoiův diagram se dá naopak odvodit z Dalunayovi triangulace.
 
 \subsection{Triangulace obecně}
-\textbf{Definice:}\cite{TB1}
+\textbf{Definice\cite{TB1}:}
 Triangulace $\Delta$ nad množinou bodu $P$ představuje takové planární rozdělení, které vytvoří soubor $m$ trojúhelníků $t = \{ t_1, t_2,...,t_m \}$ a hran tak, aby platilo:
 
 Libovolné dva trojúhelníky $t_i$,$t_j \in \Delta, (i \neq j)$, mají společnou nejvýše hranu.
@@ -147,7 +150,6 @@ V našem případě budeme triangulaci provádět uvnitř takzvaného \emph{konv
 \subsection{Validní a regulérní triangulace}
 V podstatě by se dalo říct, že triangulace je jakákoliv trojúhelníkoví síť mezi body v prostoru. Tato práce se však bude zabývat triangulační sítí se specifickými vlastnostmi.
 
-\todo[inline]{pridat obrazky pro jednotlive podminky}
 1. Žádný z trojúhelníků $t_{ijk}$ není zdegenerovaný, tzn. že vrcholy $i, j, k$ neleží na přímce.
 \begin{figure}[h!]
 \centering
@@ -156,36 +158,33 @@ V podstatě by se dalo říct, že triangulace je jakákoliv trojúhelníkoví s
 \label{fig:podm_1}
 \end{figure}
 
-2. Žádná dvojice trojúhelníků se nepřekrývá, tzn $Int(t_{ijk}) \cap Int(t_{lmn}) = \emptyset$
+2. Žádná dvojice trojúhelníků se nepřekrývá, tzn $Int(t_{ijk}) \cap Int(t_{lmn}) = \emptyset$.
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.25\textwidth]{img/podm_2.png}
 \caption{Překrývající se trojúhelníky}
-\label{fig:podm_1}
+\label{fig:podm_2}
 \end{figure}
 
 3. Hranice dvou trojúhelníků se setkávají pouze na jejich hranách nebo v jejich vrcholech.
 
 4. Sjednocení všech trojúhelníků v celé triangulační síti se rovná celé doméně $\Omega$, nad kterou triangulaci provádíme.
-
-5. Doména $\Omega$ musí být spojitá.
-\begin{comment}
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.9\textwidth]{img/podm_3.png}
-\caption{Spojitá doména $\Omega$}
-\label{fig:podm_1}
+\includegraphics[width=0.25\textwidth]{img/podm_domena.png}
+\caption{Nespojitá doména, triangulace obsahující díry}
+\label{fig:podm_domena}
 \end{figure}
-\end{comment}
+
+5. Doména $\Omega$ musí být spojitá.
 
 6. Triangulační síť nesmí obsahovat díry.
 
 7. Jestliže vrchol $v_i$ leží na hranici konvexního obalu, pak musí existovat právě dvě hraniční hrany, které mají vrchol $v_i$ jako společný vrchol. To mimo jiné znamená, že počet hraničních vrcholů je roven počtu hraničních hran.
 
-
+\bigskip
 Pokud jsou naplněny první čtyři podmínky, může se triangulace nazvat \emph{validní}. V případě, že naplníme všech sedm podmínek, dá se mluvit o \emph{regulérní} triangulaci.
 
-\newpage
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/vnr.png}
@@ -202,9 +201,9 @@ V případě triangulace na Obrázku \ref{fig:trian_valid_not_reg} se jedná o t
 \label{fig:train_not_valid}
 \end{figure}
 
+\newpage
 Triangulace na Obrázku \ref{fig:train_not_valid} není validní, protože nesplňuje podmínku č. 3. Tím pádem se nejedná ani o triangulaci regulérní.
 
-\newpage
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/triangulation.png}
@@ -234,7 +233,6 @@ Pokud tedy bod $p_l$ leží uvnitř kružnice $k$, je hrana $\overline{p_ip_j}$ 
 Pokud nad množinou bodů P provedeme všechny možné triangulace, můžeme nejoptimálnější triangulaci určit pomocí MaxMin popř. MinMax podmínky. V případě MaxMin podmínky je pro každou možnou triangulaci nalezen největší minimální vnitřní úhel trojúhelníku a ten je porovnán s největším minimálním úhel ostatních triangulací, což vede k eliminaci trojúhelníků s velmi tupými úhly. U MinMax podmínky se postupuje obdobně, pouze se porovnávají nejmenší maximální vnitřní úhly trojúhelníků a eliminují se tak trojúhelníky s velmi ostrými úhly.
 
 \newpage
-\todo[inline]{Vložit definici?}
 MinMax podmínka:
 Eliminace trojúhelníků s příliš tupými úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl od triangulace $\Delta^{'}(P)$ optimální, je–li největší úhel $\alpha$ generovaný triangulací $\Delta(P)$ menší než největší úhel $\alpha^{'}$ generovaný triangulací $\Delta^{'}(P)$.
 
@@ -261,15 +259,14 @@ Problém nastává ve chvíli, kdy některé body, mezi kterými chceme triangul
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/minmax2.png}}{\caption{Případ1}}{\label{fig:neutral_case_1}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/minmax1.png}}{\caption{Případ2}}{\label{fig:neutral_case_2}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/minmax2_pokus.png}}{\caption{Případ1}\label{fig:neutral_case_1}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/minmax1_pokus.png}}{\caption{Případ2}\label{fig:neutral_case_2}}
 \end{floatrow}
 \end{figure}
 
 
-Nejčastěji tento jev nastává u čtyřúhelníků, jejichž všechny vrcholy leží na kružnici. Jak můžeme vidět na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} v obou případech je maximální minimální úhel triangulace obvodový úhel nejkratší strany čtyřúhelníku. V tomto případě se tedy jedná o neutrální případ pro MaxMin podmínku. Pokud bychom tedy triangulaci vyhodnocovali pouze na základě MaxMin podmínky mohly bychom obě triangulace prohlásit za optimální. Už od pohledu je ale zřejmé, že lepší tvar trojúhelníků poskytujeme triangulace nalevo. Pokud ale triangulace hodnotíme i s ohledem na MinMax podmínknu, můžeme prokázat, že triangulace na Obrázku \ref{fig:neutral_case_2} je optimální.
+Nejčastěji tento jev nastává u čtyřúhelníků, jejichž všechny vrcholy leží na kružnici. Jak můžeme vidět na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2}, maximální minimální úhel triangulace je v obou případech úhel $\alpha$, což je obvodový úhel nejkratší strany čtyřúhelníku. V tomto případě se tedy jedná o neutrální případ pro MaxMin podmínku. Pokud bychom tedy triangulaci vyhodnocovali pouze na základě MaxMin podmínky mohly bychom obě triangulace prohlásit za optimální. Už od pohledu je ale zřejmé, že lepší tvar trojúhelníků poskytujeme triangulace nalevo. Pokud ale triangulace hodnotíme i s ohledem na MinMax podmínknu, můžeme prokázat, že triangulace na Obrázku \ref{fig:neutral_case_2} je optimální.
 
-\todo[inline]{Obrázky z GRASSu, jak udělat skutečnou kružnici, označení úhlů}
 
 \paragraph{Edge swaping, legalizace}
 Na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} jsme si ukázali případ neutrálního případu pro MinMax podmínku. Proces, při kterém jsme zaměnili diagonálu čtyřúhelníku tak, aby byli oba trojúhelníky lokálně optimální, se nazýva \emph{Edge swaping.} Pokud budeme tento proces aplikovat pro celou triangulaci dojde k takzvané \emph{legalizaci} triangulace.
@@ -295,6 +292,10 @@ Voronoiův diagram má následující vlastnosti:
 \item Uzel leží ve středu kružnice určené 3 body z P, které leží v přilehlých oblastech a neleží na přímce.
 \end{enumerate}
 
+Nechť $H(p_i,P_j)$ je polorovina obsahující všechny body v rovině, jejichž vzdálenost od bodu $p_i$ je menší než od bodu $p_j$. Potom Voronoiova oblast $V(p_i)$ je průnikem N-1 polorovin,
+$V(p_i)= \bigcap\limits_{\substack{j=1,...,N \\ i\not=j}}H(p_i,p_j)$, kde každá oblast má maximálně N-1 stran.
+
+\newpage
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/vor_pol.png}
@@ -302,10 +303,7 @@ Voronoiův diagram má následující vlastnosti:
 \label{fig:vor_pol}
 \end{figure}
 
-Nechť $H(p_i,P_j)$ je polorovina obsahující všechny body v rovině, jejichž vzdálenost od bodu $p_i$ je menší než od bodu $p_j$. Potom Voronoiova oblast $V(p_i)$ je průnikem N-1 polorovin,
-$V(p_i)= \bigcap\limits_{\substack{j=1,...,N \\ i\not=j}}H(p_i,p_j)$, kde každá oblast má maximálně N-1 stran.
-
-Z Obrázku \ref{fig:vor_pol} je vidět, že oblasti přiřazené pro body na okraji konvexního obalu nejsou zcela ohraničené a uzavřené. Jednotlivé hranice oblastí nazýváme \emph{Voronoiovi polygony}, které jsou složeny z takzvaných \emph{Voronoiových hran a bodů}. O dvou bodech $p_j$ a $p_k$ můžeme tvrdit, že jsou \emph{Voronoiovi sousedé}, pokud oblasti, kterým náleží, sdílí společnou \emph{Voronoiovu hranu}. 
+Z Obrázku \ref{fig:vor_pol} je vidět, že oblasti přiřazené pro body na okraji konvexního obalu nejsou zcela ohraničené a uzavřené. Jednotlivé hranice oblastí nazýváme \emph{Voronoiovy polygony}, které jsou složeny z takzvaných \emph{Voronoiových hran a bodů}. O dvou bodech $p_j$ a $p_k$ můžeme tvrdit, že jsou \emph{Voronoiovi sousedé}, pokud oblasti, kterým náleží, sdílí společnou \emph{Voronoiovu hranu}. 
 
 Občas se můžeme setkat i s označením \emph{Thiessenovy polygony} podle klimatologa Thiessena, který Voronoiovi diagramy používal k interpolaci klimatických dat z náhodně distribuovaných meteorologických stanic.
 
