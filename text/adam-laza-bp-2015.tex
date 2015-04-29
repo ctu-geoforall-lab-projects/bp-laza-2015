@@ -328,7 +328,6 @@ Trojúhelníky této sítě se nazývají \emph{Delaunayovi trojúhelníky}, kte
 
 \newpage
 \section{Algoritmy pro tvorbu DT}
-\todo[inline]{Obrázky pro algoritmy}
 Triangulační algoritmy jsou poměrně dobře matematicky prozkoumaná oblast, ke které máme k dispozici široký teoretický základ. Při hledání vhodného algoritmu musíme zohlednit následující požadavky:
 \begin{itemize}
 \item Jednoduchost algoritmu a jeho snadná implementace.
@@ -370,12 +369,19 @@ Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čty�
 \newline
 \hrule
 
-
+\newpage
 \subsection{Paprskovitý algoritmus}
 
 Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný postup, jak nalézt počáteční triangulaci $\Delta$. Na začátku se nalezne bod $p$ z množiny $P$, takový který je nejbližší jejímu středu. Po té jej paprskovitě spojíme se všemi zbývajícími body množiny $P$. Tyto body se následně seřadí podle orientace a vzdálenosti od bodu $p$ a v tomto pořadí se spojí hranami. Potom se vytvoří hrany na hranici triangulace. Vzniklá triangulace se dále postupně po jednotlivých hranách legalizuje stejně jako v předchozím případě.
 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.85\textwidth, angle=90]{img/rsweep.jpg}
+\caption{Paprskovitý (Radial sweep) algoritmus, zdroj: \cite{triangulation}}
+\label{fig:rsweep}
+\end{figure}
 
+\newpage
 \subsection{Algoritmus inkrementálního vkládání}
 
 Tento algoritmus je poměrně jednoduchý a snadný na implementaci, obzvlášť pokud je zvolena vhodná datová struktura. Jeho složitost je $0.(n^2)$, kterou lze úpravami zlepšit až na $0.(n.log(n))$. Tato metoda je tvořena třemi kroky. Na začátku je vytvořen konvexní obal množiny bodů $P$ a pro jeho lomové body se provede triangulace. Do vzniklé triangulace se postupně vkládají body z množiny $P$. Tato nově vzniklá triangulace nemusí být nutně DT a proto se provede ještě její legalizace.
@@ -468,16 +474,41 @@ Základní vlastnost toho postupu je, že se v každém kroku ke stávající tr
 \hrule
 
 \newpage
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.7\textwidth, angle=90]{img/stepbystep.jpg}
+\caption{Algoritmus inkrementální konstrukce (Step-by-Step), zdroj: \cite{triangulation}}
+\label{fig:stepbystep}
+\end{figure}
+
+\newpage
 \subsection{Algoritmus Rozděl a panuj}
 
 Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovské triangulaci nabízí nejlepší výsledky, co se výkonnosti týče. Tento přístup je založený na jednoduchých krocích:
 
 1. Rekurzivní dělení množiny bodů $P$ až do stavu, kdy se pro podmnožinu nabízí jednoduché geometrické řešení. Při postupném dělení množiny $P$ se nakonec dostaneme do stavu, kdy nám zbudou buď tři body, v tom případě vytvoříme trojúhelník, nebo dva body, kdy vytvoříme hranu.
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.48\textwidth, angle=90]{img/div_n_conq.jpg}
+\caption{Rekurzivní dělení na dílčí podmnožiny, zdroj: \cite{triangulation}}
+\label{fig:div_n_conq}
+\end{figure}
 
 2. Vytvoření prozatimní triangulace, která nemusí být Delaunayovská.
 
 3. Připojení ke stávající triangulaci a její legalizace na Delaunayovskou. Právě propojování podmnožin na jednotlivých vrstvách je nejnáročnější část tohoto algoritmu.
-\todo[inline]{Obrázek dělení na podmnožiny}
+
+\bigskip
+Algoritmus Divide and Conquer využívá modul \emph{v.delaunay}, o kterém budeme mluvit později, viz Kapitola \ref{chap:v.delaunay}.
+
+\newpage
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth, angle=90]{img/merge.jpg}
+\caption{Propojování dílčích triangulací, zdroj: \cite{triangulation}}
+\label{fig:merge}
+\end{figure}
+
 
 \newpage
 \section{Datové struktury}\label{sec:data_struct}
@@ -535,7 +566,6 @@ Tato struktura přináší rozšíření o informaci, s kterými trojúhelníky 
 \label{tab:troj_strukt_sous}
 \end{table}
 
-
 \subsection{Vertex-based struktura se sousedy}
 
 Vertex-based struktura se sousedy je poměrně úsporná struktura, co se objemu dat týče. Ke každému vrcholu $v_i$ v síti jsou uloženy do seznamu sousedů vrcholy, které jsou s ním spojené. V případě že $v_i$ leží na konvexním obalu je seznam sousedů ukončen 'pseudovrcholem'. 
@@ -557,6 +587,13 @@ Vrchol & \multicolumn{6}{|c|}{Sousední vrcholy} & Suma vrcholů \\ \hline \hlin
 \label{tab:vertex_based}
 \end{table}
 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.6\textwidth, angle=90]{img/pseudo_node.jpg}
+\caption{Datová struktura s použitím pseudo-uzlu, zdroj: \cite{triangulation}}
+\label{fig:pseudo_node}
+\end{figure}
+
 \newpage
 \subsection{Half-edge datová struktura}
 
@@ -572,7 +609,13 @@ Tato struktura uchovává topologický model na základě orientovaných polovi�
 Z half-edge struktury je možné odvodit mnohé jiné příbuzné struktury obsahující další informace o topologii, které ulehčují procházení celou sítí při vyhledávání, ale zároveň zvyšují nároky na kapacitu. Mezi tyto příbuzné struktury patří například \emph{vertex-edge}, \emph{face-edge} nebo \emph{winged edge} datová struktura, kterou používá například modul \emph{v.delaunay} v GRASS GISu.
 
 \newpage
-\begin{table}[h]
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.35\textwidth, angle=90]{img/half_edge.jpg}
+\caption{Half-edge struktura, zdroj: \cite{triangulation}}
+\label{fig:half_edge_scan}
+\end{figure}
+\begin{table}[h!]
 \catcode`\-=12
 \begin{tabular}{|c||c||c|c|}
 \hline
@@ -601,7 +644,7 @@ Z half-edge struktury je možné odvodit mnohé jiné příbuzné struktury obsa
 \label{tab:half_edge}
 \end{table}
 
-\bigskip
+\newpage
 \begin{lstlisting}[caption={Definice datové struktury}]
 class Half-edge
 {
@@ -611,12 +654,19 @@ class Half-edge
 };
 \end{lstlisting}
 
-\newpage
 \subsection{Dart-based datová struktura}
-\todo[inline]{Vložit oskenovanou strukturu}
+Dart-based datová struktura nabízí extrémně rychlé procházení topologie napříč datovou strukturou. Ta může být representována jako množina šipek $D$, kde každá šipka $d \in D$ odkazuje k jednomu vrcholu a třem dalším šipkám z $D$, definovaných jako iterátory $\alpha_0, \alpha_1 a \alpha_2$. 
+\todo[inline]{Vložit obrázek iterátorů, odstavec o nich}
 
+\newpage
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth, angle=90]{img/dart_struct.jpg}
+\caption{Dart-based datová struktura, zdroj: \cite{triangulation}}
+\label{fig:dart_struct}
+\end{figure}
 
-\begin{table}[h]
+\begin{table}[h!]
 \catcode`\-=12
 \begin{tabular}{|c||c|c|c|c|}
 \hline
@@ -943,6 +993,7 @@ Knihovna CGAL (The Computational Geometry Algorithms Library) je projekt, který
 
 \newpage
 \subsection{Modul \emph{v.delaunay}}
+\label{chap:v.delaunay}
 Modul \emph{v.delaunay}\footnote{http://grass.osgeo.org/grass71/manuals/v.delaunay.html} je součást oficiální distribuce GRASS GISu. Tento modul poskytuje Delaunayovu triangulaci nad vektorovou mapou s body nebo centroidy. 
 
 Ovládání modulu je velmi jednoduché na výběr máme pouze z několika flagů a několika paramatrů:
@@ -1023,10 +1074,14 @@ Počet bodů & GRASS GIS  & ArcGIS     \\ \hline
 \necislovana{Seznam použitých zkratek}
 
 \begin{tabular}{ll}
+\textbf{DMT}& Digitální model terénu\\
 \textbf{DT}& Delaunayova triangulace\\
+\textbf{DPZ}& Dálkový průzkum Země\\
 \textbf{GIS}& Geographic Information System (Geografický informační systém)\\
+\textbf{GNU GPL}& GNU General Public License\\
 \textbf{GRASS}& Geographical Resources Analysis Support System\\
 \textbf{HW}& Hardware\\
+\textbf{OS}& Operační systém\\
 \textbf{QGIS}& Quantum GIS\\
 \textbf{GUI}& Graphical User Interface (Grafické uživatelské rozhraní)\\
 \textbf{USA-CERL}& US Army Construction Engineering Research Laboratories\\
