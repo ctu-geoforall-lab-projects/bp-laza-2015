@@ -655,8 +655,19 @@ class Half-edge
 \end{lstlisting}
 
 \subsection{Dart-based datová struktura}
-Dart-based datová struktura nabízí extrémně rychlé procházení topologie napříč datovou strukturou. Ta může být representována jako množina šipek $D$, kde každá šipka $d \in D$ odkazuje k jednomu vrcholu a třem dalším šipkám z $D$, definovaných jako iterátory $\alpha_0, \alpha_1 a \alpha_2$. 
-\todo[inline]{Vložit obrázek iterátorů, odstavec o nich}
+Dart-based datová struktura nabízí extrémně rychlé procházení topologie napříč datovou strukturou. Ta může být representována jako množina šipek $D$. Šipka $d \in D$ představuje trojici $(v_i, e_j, t_k)$, kde $v_i$ je vrchol hrany $e_j$ v trojúhelníku $t_k$. V jednom trojúhelníky tedy můžeme definovat celkem šest šipek. Každá šipka $d \in D$ odkazuje k jednomu vrcholu a třem dalším šipkám z $D$ pomocí takzvaných $\alpha$\emph{- iteratorů}. Tyto iterátory jsou definovány takto (Obrázek \ref{fig:iterators}(b)):
+\begin{itemize}
+\item $\alpha_0(d)$ odkazuje k trojici s rozdílným vrcholem $v$, ale stejnou hranou $e$ a trojúhelníkem $t$,
+\item $\alpha_1(d)$ odkazuje k trojici s rozdílnou hranou $e$, ale stejným vrcholem $v$ a trojúhelníkem $t$,
+\item $\alpha_2(d)$ odkazuje k trojici s rozdílným trojúhelníkem $t$, ale stejným vrcholem $v$ a hranou $e$.
+\end{itemize}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.3\textwidth, angle=90]{img/iterators.jpg}
+\caption{$\alpha-iterátory $, zdroj: \cite{triangulation}}
+\label{fig:iterators}
+\end{figure}
 
 \newpage
 \begin{figure}[h!]
@@ -759,7 +770,6 @@ Při řešení otázky, jak implementovat metodu přirozeného souseda pro GRASS
 \end{description}
 
 \bigskip
-\todo[inline]{nastaveni listing}
 
 Volání v příkazové řádce pak může vypadata například takto:
 \begin{lstlisting}[caption={bash version}]
@@ -793,7 +803,7 @@ V následující části této práce bude popsáno jak pythoní modul funguje, 
 \paragraph{Vstupní data}
 Stejně jako původní bashový modul, i tento modul pracuje se vstupními daty buď v podobě textového ASCII souboru nebo vektorové mapy. 
 
-V případě použití vstupní vektorové mapy s body je pak při volání modulu použit parametr \emph{zcolumn}, který určuje z jakého sloupce atributové tabulky se budou brát hodnoty k interpolaci.
+V případě použití vstupní vektorové mapy s body je pak při volání modulu použit parametr \emph{column}, který určuje z jakého sloupce atributové tabulky se budou brát hodnoty k interpolaci.
 
 \begin{figure}[h!]
 \centering
@@ -803,7 +813,7 @@ V případě použití vstupní vektorové mapy s body je pak při volání modu
 \end{figure}
 
 \newpage
-Druhou možností je použít textový ASCII soubor, který musí obsahovat $n$ bodů na $n$ řádcích ve třech sloupcích. V prvních dvou sloupcích je uložen údaj o poloze v podobě x a y souřadnice. Ve třetím sloupci jsou pak uloženy hodnoty veličiny, kterou chceme interpolovat.
+Druhou možností je použít textový ASCII soubor, který musí obsahovat $n$ bodů na $n$ řádcích ve třech sloupcích. V prvních dvou sloupcích je uložen údaj o poloze v podobě x a y souřadnice. Ve třetím sloupci jsou pak uloženy hodnoty veličiny, kterou chceme interpolovat, a v posledním sloupci nalezneme id bodu.
 
 %ukazka TMPXYZ
 \begin{lstlisting}[caption={Příklad vstupního souboru}]
@@ -842,7 +852,7 @@ V případě, že pracujeme s vektorovou mapu, uložíme informace o bodových d
 639137.670258715632372 221096.622500944242347 8 16.613054999999999
 \end{lstlisting}
 
-Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné \emph{TMPYZ} si uložíme pouze informace o poloze a hodnotu k interpolaci. V případě, že nepracujeme s vektorovou mapou, ale ASCII souborem, tak tento soubor rovnou uložíme do proměnné \emph{TMPXYZ}.
+Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné \emph{TMPXYZ} si uložíme pouze informace o poloze a hodnotu k interpolaci. V případě, že nepracujeme s vektorovou mapou, ale ASCII souborem, tak tento soubor rovnou uložíme do proměnné \emph{TMPXYZ}.
 
 \bigskip
 %ukazka souboru TMPxyz
@@ -862,12 +872,12 @@ Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné \
 \paragraph{Funkce compute()}
 V této části kódu je volán program \emph{nnbathy} s následujícími vstupními paramatry:
 \begin{description}
-\item[-w]{proměnná typu double, omezuje extrapolaci přiřezením minimální váhy pro vrchol Delaunayovi sítě. V našem případě nastavena nula, což zamezuje extrapolaci.}
-\item[-i]{proměnná typu string, název vstupního souboru o $n$ řádcích, se třemi sloupci, x a y souřadnicí a hodnotou k interpolaci}
-\item[-x]{dvojice $x_min$, $x^max$ typu double, mezní hodnoty výstupní mřížky}
-\item[-y]{dvojice $x_min$, $x^max$ typu double, mezní hodnoty výstupní mřížky}
-\item[-P]{proměnná typu string, použitá metoda interpolace}
-\item[-n]{dvojice double x double, rozlišení výstupní mřížky}
+\item[-w]{proměnná typu \emph{double}, omezuje extrapolaci přiřezením minimální váhy pro vrchol Delaunayovi sítě. V našem případě nastavena nula, což zamezuje extrapolaci.}
+\item[-i]{proměnná typu \emph{string}, název vstupního souboru o $n$ řádcích, se třemi sloupci, x a y souřadnicí a hodnotou k interpolaci}
+\item[-x]{dvojice $x_{min}$, $x^{max}$ typu \emph{double}, mezní hodnoty výstupní mřížky}
+\item[-y]{dvojice $y_{min}$, $y^{max}$ typu \emph{double}, mezní hodnoty výstupní mřížky}
+\item[-P]{proměnná typu \emph{string}, použitá metoda interpolace}
+\item[-n]{dvojice \emph{double} x \emph{double}, rozlišení výstupní mřížky}
 \end{description}
 
 Výstupem z \emph{nnbathy} je soubor \emph{XYZout}. Obsahuje data o výstupní mřížce buňku po buňce ve třech sloupcích. V prvních dvou jsou x a y souřadnice, ve třetím vyinterpolovaná hodnota. V případě buňek mimo oblast, kde probíhala interpolace, je ve třetím sloupci uložena hodnota NaN.
@@ -912,9 +922,9 @@ Dále je potřeba vybrat vyinterpolované hodnoty jednotlivých buněk ze soubor
 \begin{lstlisting}
 \end{lstlisting}
 
+\newpage
 \paragraph{Funkce import\_to\_raster()}
 Soubor \emph{TMP}, ve kterém máme uložené vyinterpolované hodnoty v pravidelné mřížce, slouží jako vstupní soubor pro modul \emph{r.in.ascii}, který tyto hodnoty převedu do rastru. Dále je použit modul \emph{r.support}, který uloží příkazy do rastrových metadat. Na závěr je vytištěna zpráva, že byla vytvořena rastrová mapa.
-
 
 \paragraph{Výstupní data}
 Výstupem modulu \emph{v.surf.nnbathy} je rastrová mapa.
