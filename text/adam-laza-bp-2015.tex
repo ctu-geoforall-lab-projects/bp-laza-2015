@@ -376,7 +376,7 @@ Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný postup, 
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.85\textwidth, angle=90]{img/rsweep.jpg}
+\includegraphics[width=0.85\textwidth]{img/rsweep.png}
 \caption{Paprskovitý (Radial sweep) algoritmus, zdroj: \cite{triangulation}}
 \label{fig:rsweep}
 \end{figure}
@@ -476,7 +476,7 @@ Základní vlastnost toho postupu je, že se v každém kroku ke stávající tr
 \newpage
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.7\textwidth, angle=90]{img/stepbystep.jpg}
+\includegraphics[width=0.7\textwidth]{img/stepbystep.png}
 \caption{Algoritmus inkrementální konstrukce (Step-by-Step), zdroj: \cite{triangulation}}
 \label{fig:stepbystep}
 \end{figure}
@@ -489,7 +489,7 @@ Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovs
 1. Rekurzivní dělení množiny bodů $P$ až do stavu, kdy se pro podmnožinu nabízí jednoduché geometrické řešení. Při postupném dělení množiny $P$ se nakonec dostaneme do stavu, kdy nám zbudou buď tři body, v tom případě vytvoříme trojúhelník, nebo dva body, kdy vytvoříme hranu.
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.48\textwidth, angle=90]{img/div_n_conq.jpg}
+\includegraphics[width=0.8\textwidth]{img/div_n_conq.png}
 \caption{Rekurzivní dělení na dílčí podmnožiny, zdroj: \cite{triangulation}}
 \label{fig:div_n_conq}
 \end{figure}
@@ -504,7 +504,7 @@ Algoritmus Divide and Conquer využívá modul \emph{v.delaunay}, o kterém bude
 \newpage
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.5\textwidth, angle=90]{img/merge.jpg}
+\includegraphics[width=0.8\textwidth]{img/merge.png}
 \caption{Propojování dílčích triangulací, zdroj: \cite{triangulation}}
 \label{fig:merge}
 \end{figure}
@@ -517,7 +517,7 @@ Existuje mnoho různých datových struktur pro uložení topologických informa
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.9\textwidth]{img/struct_triangulace.png}
+\includegraphics[width=0.6\textwidth]{img/data_struct.png}
 \caption{Příklad jednoduché triangulace}
 \label{fig:struct_triangulace}
 \end{figure}
@@ -532,12 +532,12 @@ Tato struktura ukládá informace v nejjednodušší podobě. Pracuje pouze s tr
 \hline
 \multirow{2}{*}{Trojúhelník} & \multicolumn{3}{c|}{Vrcholy} \\ \cline{2-4} 
                              & i        & j       & k       \\ \hline \hline
-1                            & 4        & 6       & 5       \\ \hline
-2                            & 7        & 6       & 4       \\ \hline
-3                            & 1        & 6       & 7       \\ \hline
-4                            & 2        & 7       & 4       \\ \hline
-5                            & 2        & 4       & 3       \\ \hline
-6                            & 2        & 1       & 7       \\ \hline
+1                            & 1        & 7       & 2       \\ \hline
+2                            & 2        & 7       & 4       \\ \hline
+3                            & 2        & 4       & 3       \\ \hline
+4                            & 7        & 6       & 4       \\ \hline
+5                            & 4        & 6       & 5       \\ \hline
+6                            & 7        & 1       & 6       \\ \hline
 \end{tabular}
 \caption{Jednoduchá trojúhelníková struktura}
 \label{tab:troj_struktura_simple}
@@ -555,12 +555,12 @@ Tato struktura přináší rozšíření o informaci, s kterými trojúhelníky 
 \hline
 \multirow{2}{*}{Trojúhelník} & \multicolumn{3}{|c|}{Vrcholy} & \multicolumn{3}{|c|}{Sousedé}      \\ \cline{2-7} 
                              & i        & j       & k       & $t_{j,k}$ & $t_{k,i}$ & $t_{i,j}$ \\ \hline \hline
-1                            & 4        & 6       & 5       & -         & -         & 2         \\ \hline
-2                            & 7        & 6       & 4       & 1         & 4         & 3         \\ \hline
-3                            & 1        & 6       & 7       & 2         & 6         & -         \\ \hline
-4                            & 2        & 7       & 4       & 2         & 5         & 6         \\ \hline
-5                            & 2        & 4       & 3       & -         & -         & 4         \\ \hline
-6                            & 2        & 1       & 7       & 3         & 4         & -         \\ \hline
+1                            & 1        & 7       & 2       & 2         & -         & 6         \\ \hline
+2                            & 2        & 7       & 4       & 4         & 3         & 1         \\ \hline
+3                            & 2        & 4       & 3       & -         & -         & 2         \\ \hline
+4                            & 7        & 6       & 4       & 5         & 2         & 6         \\ \hline
+5                            & 4        & 6       & 5       & -         & -         & 4         \\ \hline
+6                            & 7        & 1       & 6       & -         & 4         & 1         \\ \hline
 \end{tabular}
 \caption{Trojúhelníková struktura se sousedy}
 \label{tab:troj_strukt_sous}
@@ -589,7 +589,7 @@ Vrchol & \multicolumn{6}{|c|}{Sousední vrcholy} & Suma vrcholů \\ \hline \hlin
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.6\textwidth, angle=90]{img/pseudo_node.jpg}
+\includegraphics[width=0.4\textwidth]{img/pseudo_node.png}
 \caption{Datová struktura s použitím pseudo-uzlu, zdroj: \cite{triangulation}}
 \label{fig:pseudo_node}
 \end{figure}
@@ -611,7 +611,7 @@ Z half-edge struktury je možné odvodit mnohé jiné příbuzné struktury obsa
 \newpage
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.35\textwidth, angle=90]{img/half_edge.jpg}
+\includegraphics[width=0.8\textwidth]{img/half_edge2.png}
 \caption{Half-edge struktura, zdroj: \cite{triangulation}}
 \label{fig:half_edge_scan}
 \end{figure}
@@ -664,7 +664,7 @@ Dart-based datová struktura nabízí extrémně rychlé procházení topologie 
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.3\textwidth, angle=90]{img/iterators.jpg}
+\includegraphics[width=0.8\textwidth]{img/iterators.png}
 \caption{$\alpha-iterátory $, zdroj: \cite{triangulation}}
 \label{fig:iterators}
 \end{figure}
@@ -672,7 +672,7 @@ Dart-based datová struktura nabízí extrémně rychlé procházení topologie 
 \newpage
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.5\textwidth, angle=90]{img/dart_struct.jpg}
+\includegraphics[width=0.8\textwidth]{img/dart_struct.png}
 \caption{Dart-based datová struktura, zdroj: \cite{triangulation}}
 \label{fig:dart_struct}
 \end{figure}
@@ -1120,13 +1120,11 @@ SOCHOR, Jiří; Žára, Jiří. \textit{Algoritmy počítačové grafiky}. Praha
 
 \bibitem{script}
 GRASS Development Team. \textit{GRASS 7 Programmer's Manual} [online].
-c2000-2011, generated on Sat Apr 16 2011 [cit. 2011-03-19].
 URL: \textless\url{http://grass.osgeo.org/programming7}\textgreater
 
 
 \bibitem{trac}
-\textit{GRASS GIS Tracker and Wiki} [online]. Last modified 12 April 2011
-[cit. 2011-04-20].
+\textit{GRASS GIS Tracker and Wiki} [online]. 
 URL: \textless\url{http://trac.osgeo.org/grass}\textgreater
 
 
@@ -1151,6 +1149,11 @@ BAYER, Tomáš. \textit{Voronoi diagram} [online].
 URL: \textless\url{https://web.natur.cuni.cz/~bayertom/Adk/adk5.pdf}
 \textgreater
 
+\bibitem{Kohout}
+KOHOUT, Josef. \textit{Paralelní Delaunayova triangulace
+ve 2D a 3D} [online].
+URL: \textless\url{http://graphics.zcu.cz/files/DP_2002_Kohout_Josef.pdf}
+\textgreater
 
 \end{thebibliography}
 
