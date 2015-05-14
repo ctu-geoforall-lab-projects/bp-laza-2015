@@ -12,6 +12,9 @@
 \usepackage{todonotes}
 \usepackage{floatrow}
 \usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
 
 \usepackage{listings}			%vkladani kodu
 \lstset{basicstyle=\ttfamily,
@@ -104,7 +107,7 @@ Tato práce se zabývá interpolací přirozeného souseda a její implementací
 
 V současné době je interpolace metodou přirozeného souseda prováděna pomocí modulů \emph{v.surf.nnbathy} a \emph{r.surf.nnbathy} z rozšíření Add-Ons, které jsou navíc napsané v Bashi. Tyto moduly jsou však podporované pouze pro GRASS GIS do verze 6. Od 22. února 2015 ovšem byla uvolněná verze 7, která nepodporuje moduly psané v Bashi. Jako první krok, je tedy nutné moduly přepsat do podporovaného jazyka- Pythonu. 
 
-\bigskip
+\newpage
 Dále je třeba zjistit, jak postupovat, aby mohl být interpolační nástroj začleněn do oficiální distribuce GRASS GISu. Jednou z cest by mohlo být zbavení se závislosti knihovny \emph{nn-c}, která provádí samotnou interpolaci, na knihovně \emph{Triangle}, která konstruuje Delaunayovu triangulaci, ale kterou kvůli nevyhovující licenci není možné použít do standardní distribuce GRASS GISu. V tomto případě je nutné vyzkoumat, jaké nástroje by mohly knihovnu \emph{Triangle} nahradit. Bude zjištěno jaké prostředky má k dispozici samotný GRASS GIS, nebo zda je možné použít nějaký jiný open source nástroj, který by triangulaci provedl.
 
 Jako další cesta se jeví možnost využítí knihovny \emph{CGAL}. Tato knihovna už přímo v sobě obsahuje jak Delaunayovu triangulaci, tak samotnou interpolaci. Knihovna \emph{CGAL} je špička v oblasti výpočetní geomterie a o jejím začlenění do GRASS GISu už se uvažuje.
@@ -155,32 +158,35 @@ V našem případě budeme triangulaci provádět uvnitř takzvaného \emph{konv
 \subsection{Validní a regulérní triangulace}
 V podstatě by se dalo říct, že triangulace je jakákoliv trojúhelníkoví síť mezi body v prostoru. Tato práce se však bude zabývat triangulační sítí se specifickými vlastnostmi.
 
-1. Žádný z trojúhelníků $t_{ijk}$ není zdegenerovaný, tzn. že vrcholy $i, j, k$ neleží na přímce.
+\begin{itemize}
+\item Žádný z trojúhelníků $t_{ijk}$ není zdegenerovaný, tzn. že vrcholy $i, j, k$ neleží na přímce.
+\end{itemize}
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/podm_1.png}
 \caption{Degenerace trojúhelníku}
 \label{fig:podm_1}
 \end{figure}
-
-2. Žádná dvojice trojúhelníků se nepřekrývá, tzn $Int(t_{ijk}) \cap Int(t_{lmn}) = \emptyset$.
+\begin{itemize}
+\item Žádná dvojice trojúhelníků se nepřekrývá, tzn $Int(t_{ijk}) \cap Int(t_{lmn}) = \emptyset$.
+\end{itemize}
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.25\textwidth]{img/podm_2.png}
 \caption{Překrývající se trojúhelníky}
 \label{fig:podm_2}
 \end{figure}
+\begin{itemize}
+\item Hranice dvou trojúhelníků se setkávají pouze na jejich hranách nebo v jejich vrcholech.
 
-3. Hranice dvou trojúhelníků se setkávají pouze na jejich hranách nebo v jejich vrcholech.
+\item Sjednocení všech trojúhelníků v celé triangulační síti se rovná celé doméně $\Omega$, nad kterou triangulaci provádíme.
 
-4. Sjednocení všech trojúhelníků v celé triangulační síti se rovná celé doméně $\Omega$, nad kterou triangulaci provádíme.
+\item Doména $\Omega$ musí být spojitá.
 
-5. Doména $\Omega$ musí být spojitá.
+\item Triangulační síť nesmí obsahovat díry.
 
-6. Triangulační síť nesmí obsahovat díry.
-
-7. Jestliže vrchol $v_i$ leží na hranici konvexního obalu, pak musí existovat právě dvě hraniční hrany, které mají vrchol $v_i$ jako společný vrchol. To mimo jiné znamená, že počet hraničních vrcholů je roven počtu hraničních hran.
-
+\item Jestliže vrchol $v_i$ leží na hranici konvexního obalu, pak musí existovat právě dvě hraniční hrany, které mají vrchol $v_i$ jako společný vrchol. To mimo jiné znamená, že počet hraničních vrcholů je roven počtu hraničních hran.
+\end{itemize}
 \bigskip
 Pokud jsou naplněny první čtyři podmínky, může se triangulace nazvat \emph{validní}. V případě, že naplníme všech sedm podmínek, dá se mluvit o \emph{regulérní} triangulaci.
 
@@ -217,11 +223,11 @@ Triangulace na Obrázku \ref{fig:train_not_valid} není validní, protože nespl
 \label{fig:triangulace}
 \end{figure}
 
-Na Obrázku \ref{fig:triangulace} už můžeme vidět validní a regulérní triangulaci. Jedná se též o triangulaci \emph{optimální}, což je termín, kterým se budeme zabývat v kapitole \ref{chap:Optim_trian}.
+Na Obrázku \ref{fig:triangulace} už můžeme vidět validní a regulérní triangulaci. Jedná se též o triangulaci \emph{optimální}, což je termín, kterým se budeme zabývat v kapitole \ref{subsec:Optim_trian}.
 
 \newpage
 \subsection{Optimální triangulace}
-\label{chap:Optim_trian}
+\label{subsec:Optim_trian}
 
 Nad doménou $\Omega$ neexistuje pouze jediná trojúhelníková síť, v závislosti na počtu bodů v množině a jejich konfiguraci existuje poměrně velké množství možností, jak může trojúhelníková síť vypadat. Ne všechny sítě jsou však vhodné k dalšímu zpracovávání, a právě proto je snaha najít \emph{optimální} triangulaci.
 
@@ -292,7 +298,7 @@ Pro každou takovouto oblast přiřazenou bodu $p_i$ po té platí, že všechny
 
 \bigskip
 Voronoiův diagram má následující vlastnosti: 
-\begin{enumerate}
+\begin{itemize}
 \item Voronoiův diagram pro množinu bodů je pouze jeden.
 \item Všechny oblasti jsou konvexní.
 \item Oblast $V(p_i)$ obsahuje jediný bod $p_i \in P$.
@@ -300,7 +306,7 @@ Voronoiův diagram má následující vlastnosti:
 \item Počet hran a uzlů je přímo úměrný počtu bodů v množině P.
 \item Pokud žádné 4 body neleží na kružnici, uzly mají stupeň 3.
 \item Uzel leží ve středu kružnice určené 3 body z P, které leží v přilehlých oblastech a neleží na přímce.
-\end{enumerate}
+\end{itemize}
 
 Nechť $H(p_i,P_j)$ je polorovina obsahující všechny body v rovině, jejichž vzdálenost od bodu $p_i$ je menší než od bodu $p_j$. Potom Voronoiova oblast $V(p_i)$ je průnikem N-1 polorovin,
 $V(p_i)= \bigcap\limits_{\substack{j=1,...,N \\ i\not=j}}H(p_i,p_j)$, kde každá oblast má maximálně N-1 stran.
@@ -348,36 +354,30 @@ Triangulační algoritmy jsou poměrně dobře matematicky prozkoumaná oblast, 
 \end{itemize}
 Vhodný algoritmus je třeba vybírat na základe datových struktur a konkrétním případu. Ne vždy lze dokonale splnit všechny požadavky, např. jednoduché implementace mají delší výpočetní čas. Naopak algoritmy s kratším výpočetním časem jsou dost náročné na implementaci.
 
+\newpage
 \subsection{Lokální optimalizace}
 \emph{Lokální optimalizace (LO)} je proces přetvoření libovolné triangulace na DT. Proces je prováděn pomocí prohazování nelegálních hran v dvojicích trojúhelníků tvořících konvexní čtyřúhelník na základě Kruhové nebo MaxMin podmínky.
 
 Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čtyřúhelník tvořený dvěma trojúhelníky se společnou hranou $e_i$. Pomineme možnost, že čtyřúhelník je nekonvexní nebo že všechny body leží na kružnici. Po té za použití MaxMin nebo Kruhové podmínky rozhodněme, zda je třeba prohodit hranu $e_i$. V případě, že po použití Lokální optimalizace není potřeba prohodit hranu, můžeme ji prohlásit za lokálně optimální. V případě, že  budeme lokální optimalizaci používat opakovaně pro všechny hrany v triangulaci, dokud nebudou všechny hrany lokálně optimální, získáme optimální triangulaci.
 
-\todo[inline]{Jak psát pseudokód??}
-
-
-\hrule
-1. Vytvoř pomocnou triangulaci $\Delta(P)$.
-
-2. legal=false
-
-3. while $\Delta(P)$ !legal
-
-4.\indent legal=true;
-
-5.\indent Opakuj pro $\forall e_i \in \Delta(P)$
-
-6.\indent \indent Vezmi hranu $e_i \in \Delta(P)$
-
-7.\indent \indent Nalezni trojúhelníky $t_1,t_2$ incidující s $e_i$.
-
-8.\indent \indent if $(t_1 \cup t_2)$ konvexní a nelegální
-
-9.\indent \indent \indent  Legalize $(t_1,t_2)$
-
-10.\indent \indent \indent legal=false;
-\newline
-\hrule
+\begin{algorithm}
+\caption{LOP}
+\begin{algorithmic}[1]
+\State Vytvoř pomocnou triangulaci $\Delta(P)$
+\State legal=false
+\While{ $\Delta(P)$ != legal}
+	\State legal=true
+	\For{$\forall e_i \in \Delta(P)$}
+		\State Vezmi hranu $e_i \in \Delta(P)$
+		\State Nalezni trojúhelníky $t_1,t_2$ incidující s $e_i$.
+		\If {$(t_1 \cup t_2)$ je konvexní a nelegální}
+			\State Legalize $(t_1,t_2)$
+			\State legal=false
+		\EndIf
+	\EndFor
+\EndWhile	
+\end{algorithmic}
+\end{algorithm}
 
 \newpage
 \subsection{Paprskovitý algoritmus}
@@ -393,97 +393,46 @@ Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný postup, 
 
 \newpage
 \subsection{Algoritmus inkrementálního vkládání}
+\label{subsec:Inc_alg}
 
 Tento algoritmus je poměrně jednoduchý a snadný na implementaci, obzvlášť pokud je zvolena vhodná datová struktura. Jeho složitost je $0.(n^2)$, kterou lze úpravami zlepšit až na $0.(n.log(n))$. Tato metoda je tvořena třemi kroky. Na začátku je vytvořen konvexní obal množiny bodů $P$ a pro jeho lomové body se provede triangulace. Do vzniklé triangulace se postupně vkládají body z množiny $P$. Tato nově vzniklá triangulace nemusí být nutně DT a proto se provede ještě její legalizace.
 
-\bigskip
-\hrule
-1.  Vytvoření konvexního obalu $\Omega$ nad množinou bodů $P$.
-
-2.  Vytvoř DT pro lomové body konvexního obalu.
-
-3.  Opakuj pro $i \in 1,...,n$
-
-4.\indent  Přidej p do DT.
-
-5.\indent  Najdi trojúhelník $t$ s vrcholy $p_i, p_j, p_k$ takový, že $p \in t$
-
-6.\indent  Jestliže $p$ leží uvnitř $t$:
-
-7.\indent \indent Přidání hrany $\overline{p,p_i}$.
-
-8.\indent \indent Přidání hrany $\overline{p,p_j}$.
-
-9.\indent \indent Přidání hrany $\overline{p,p_k}$.
-
-10.\indent \indent Legalizace hrany $p,\overline{p_i,p_j},t$.
-
-11.\indent \indent Legalizace hrany $p,\overline{p_j,p_k},t$.
-
-12.\indent \indent Legalizace hrany $p,\overline{p_k,p_l},t$.
-
-13.\indent Jinak jestliže $p$ leží na hraně $p_i, p_j$ trojúhelníků $t_1, t_2$:
-
-14.\indent \indent Přidání hrany $\overline{p,p_i}$.
-
-15.\indent \indent Přidání hrany $\overline{p,p_j}$.
-
-16.\indent \indent Přidání hrany $\overline{p,p_k}$.
-
-17.\indent \indent Přidání hrany $\overline{p,p_l}$.
-
-18.\indent \indent Legalizace hrany $p,\overline{p_j,p_k},t$.
-
-19.\indent \indent Legalizace hrany $p,\overline{p_k,p_i},t$.
-
-20.\indent \indent Legalizace hrany $p,\overline{p_i,p_l},t$.
-
-21.\indent \indent Legalizace hrany $p,\overline{p_l,p_j},t$.
-\newline
-\hrule
+\begin{algorithm}
+\caption{Incremental algorithm}
+\begin{algorithmic}[1]
+\State Vytvoření konvexního obalu $\Omega$ nad množinou bodů $P$
+\State Vytvoř DT pro lomové body konvexního obalu
+\For{$i \in 1,...,n$}
+	\State Přidej p do DT
+	\State Najdi trojúhelník $t$ s vrcholy $p_i, p_j, p_k$ takový, že $p \in t$
+	\If {$p$ leží uvnitř $t$}
+		\State Přidání hrany $\overline{p,p_i}$
+		\State Přidání hrany $\overline{p,p_j}$
+		\State Přidání hrany $\overline{p,p_k}$
+		\State Legalizace hrany $p,\overline{p_i,p_j},t$
+		\State Legalizace hrany $p,\overline{p_j,p_k},t$
+		\State Legalizace hrany $p,\overline{p_k,p_l},t$
+	\ElsIf {$p$ leží na hraně $p_i, p_j$ trojúhelníků $t_1, t_2$}
+		\State Přidání hrany $\overline{p,p_i}$
+		\State Přidání hrany $\overline{p,p_j}$
+		\State Přidání hrany $\overline{p,p_k}$
+		\State Přidání hrany $\overline{p,p_l}$
+		\State Legalizace hrany $p,\overline{p_j,p_k},t$
+		\State Legalizace hrany $p,\overline{p_k,p_i},t$
+		\State Legalizace hrany $p,\overline{p_i,p_l},t$
+		\State Legalizace hrany $p,\overline{p_l,p_j},t$
+	\EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
 
 \newpage
 \subsection{Algoritmus inkrementální konstrukce (Step-by-Step)}
 
-Tento postup je založen na postupném přidávání bodů do již vytvořené DT, tvoří triangulaci postupně, trojúhelník po trojúhelníku. Na začátku jsou vybrány dva body$p_1, p_2$, které jsou sami sobě Voronoiovými sousedy a mezi nimi je vytvořena základní Delaunayova hrana $e$. K této hraně $e$ se hledá další bod 	$p$, tak aby vyhovoval kruhové podmínce a který společně s hranou $e$ vytvoří Delaunayův trojúhelník s vrcholy $p_1, p_2$ a $p$, který se zapíše do DT. Každá Delaunayovská hrana je orientována, bod $p$ hledáme pouze vlevo od ní. Pro konstrukci se používá modifikovaná datová struktura AEL (Active Edge List). Obsahuje hrany $e$, ke kterým hledáme body $p$, do struktury se neukládá topologický model (viz kapitola \ref{sec:data_struct}).
+Tento postup je založen na postupném přidávání bodů do již vytvořené DT, tvoří triangulaci postupně, trojúhelník po trojúhelníku. Na začátku jsou vybrány dva body $p_1, p_2$, které jsou sami sobě Voronoiovými sousedy a mezi nimi je vytvořena základní Delaunayova hrana $e$. K této hraně $e$ se hledá další bod 	$p$, tak aby vyhovoval kruhové podmínce a který společně s hranou $e$ vytvoří Delaunayův trojúhelník s vrcholy $p_1, p_2$ a $p$, který se zapíše do DT. Každá Delaunayovská hrana je orientována, bod $p$ hledáme pouze vlevo od ní. Pro konstrukci se používá modifikovaná datová struktura AEL (Active Edge List). Obsahuje hrany $e$, ke kterým hledáme body $p$, do struktury se neukládá topologický model, viz kapitola \ref{sec:data_struct}.
 
 Základní vlastnost toho postupu je, že se v každém kroku ke stávající triangulaci připojí další bod a triangulaci tak rozšíří. Vznikající triangulace je už v procesu tvoření Delaunayova a není tedy třeba žádné následující optimalizace.
 
-\bigskip
-\hrule
-1. $p_1$=náhodný bod z $P$, $p_2$=nejbližší bod k $p_1$.
-
-2. Vytvoř hranu $\overline{e=p_1p_2}$
-
-3. $p=d_D(e)$, bod s nejmenší Delaunay vzdáleností vlevo od $e$.
-
-4. Pokud $p=NULL$, prohod’ orientaci $\overline{e=p_1p_2} \Rightarrow \overline{e=p_2p_1}$.
-
-5. $e_2=\overline{p_2p}$, $e_3=\overline{pp_1}$.
-
-6. Add $e, e_2, e_3$ do AEL.
-
-7. while AEL not empty do:
-
-9.\indent  $e=\overline{p_1p_2}$ první hrana AEL.
-
-10.\indent  Změna orientace hrany $e=\overline{p_1p_2} \Rightarrow e=\overline{p_2p_1}$.
-
-11.\indent  Bod $p$ s nejmenší Delaunay vzdáleností $d_D(e)$ vlevo od $e$.
-
-12.\indent  if $p! =NULL:$
-
-13.\indent \indent $e_2=\overline{p_2p}, e_3=\overline{pp_1}$.
-
-14.\indent \indent Add $e, e_2, e_3$ do AEL.
-
-15.\indent \indent Add $e$ do DT.
-
-16.\indent pop(e)
-\newline
-\hrule
-
-\newpage
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.7\textwidth]{img/stepbystep.png}
@@ -492,7 +441,34 @@ Základní vlastnost toho postupu je, že se v každém kroku ke stávající tr
 \end{figure}
 
 \newpage
+\begin{algorithm}[h!]
+\caption{A step-by-step algorithm}
+\begin{algorithmic}[1]
+\State $p_1$=náhodný bod z $P$, $p_2$=nejbližší bod k $p_1$
+\State Vytvoř hranu $\overline{e=p_1p_2}$
+\State $p=d_D(e)$, bod s nejmenší Delaunay vzdáleností vlevo od $e$
+\If{$p=NULL}$
+	\State prohod’ orientaci $\overline{e=p_1p_2} \Rightarrow \overline{e=p_2p_1}$
+\EndIf
+\State $e_2=\overline{p_2p}$, $e_3=\overline{pp_1}$
+\State  Add $e, e_2, e_3$ do AEL
+\While {AEL not empty}
+	\State $e=\overline{p_1p_2}$ první hrana AEL
+	\State Změna orientace hrany $e=\overline{p_1p_2} \Rightarrow e=\overline{p_2p_1}$
+	\State Bod $p$ s nejmenší Delaunay vzdáleností $d_D(e)$ vlevo od $e$
+	\If {$p! =NULL$}
+		\State $e_2=\overline{p_2p}, e_3=\overline{pp_1}$
+		\State Add $e, e_2, e_3$ do AEL
+		\State Add $e$ do DT
+	\EndIf
+	\State pop(e)
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\newpage
 \subsection{Algoritmus Rozděl a panuj}
+\label{subsec:DnC_alg}
 
 Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovské triangulaci nabízí nejlepší výsledky, co se výkonnosti týče. Tento přístup je založený na jednoduchých krocích:
 
@@ -509,7 +485,7 @@ Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovs
 3. Připojení ke stávající triangulaci a její legalizace na Delaunayovskou. Právě propojování podmnožin na jednotlivých vrstvách je nejnáročnější část tohoto algoritmu.
 
 \bigskip
-Algoritmus Divide and Conquer využívá modul \emph{v.delaunay}, o kterém budeme mluvit později, viz Kapitola \ref{chap:v.delaunay}.
+Algoritmus Divide and Conquer využívá modul \emph{v.delaunay}, o kterém budeme mluvit později, viz kapitola \ref{subsec:v.delaunay}.
 
 \newpage
 \begin{figure}[h!]
@@ -521,7 +497,8 @@ Algoritmus Divide and Conquer využívá modul \emph{v.delaunay}, o kterém bude
 
 
 \newpage
-\section{Datové struktury}\label{sec:data_struct}
+\section{Datové struktury}
+\label{sec:data_struct}
 
 Existuje mnoho různých datových struktur pro uložení topologických informací o triangulační síti. Každá nabízí nějaké výhody a uživatel většinou musí řešit dva problémy. Jednak požadavky na dostatečnou kapacitu pro uložení dat a pak dostatečnou efektivitu při získávání informací ze struktury.
 
@@ -606,6 +583,7 @@ Vrchol & \multicolumn{6}{|c|}{Sousední vrcholy} & Suma vrcholů \\ \hline \hlin
 
 \newpage
 \subsection{Half-edge datová struktura}
+\label{subsec:HE_struct}
 
 Tato struktura uchovává topologický model na základě orientovaných polovičních hran. Princip je rozdělit každou hranu na dvě orientované \emph{půl-hrany}, z nichž každá směřuje opačným směrem. Každému trojúhelníku můžeme tak přiřadit tři půl-hrany, které jsou orientované v protisměru hodinových ručiček. Každá půl-hrana začíná v \emph{počátečním vrcholu} a směřuje do \emph{cílového vrcholu}. V half-edge struktuře si každá půl-hrana uchovává pointer na svůj počáteční bod, na následující půl-hranu, patřící stejnému trojúhelníku a nakonec pointer na opačně orientovanou hranu, tzv. \emph{twin-edge}. Pointer na twin-edge hranu nemají pouze půl-hrany ležící na konvexním obalu triangulace.
 
@@ -616,7 +594,7 @@ Tato struktura uchovává topologický model na základě orientovaných polovi�
 \label{fig:half_edge}
 \end{figure}
 
-Z half-edge struktury je možné odvodit mnohé jiné příbuzné struktury obsahující další informace o topologii, které ulehčují procházení celou sítí při vyhledávání, ale zároveň zvyšují nároky na kapacitu. Mezi tyto příbuzné struktury patří například \emph{vertex-edge}, \emph{face-edge} nebo \emph{winged edge} datová struktura, kterou používá například modul \emph{v.delaunay}\ref{chap:v.delaunay} v GRASS GISu.
+Z half-edge struktury je možné odvodit mnohé jiné příbuzné struktury obsahující další informace o topologii, které ulehčují procházení celou sítí při vyhledávání, ale zároveň zvyšují nároky na kapacitu. Mezi tyto příbuzné struktury patří například \emph{vertex-edge}, \emph{face-edge} nebo \emph{winged edge} datová struktura, kterou používá například modul \emph{v.delaunay} v GRASS GISu, kapitola \ref{subsec:v.delaunay}.
 
 \newpage
 \begin{figure}[h!]
@@ -717,6 +695,7 @@ Interpolace metodou přirozeného souseda je deterministická interpolační met
 
 Pro výpočet vah využívá Voronoiových diagramů. Do VD pro měřené body vkládá body určené k interpolaci. Vložením nového bodu dojde v jeho okolí k přetvoření VD. K vypočtení váhy se používá jak VD před vložením bodu, tak VD po vložení bodu. Voronoiova buňka nově vloženého bodu překrývá několik buněk z původního VD. Právě tento překryv, který nově vložený bod "ukradne" z plochy původních buněk slouží k výpočtu váhy pro interpolaci.
 
+\subsection{Lineární interpolace}
 \bigskip
 Matematicky tedy můžeme zapsat:
 \newline
@@ -758,6 +737,8 @@ Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka "ukradla" n
 \label{fig:fig:canvas2}
 \end{figure}
 
+\subsection{Nelineární interpolace na základě gradientu}
+\todo[inline]{Konzultace doc. Mayer}
 
 \newpage	
 \part{Praktická část}
@@ -958,12 +939,10 @@ Výstupem modulu \emph{v.surf.nnbathy} je rastrová mapa.
 
 \newpage
 \subsection{OOP}
-V průběhu práce na přidání pythoního modulu \emph{v.surf.nnbathy} jsem zjistil, že v GRASS GISu verze 6 je k dispozici také bash modul \emph{r.surf.nnbathy}, který pracuje s rastrovými daty. Jelikož větší část kódu byla pro moduly v.surf.nnbathy a r.surf.nnbathy společná, rozhodl jsem se hlavní výpočetní část spojit. Na místo dvou procedurálních modulů byla objektově vytvořena knihovna \emph{nnbathy.py} a dva moduly \emph{v.surf.nnabthy.py} pro vektorová data a \emph{r.surf.nnbathy.py} pro data rastrová, které knihovnu \emph{nnbathy} volají.
+V průběhu práce na přidání pythoního modulu \emph{v.surf.nnbathy} bylo zjištěno, že v GRASS GISu verze 6 je k dispozici také bash modul \emph{r.surf.nnbathy}, který pracuje s rastrovými daty. Jelikož větší část kódu byla pro moduly v.surf.nnbathy a r.surf.nnbathy společná, byla hlavní výpočetní část spojena. Na místo dvou procedurálních modulů byla objektově vytvořena knihovna \emph{nnbathy.py} a dva moduly \emph{v.surf.nnabthy.py} pro vektorová data a \emph{r.surf.nnbathy.py} pro data rastrová, které knihovnu \emph{nnbathy} volají.
 
 \subsubsection{v.surf.nnbathy}
 V objektově orientovaném modulu pro vektorová data, tak zůstaly úvodní část, která automaticky generuje GUI, úvodní vstupní kontroly a dále if podmínka, která vyhodnocovala, zda vstupují vektorová data v podobě vektorové mapy nebo ASCII souboru.
-
-
 
 \subsubsection{r.surf.nnbathy}
 Modul \emph{r.surf.nnbathy} pracuje na podobném principu jako modul \emph{v.surf.nnbathy}, jen pro rastrová data. Při volání je možnost použít méně parametrů.
@@ -980,7 +959,7 @@ I v tomto modulu zůstala část, která vytváří GUI. Protože ale modul prac
 \subsubsection{nnbathy}
 V knihovně nnbathy, které oba moduly volají tedy zůstala hlavní výpočetní část kódu. 
 
-\paragraph{Rodičovská třída Nnbathy} V rodičovské třídě NNbathy bylo vytvořeno několik objektů, které přebraly funkce jednotlivých procedur z předchozího kódu. Navíc byly vytvořeny tyto objekty:
+\paragraph{Rodičovská třída Nnbathy} V rodičovské třídě Nnbathy bylo vytvořeno několik objektů, které přebraly funkce jednotlivých procedur z předchozího kódu. Navíc byly vytvořeny tyto objekty:
 
 \paragraph{Objekt \_\_init\_\_}
 V tomto objektu se inicializují dočasné soubory a volá objekt region().
@@ -1015,16 +994,14 @@ Cílem do budoucna však není nechat tyto moduly pouze v rámci Add-Ons. Jeliko
 \subsection{Knihovna Triangle}
 Knihovna Triangle verze 1.4\footnote{http://www.cs.cmu.edu/~quake/triangle.html} byla napsaná Jonathanem Richardem Shewchuk v roce 2002. Je distribuována pod licencí MIT, která nedovoluje začlenění do oficiální distribuce GRASS GISu. V programu \emph{nnbathy} má na starosti Delaunayovu trinagulaci. Je tedy třeba najít vhodný způsob, jak tuto knihovnu nahradit.
 
-Triangle pro tvorbu triangulace využívá Divide and Conquer algoritmu v kombinaci Inkrementálním algoritmem. Pro ukládání dat využívá svoji vlastní, poměrně obsáhlou datovou strukturu \emph{delaunay}, do které si ukládá hraniční body regionu, všechny body triangulace, všechny trojúhelníky s hranami a jejich opsanými kružnicemi, včetně jejich sousedů. 
+Triangle pro tvorbu triangulace využívá Divide and Conquer algoritmus, viz kapitola \ref{subsec:DnC_alg}, v kombinaci s Inkrementálním algoritmem, kapitola \ref{subsec:Inc_alg}. Pro ukládání dat využívá svoji vlastní, poměrně obsáhlou datovou strukturu \emph{delaunay}, do které si ukládá hraniční body regionu, všechny body triangulace, všechny trojúhelníky s hranami a jejich opsanými kružnicemi, včetně jejich sousedů. 
+\todo[inline]{odkaz do příloh}
 
 Tuto datovou strukturu delaunay dále využívá i samotný program \emph{nnbathy}, který provádí interpolaci metodou přirozeného souseda. Právě převod na tuto datovou strukturu bude v budoucnosti klíčový v případě, že se podaří najít vhodný triangulační nástroj, který nahradí knihovnu Triangle.
 
-\subsection{Knihovna CGAL}
-Knihovna CGAL (The Computational Geometry Algorithms Library) je projekt, který poskytuje snadný přístup k efektivním a spolehlivým geometrickým algoritmům ve formě C++ knihovny. CGAL se používá v různých oblastech, které potřebují geometrické výpočty, jako např. v GISech, CADu, molekulární biologii, počítačové grafice a robotice. Jeden z jeho balíčků se přímo zabývá interpolací a nabízí funkce pro výpočet souřadnic přirozeného souseda. Tato knihovna je třeba ještě dále prozkoumat a zjistit její možnosti, neboť možnost její budoucí implementace do GRASS GISu se nejeví nereálně.
-
 \newpage
 \subsection{Modul \emph{v.delaunay}}
-\label{chap:v.delaunay}
+\label{subsec:v.delaunay}
 Modul \emph{v.delaunay}\footnote{http://grass.osgeo.org/grass71/manuals/v.delaunay.html} je součást oficiální distribuce GRASS GISu. Tento modul poskytuje Delaunayovu triangulaci nad vektorovou mapou s body nebo centroidy. 
 
 Ovládání modulu je velmi jednoduché na výběr máme pouze z několika flagů a několika paramatrů:
@@ -1049,10 +1026,13 @@ v.delaunay input=elev_lid792_randpts output=elev_lid792_randpts_delaunay
 
 \todo[inline]{Vložit obrázek bodů a triangulace}
 
-Pro vytvoření triangulace používá modul algoritmus Rozděl a panuj. Data ukládá do datové struktury half-edge. Z hlediska rychlosti se tento modul jeví jako adekvátní náhrada za knihovnu Triangle. Při testech bylo dokázáno, že pro náhodné konfigurace miliónu bodů dokáže triangulaci provést za méně než 15 s, což se jeví jako dostatečně efektivní.
+Pro vytvoření triangulace používá modul algoritmus Rozděl a panuj, viz kapitola \ref{subsec:DnC_alg}. Data ukládá do datové struktury winged-edge, kapitola \ref{subsec:HE_struct}. Z hlediska rychlosti se tento modul jeví jako adekvátní náhrada za knihovnu Triangle. Při testech bylo dokázáno, že pro náhodné konfigurace miliónu bodů dokáže triangulaci provést za méně než 15 s, což se jeví jako dostatečně efektivní.
 
 Zbývající otázkou pro jeho použití do budoucnosti je tedy převod datové struktury half-edge na datovou strukturu, kterou využívá program nnbathy, tedy strukturu delaunay.
 
+
+\subsection{Knihovna CGAL}
+Knihovna CGAL (The Computational Geometry Algorithms Library)\footnote{http://www.cgal.org/} je projekt, který poskytuje snadný přístup k efektivním a spolehlivým geometrickým algoritmům ve formě C++ knihovny. CGAL se používá v různých oblastech, které potřebují geometrické výpočty, jako např. v GISech, CADu, molekulární biologii, počítačové grafice a robotice. Jeden z jeho balíčků se přímo zabývá interpolací a nabízí funkce pro výpočet souřadnic přirozeného souseda. Tato knihovna je třeba ještě dále prozkoumat a zjistit její možnosti, neboť možnost její budoucí implementace do GRASS GISu se nejeví nereálně.
 
 \newpage
 \section{Srovnání GRASS GIS a ArcGIS}
