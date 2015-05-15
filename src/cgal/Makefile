@@ -1,4 +1,4 @@
-MODULE_TOPDIR = ../..
+MODULE_TOPDIR = /home/adam/src/grass_trunk/dist.x86_64-unknown-linux-gnu
 
 PGM = v.surf.nn
 

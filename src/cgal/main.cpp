@@ -26,10 +26,9 @@ extern "C" {
 
 int main(int argc, char *argv[])
 {
-    int type;  /* line or face */
     int field;
-    unsigned int npoints, nvertices;
-    
+    int npoints;
+
     struct GModule *module;
     
     struct {
@@ -58,14 +57,9 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    if (flag.line->answer)
-	type = GV_LINE;
-    else
-	type = GV_FACE;
-
     /* open input map */
     Vect_open_old2(&In, opt.input->answer, "", opt.field->answer);
-    Vect_set_error_handler_io(&In, &Out);
+    Vect_set_error_handler_io(&In, NULL);
 
     field = Vect_get_field_number(&In, opt.field->answer);
     
