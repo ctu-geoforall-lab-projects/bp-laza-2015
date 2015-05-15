@@ -1,0 +1,70 @@
+\select@language {english}
+\select@language {english}
+\select@language {czech}
+\contentsline {section}{\IeC {\'U}vod}{7}{section*.2}
+\contentsline {part}{I\hspace {1em}Teoretick\IeC {\'a} \IeC {\v c}\IeC {\'a}st}{9}{part.1}
+\contentsline {section}{\numberline {1}GRASS GIS}{10}{section.1}
+\contentsline {subsection}{\numberline {1.1}GRASS GIS Add-Ons}{10}{subsection.1.1}
+\contentsline {section}{\numberline {2}Delaunayova triangulace}{11}{section.2}
+\contentsline {subsection}{\numberline {2.1}Triangulace obecn\IeC {\v e}}{11}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Validn\IeC {\'\i } a regul\IeC {\'e}rn\IeC {\'\i } triangulace}{13}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Optim\IeC {\'a}ln\IeC {\'\i } triangulace}{16}{subsection.2.3}
+\contentsline {paragraph}{Kruhov\IeC {\'a} podm\IeC {\'\i }nka}{16}{section*.4}
+\contentsline {paragraph}{MaxMin a MinMax \IeC {\'u}hlov\IeC {\'a} podm\IeC {\'\i }nka}{16}{section*.5}
+\contentsline {paragraph}{Neutr\IeC {\'a}ln\IeC {\'\i } p\IeC {\v r}\IeC {\'\i }pad pro MaxMin podm\IeC {\'\i }nku}{17}{section*.6}
+\contentsline {paragraph}{Edge swaping, legalizace}{18}{section*.7}
+\contentsline {paragraph}{Delaunayova triangulace}{18}{section*.8}
+\contentsline {subsection}{\numberline {2.4}Voronoiovy diagramy}{19}{subsection.2.4}
+\contentsline {subsection}{\numberline {2.5}Voronoiovy diagramy a Delaunayova triangulace}{21}{subsection.2.5}
+\contentsline {section}{\numberline {3}Algoritmy pro tvorbu DT}{22}{section.3}
+\contentsline {subsection}{\numberline {3.1}Lok\IeC {\'a}ln\IeC {\'\i } optimalizace}{23}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Paprskovit\IeC {\'y} algoritmus}{24}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Algoritmus inkrement\IeC {\'a}ln\IeC {\'\i }ho vkl\IeC {\'a}d\IeC {\'a}n\IeC {\'\i }}{25}{subsection.3.3}
+\contentsline {subsection}{\numberline {3.4}Algoritmus inkrement\IeC {\'a}ln\IeC {\'\i } konstrukce (Step-by-Step)}{26}{subsection.3.4}
+\contentsline {subsection}{\numberline {3.5}Algoritmus Rozd\IeC {\v e}l a panuj}{28}{subsection.3.5}
+\contentsline {section}{\numberline {4}Datov\IeC {\'e} struktury}{30}{section.4}
+\contentsline {subsection}{\numberline {4.1}Jednoduch\IeC {\'a} troj\IeC {\'u}heln\IeC {\'\i }kov\IeC {\'a} struktura}{31}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Troj\IeC {\'u}heln\IeC {\'\i }kov\IeC {\'a} struktura se sousedy}{31}{subsection.4.2}
+\contentsline {subsection}{\numberline {4.3}Vertex-based struktura se sousedy}{32}{subsection.4.3}
+\contentsline {subsection}{\numberline {4.4}Half-edge datov\IeC {\'a} struktura}{33}{subsection.4.4}
+\contentsline {subsection}{\numberline {4.5}Dart-based datov\IeC {\'a} struktura}{35}{subsection.4.5}
+\contentsline {section}{\numberline {5}Interpolace metodou p\IeC {\v r}irozen\IeC {\'e}ho souseda}{37}{section.5}
+\contentsline {subsection}{\numberline {5.1}Line\IeC {\'a}rn\IeC {\'\i } interpolace}{37}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}Neline\IeC {\'a}rn\IeC {\'\i } interpolace na z\IeC {\'a}klad\IeC {\v e} gradientu}{39}{subsection.5.2}
+\contentsline {part}{II\hspace {1em}Praktick\IeC {\'a} \IeC {\v c}\IeC {\'a}st}{40}{part.2}
+\contentsline {section}{\numberline {6}Postup \IeC {\v r}e\IeC {\v s}en\IeC {\'\i }}{41}{section.6}
+\contentsline {subsection}{\numberline {6.1}Bash}{41}{subsection.6.1}
+\contentsline {subsubsection}{\numberline {6.1.1}v.surf.nnbathy}{41}{subsubsection.6.1.1}
+\contentsline {subsection}{\numberline {6.2}Python}{43}{subsection.6.2}
+\contentsline {subsubsection}{\numberline {6.2.1}v.surf.nnbathy.py}{43}{subsubsection.6.2.1}
+\contentsline {paragraph}{Vstupn\IeC {\'\i } data}{43}{section*.10}
+\contentsline {paragraph}{Funkce region()}{44}{section*.11}
+\contentsline {paragraph}{Funkce initials\_controls()}{44}{section*.12}
+\contentsline {paragraph}{Funkce compute()}{45}{section*.13}
+\contentsline {paragraph}{Funkce convert()}{46}{section*.14}
+\contentsline {paragraph}{Funkce import\_to\_raster()}{48}{section*.15}
+\contentsline {paragraph}{V\IeC {\'y}stupn\IeC {\'\i } data}{48}{section*.16}
+\contentsline {subsection}{\numberline {6.3}OOP}{49}{subsection.6.3}
+\contentsline {subsubsection}{\numberline {6.3.1}v.surf.nnbathy}{49}{subsubsection.6.3.1}
+\contentsline {subsubsection}{\numberline {6.3.2}r.surf.nnbathy}{49}{subsubsection.6.3.2}
+\contentsline {subsubsection}{\numberline {6.3.3}nnbathy}{50}{subsubsection.6.3.3}
+\contentsline {paragraph}{Rodi\IeC {\v c}ovsk\IeC {\'a} t\IeC {\v r}\IeC {\'\i }da Nnbathy}{50}{section*.17}
+\contentsline {paragraph}{Objekt \_\_init\_\_}{50}{section*.18}
+\contentsline {paragraph}{Objekt \_\_del\_\_}{50}{section*.19}
+\contentsline {paragraph}{T\IeC {\v r}\IeC {\'\i }da Nnbathy\_raster}{50}{section*.20}
+\contentsline {paragraph}{T\IeC {\v r}\IeC {\'\i }da Nnbathy\_vector}{50}{section*.21}
+\contentsline {paragraph}{T\IeC {\v r}\IeC {\'\i }da Nnbathy\_file}{50}{section*.22}
+\contentsline {section}{\numberline {7}Mo\IeC {\v z}nosti budouc\IeC {\'\i } implementace}{51}{section.7}
+\contentsline {subsection}{\numberline {7.1}Knihovna Triangle}{52}{subsection.7.1}
+\contentsline {subsection}{\numberline {7.2}Modul \emph {v.delaunay}}{53}{subsection.7.2}
+\contentsline {subsection}{\numberline {7.3}Knihovna CGAL}{54}{subsection.7.3}
+\contentsline {section}{\numberline {8}Srovn\IeC {\'a}n\IeC {\'\i } GRASS GIS a ArcGIS}{55}{section.8}
+\contentsline {section}{Seznam pou\IeC {\v z}it\IeC {\'y}ch zkratek}{58}{section*.25}
+\contentsline {section}{Pou\IeC {\v z}it\IeC {\'e} zdroje}{59}{section*.27}
+\contentsline {section}{Seznam p\IeC {\v r}\IeC {\'\i }loh}{60}{section*.29}
+\ttl@starttoc {sections@1}
+\contentsline {section}{\numberline {A}Zdrojov\IeC {\'e} k\IeC {\'o}dy}{60}{appendix.A}
+\contentsline {subsection}{\numberline {A.1}nnbathy.py}{60}{subsection.A.1}
+\contentsline {subsection}{\numberline {A.2}v.surf.nnbathy.py}{64}{subsection.A.2}
+\contentsline {subsection}{\numberline {A.3}r.surf.nnbathy.py}{67}{subsection.A.3}
+\contentsfinish 

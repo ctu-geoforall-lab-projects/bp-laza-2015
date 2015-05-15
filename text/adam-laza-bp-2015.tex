@@ -15,6 +15,7 @@
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
+\usepackage{titletoc}
 
 \usepackage{listings}			%vkladani kodu
 \lstset{basicstyle=\ttfamily,
@@ -40,7 +41,6 @@ bottom=35mm]
 \parskip=0.8ex plus 0.4ex minus 0.1 ex	%mezera mezi odstavci
 
 \newcommand{\keywords}[2]{\noindent\textbf{#1: }#2}
-
 \newcommand{\necislovana}[1]{%
 \phantomsection
 \addcontentsline{toc}{section}{#1}
@@ -994,15 +994,14 @@ Cílem do budoucna však není nechat tyto moduly pouze v rámci Add-Ons. Jeliko
 \subsection{Knihovna Triangle}
 Knihovna Triangle verze 1.4\footnote{http://www.cs.cmu.edu/~quake/triangle.html} byla napsaná Jonathanem Richardem Shewchuk v roce 2002. Je distribuována pod licencí MIT, která nedovoluje začlenění do oficiální distribuce GRASS GISu. V programu \emph{nnbathy} má na starosti Delaunayovu trinagulaci. Je tedy třeba najít vhodný způsob, jak tuto knihovnu nahradit.
 
-Triangle pro tvorbu triangulace využívá Divide and Conquer algoritmus, viz kapitola \ref{subsec:DnC_alg}, v kombinaci s Inkrementálním algoritmem, kapitola \ref{subsec:Inc_alg}. Pro ukládání dat využívá svoji vlastní, poměrně obsáhlou datovou strukturu \emph{delaunay}, do které si ukládá hraniční body regionu, všechny body triangulace, všechny trojúhelníky s hranami a jejich opsanými kružnicemi, včetně jejich sousedů. 
-\todo[inline]{odkaz do příloh}
+Triangle pro tvorbu triangulace využívá Divide and Conquer algoritmus, viz kapitola \ref{subsec:DnC_alg}, v kombinaci s Inkrementálním algoritmem, kapitola \ref{subsec:Inc_alg}. Pro ukládání dat využívá svoji vlastní, poměrně obsáhlou datovou strukturu \emph{delaunay} (Příloha \ref{app:delaunay_struct}), do které si ukládá hraniční body regionu, všechny body triangulace, všechny trojúhelníky s hranami a jejich opsanými kružnicemi, včetně jejich sousedů. 
 
 Tuto datovou strukturu delaunay dále využívá i samotný program \emph{nnbathy}, který provádí interpolaci metodou přirozeného souseda. Právě převod na tuto datovou strukturu bude v budoucnosti klíčový v případě, že se podaří najít vhodný triangulační nástroj, který nahradí knihovnu Triangle.
 
 \newpage
 \subsection{Modul \emph{v.delaunay}}
 \label{subsec:v.delaunay}
-Modul \emph{v.delaunay}\footnote{http://grass.osgeo.org/grass71/manuals/v.delaunay.html} je součást oficiální distribuce GRASS GISu. Tento modul poskytuje Delaunayovu triangulaci nad vektorovou mapou s body nebo centroidy. 
+Modul \emph{v.delaunay}\footnote{http://grass.osgeo.org/grass71/manuals/v.delaunay.html} je součást oficiální distribuce GRASS GISu. Tento modul poskytuje Delaunayovu triangulaci nad vektorovou mapou s body nebo centroidy. Pro vytvoření triangulace používá modul algoritmus Rozděl a panuj, viz kapitola \ref{subsec:DnC_alg}. Data ukládá do datové struktury winged-edge, kapitola \ref{subsec:HE_struct}.
 
 Ovládání modulu je velmi jednoduché na výběr máme pouze z několika flagů a několika paramatrů:
 
@@ -1024,62 +1023,24 @@ Parametry:
 v.delaunay input=elev_lid792_randpts output=elev_lid792_randpts_delaunay
 \end{lstlisting}
 
-\todo[inline]{Vložit obrázek bodů a triangulace}
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/b20.png}}{\caption{Množina bodů pro triangulaci}}{\label{fig:b20}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/b20_del.png}}{\caption{Triangulace pomocí v.delaunay}}{\label{fig:b20_del}}
+\end{floatrow}
+\end{figure}
 
-Pro vytvoření triangulace používá modul algoritmus Rozděl a panuj, viz kapitola \ref{subsec:DnC_alg}. Data ukládá do datové struktury winged-edge, kapitola \ref{subsec:HE_struct}. Z hlediska rychlosti se tento modul jeví jako adekvátní náhrada za knihovnu Triangle. Při testech bylo dokázáno, že pro náhodné konfigurace miliónu bodů dokáže triangulaci provést za méně než 15 s, což se jeví jako dostatečně efektivní.
+\subsection{Převod mezi strukturami}
+Z hlediska rychlosti se modul \emph{v.delaunay} jeví jako adekvátní náhrada za knihovnu Triangle. Při testech bylo dokázáno, že pro náhodné konfigurace miliónu bodů dokáže triangulaci provést za méně než 15 s, což se jeví jako dostatečně efektivní.
 
-Zbývající otázkou pro jeho použití do budoucnosti je tedy převod datové struktury half-edge na datovou strukturu, kterou využívá program nnbathy, tedy strukturu delaunay.
+Jako problémová se jeví část převodu dat mezi strukturami. \emph{Nnbathy} počítá interpolaci nad daty uloženými ve struktuře \emph{delaunay} (Příloha \ref{app:delaunay_struct}), která je poměrně netypická, protože data ukládá do polí za pomocí pointerů a indexů zároveň. 
+
+Nicméně naplnění struktury \emph{delaunay} možné je,  byť vyžaduje několikerý průchod přes všechny hrany triangulace. Na jeden průchod je možné získat celkový počet bodů \emph{n}, získat id jednotlivých trojúhelníků, id jejich vrcholů a vypočítat středy opsaných kružnic. Dále je nutné označit pro každý trojúhelník, jeho sousedy, tedy trojúhelníky, který s ním sdílí hranu. Opět je třeba projít celou triangulaci. Během tohoto průchodu je pravděpodobné, že se dostaneme k již zpracovanému trojúhelníku. Proto bude třeba vytvořit např. pomocný vektor typu boolean, do kterého se bude ukládat, zda trojúhelník už byl zpracován či nikoliv.
 
 
 \subsection{Knihovna CGAL}
 Knihovna CGAL (The Computational Geometry Algorithms Library)\footnote{http://www.cgal.org/} je projekt, který poskytuje snadný přístup k efektivním a spolehlivým geometrickým algoritmům ve formě C++ knihovny. CGAL se používá v různých oblastech, které potřebují geometrické výpočty, jako např. v GISech, CADu, molekulární biologii, počítačové grafice a robotice. Jeden z jeho balíčků se přímo zabývá interpolací a nabízí funkce pro výpočet souřadnic přirozeného souseda. Tato knihovna je třeba ještě dále prozkoumat a zjistit její možnosti, neboť možnost její budoucí implementace do GRASS GISu se nejeví nereálně.
-
-\newpage
-\section{Srovnání GRASS GIS a ArcGIS}
-
-V následující kapitole se budeme věnovat srovnání GRASS GISu a ArcGISu při interpolaci metodou přirozeného souseda. GRASS GIS bude zastupovat modul \emph{v.surf.nnbathy}, o kterém byla řeč v předchozích kapitolách. Za ArcGIS budeme zkoumat nástroj \emph{Natural Neighbour}, který se nachází v toolboxu Spatial Analyst. 
-
-Pro porovnání byly zvoleny tři situace. Na území o velikosti deset krát deset kilometrů, s rozlišením buňky deset metrů byly vygenerována bodová pole o počtu tisíc, sto tisíc a milion bodů. Nad těmito soubory byla po té provedena interpolace v obou softwarech. Interpolace byla pro každou datovou sadu provedena v deseti opakováních, výsledný čas je průměrem. Testy byly provedeny na notebooku HP Pavilion dv6000 s procesorem Intel\copyright  Core\texttrademark 2 Duo CPU T5550 @ 1.83GHz $\times$ 2 a RAM pamětí 4 GB. Výsledky jsou uvedeny v Tabulce \ref{tab:GRASSxArc}.
-
-\bigskip
-\begin{table}[h]
-\catcode`\-=12
-\begin{tabular}{|c|c|c|}
-\hline
-Počet bodů & GRASS GIS  & ArcGIS     \\ \hline
-1000       & 13,5 s     & 7,6 s      \\ \hline
-100000     & 58,9 s     & 14,1 s     \\ \hline
-1000000    & 8 min 25 s & 1 min 24 s \\ \hline
-\end{tabular}
-\caption{Porovnání časů}
-\label{tab:GRASSxArc}
-\end{table}
-
-\newpage
-\begin{figure}[h!]
-\centering
-\begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000.png}}{\caption{ArcGIS: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_Arc}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_grass}}
-\end{floatrow}
-\end{figure}
-
-\begin{figure}[h!]
-\centering
-\begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000.png}}{\caption{ArcGIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_Arc}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_grass}}
-\end{floatrow}
-\end{figure}
-
-\newpage
-\begin{figure}[h!]
-\centering
-\begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{ArcGIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_Arc}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_grass}}
-\end{floatrow}
-\end{figure}
 
 \newpage
 \necislovana{Seznam použitých zkratek}
@@ -1161,10 +1122,71 @@ Wikipedie\textit{Boris Delaunay} [online].
 URL: \textless\url{http://en.wikipedia.org/wiki/Boris_Delaunay}
 \textgreater
 
-
 \end{thebibliography}
 
+\appendix
+\newpage
+\section{Srovnání GRASS GIS a ArcGIS}
 
+V následující kapitole se budeme věnovat srovnání GRASS GISu a ArcGISu při interpolaci metodou přirozeného souseda. GRASS GIS bude zastupovat modul \emph{v.surf.nnbathy}, o kterém byla řeč v předchozích kapitolách. Za ArcGIS budeme zkoumat nástroj \emph{Natural Neighbour}, který se nachází v toolboxu Spatial Analyst. 
+
+Pro porovnání byly zvoleny tři situace. Na území o velikosti deset krát deset kilometrů, s rozlišením buňky deset metrů byly vygenerována bodová pole o počtu tisíc, sto tisíc a milion bodů. Nad těmito soubory byla po té provedena interpolace v obou softwarech. Interpolace byla pro každou datovou sadu provedena v deseti opakováních, výsledný čas je průměrem. Testy byly provedeny na notebooku HP Pavilion dv6000 s procesorem Intel\copyright  Core\texttrademark 2 Duo CPU T5550 @ 1.83GHz $\times$ 2 a RAM pamětí 4 GB. Výsledky jsou uvedeny v Tabulce \ref{tab:GRASSxArc}.
+
+\bigskip
+\begin{table}[h]
+\catcode`\-=12
+\begin{tabular}{|c|c|c|}
+\hline
+Počet bodů & GRASS GIS  & ArcGIS     \\ \hline
+1000       & 13,5 s     & 7,6 s      \\ \hline
+100000     & 58,9 s     & 14,1 s     \\ \hline
+1000000    & 8 min 25 s & 1 min 24 s \\ \hline
+\end{tabular}
+\caption{Porovnání časů}
+\label{tab:GRASSxArc}
+\end{table}
+
+\newpage
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000.png}}{\caption{ArcGIS: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_grass}}
+\end{floatrow}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000.png}}{\caption{ArcGIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_grass}}
+\end{floatrow}
+\end{figure}
+
+\newpage
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{ArcGIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_grass}}
+\end{floatrow}
+\end{figure}
+
+\newpage
+\section{Delaunay struktura}
+\label{app:delaunay_struct}
+\lstinputlisting[language=C]{../src/delaunay_struct.h}
+
+\newpage
+\section{Zdrojové kódy}
+\subsection{nnbathy.py}
+\lstinputlisting[language=Python]{../src/nnbathy.py}
+\newpage
+\subsection{v.surf.nnbathy.py}
+\lstinputlisting[language=Python]{../src/v.surf.nnbathy.py}
+\newpage
+\subsection{r.surf.nnbathy.py}
+\lstinputlisting[language=Python]{../src/r.surf.nnbathy.py}
 
 
 
