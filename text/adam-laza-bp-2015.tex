@@ -68,6 +68,9 @@ bottom=35mm]
 \input{titulbp}
 
 \newpage
+\todo[inline]{Zde vložit oskenované zadání}
+
+\newpage
 \begin{abstract}
 \bigskip
 Cílem této bakalářské práce je návrh a implementace nástroje pro interpolaci metodou přirozeného souseda pro GRASS GIS 7. Starší verze GRASS GIS 6 sice tuto metodu nabízí v rámci volitelně doinstalovatelných balíčků Add-Ons, ale jako modul napsaný v Bashi a s vnitřní závislostí na knihovně \emph{nn-c}. Tato knihovna obsahuje knihovnu \emph{Triangle}, která nedovoluje zařazení tohoto nástroje do oficiální distribuce GRASS GISu.
@@ -91,6 +94,39 @@ The aim of this bachelor thesis is the project and the implementation of a tool 
 \end{abstract}
 \selectlanguage{czech}
 
+
+%%%%Prohlaseni a podekovani
+\newcommand{\odsaditodzhora}{\hskip1pt\vfill}
+\newpage
+\odsaditodzhora
+\noindent Prohlášení
+
+Prohlašuji, že bakalářskou práci na téma „Implementace nástroje pro interpolaci metodou přirozeného souseda do GRASS GIS“ jsem vypracoval samostatně. Pou\-žitou
+literaturu a podkladové materiály uvádím v seznamu
+zdrojů.
+
+
+\begin{flushleft}
+\begin{tabular}{cp{0.3\textwidth}c}
+V Praze dne .................
+& 
+&
+..................................
+\\
+&&
+(podpis autora)
+\end{tabular}
+
+\end{flushleft}
+\newpage
+
+\odsaditodzhora
+\noindent Poděkování
+
+Chtěl bych poděkovat mému vedoucímu bakalářské práce, Ing. Martinu Landovi, Ph.D., za 
+cenné rady a čas, který mi věnoval při konzultacích. Dále bych rád poděkoval své rodině, přátelům a okolí za podporu po celou dobu studia.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \newpage
 \tableofcontents
 
@@ -103,7 +139,7 @@ V reálném životě se většinou nesetkáváme s případem, kdy pro naši obl
 Obvykle ovšem potřebujeme znát hodnotu daného jevu i mimo měřené body, nejčastěji pro celé zájmové území. V takovéto chvíli se musíme použít nějaký interpolační nástroj, který vypočte přibližnou hodnotu v území mezi měřenými body. Jako příklad může být uvedeno vytvoření výškopisu, či DMT pro území, kde máme k dispozici data o výšce v pravidelné mřížce nebo teplotní mapa na základě údajů z nepravidelně rozmístěných meteostanic.
 
 \bigskip
-Tato práce se zabývá interpolací přirozeného souseda a její implementací do GRASS GISu 7.\footnote{\url{http://grass.osgeo.org}} Toto téma Bakalářské práce jsem si vybral z několika důvodů. Za prvé, mě zajímají geografické informační systémy, zejména pak open-source projekty. Dle mého názoru je to právě cesta open-source softwarů, kterou se budou v~budoucnosti soukromé firmy, vývoj a věda ubírat, a je proto dobré s nimi získávat zkušenost už během studia. Za druhé, práce na tomto tématu mi umožnila proniknout do GISů nejen z pohledu uživatele, ale přiučit se alespoň elementární základy jako vývojář. A za třetí, interpolace metodou přirozeného souseda je nástroj, který poskytuje kvalitní výstupy, a jeho začlenění do standardní distribuce GRASS GISu by mohlo být hojně využito.
+Tato práce se zabývá interpolací přirozeného souseda a její implementací do GRASS GISu 7.\footnote{\url{http://grass.osgeo.org}} Toto téma bakalářské práce jsem si vybral z několika důvodů. Za prvé, mě zajímají geografické informační systémy, zejména pak open-source projekty. Dle mého názoru je to právě cesta open-source softwarů, kterou se budou v~budoucnosti soukromé firmy, vývoj a věda ubírat, a je proto dobré s nimi získávat zkušenost už během studia. Za druhé, práce na tomto tématu mi umožnila proniknout do GISů nejen z pohledu uživatele, ale přiučit se alespoň elementární základy jako vývojář. A za třetí, interpolace metodou přirozeného souseda je nástroj, který poskytuje kvalitní výstupy, a jeho začlenění do standardní distribuce GRASS GISu by mohlo být hojně využito.
 
 V současné době je interpolace metodou přirozeného souseda prováděna pomocí modulů \emph{v.surf.nnbathy} a \emph{r.surf.nnbathy} z rozšíření Add-Ons, které jsou navíc napsané v Bashi. Tyto moduly jsou však podporované pouze pro GRASS GIS do verze 6. Od 22. února 2015 ovšem byla uvolněná verze 7, která nepodporuje moduly psané v Bashi. Jako první krok, je tedy nutné moduly přepsat do podporovaného jazyka- Pythonu. 
 
@@ -124,7 +160,7 @@ Historie\cite{rukovet} GRASS GISu začíná v roce 1982, kdy začal být vyvíje
 GRASS je jeden z nejznámějších open-source GIS softwarů, jehož vývoj trvá déle než třicet let. Jádro softwaru je napsáno v jazyce C. Avšak snahou vývojářů je rozšíření GRASSu mezi širší odbornou veřejnost a proto v rámci snadnějšího použití jsou do programu začleněny moduly napsané v jazyce Python nebo C. Aktuálně je k dispozici verze 7, na jejímž vývoji se podílí několik vývojářů z řad dobrovolníků po celém světe.
 
 \subsection{GRASS GIS Add-Ons}
-GRASS GIS je od roku 1982 v neustálem vývoji. Síla a úspěch GRASS GISu je založená hlavně na komunitě uživatelů. S ohledem na to, je filozofií vývojového týmu GRASS GISu vést uživatele k tvorbě jejich vlastních nástrojů a aplikaci pro GRASS GIS. Pokud uživatel vyvine nějaký nástroj, který by mohl být užitečný ostatním uživatelům má možnost svůj kód zveřejnit a zpřístupnit ostatním uživatelům pomocí Add-Ons\footnote{http://grass.osgeo.org/download/addons/}.
+GRASS GIS je od roku 1982 v neustálem vývoji. Síla a úspěch GRASS GISu je založená hlavně na komunitě uživatelů. S ohledem na to, je filozofií vývojového týmu GRASS GISu vést uživatele k tvorbě jejich vlastních nástrojů a aplikací pro GRASS GIS. Pokud uživatel vyvine nějaký nástroj, který by mohl být užitečný ostatním uživatelům, má možnost svůj kód zveřejnit a zpřístupnit ostatním uživatelům pomocí Add-Ons\footnote{http://grass.osgeo.org/download/addons/}.
 
 \newpage
 \section{Delaunayova triangulace}
@@ -156,7 +192,7 @@ V našem případě budeme triangulaci provádět uvnitř takzvaného \emph{konv
 
 \newpage
 \subsection{Validní a regulérní triangulace}
-V podstatě by se dalo říct, že triangulace je jakákoliv trojúhelníkoví síť mezi body v prostoru. Tato práce se však bude zabývat triangulační sítí se specifickými vlastnostmi.
+V podstatě by se dalo říct, že triangulace je jakákoli trojúhelníková síť mezi body v prostoru. Tato práce se však bude zabývat triangulační sítí se specifickými vlastnostmi.
 
 \begin{itemize}
 \item Žádný z trojúhelníků $t_{ijk}$ není zdegenerovaný, tzn. že vrcholy $i, j, k$ neleží na přímce.
@@ -241,33 +277,35 @@ Nechť hrana $\overline{p_ip_j}$ inciduje s trojúhelníkem $t_1$ tvořeným vrc
 
 Pokud tedy bod $p_l$ leží uvnitř kružnice $k$, je hrana $\overline{p_ip_j}$ a tedy diagonála čtyřúhelníku nelegální, stejně tak jako oba trojúhelníky $t_1$ a $t_2$. K jejich legalizaci je provést tzv. \emph{Edge swaping}.
 
-\paragraph{MaxMin a MinMax úhlová podmínka}
+\paragraph{MaxMin a MinMax úhlová podmínka}\cite{TB1}
 
 Pokud nad množinou bodů P provedeme všechny možné triangulace, můžeme nejoptimálnější triangulaci určit pomocí MaxMin popř. MinMax podmínky. V případě MaxMin podmínky je pro každou možnou triangulaci nalezen největší minimální vnitřní úhel trojúhelníku a ten je porovnán s největším minimálním úhel ostatních triangulací, což vede k eliminaci trojúhelníků s velmi tupými úhly. U MinMax podmínky se postupuje obdobně, pouze se porovnávají nejmenší maximální vnitřní úhly trojúhelníků a eliminují se tak trojúhelníky s velmi ostrými úhly.
 
 \newpage
 MinMax podmínka:
 Eliminace trojúhelníků s příliš tupými úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl od triangulace $\Delta^{'}(P)$ optimální, je–li největší úhel $\alpha$ generovaný triangulací $\Delta(P)$ menší než největší úhel $\alpha^{'}$ generovaný triangulací $\Delta^{'}(P)$.
-
+\begin{center}
 $\alpha_{max} = max(\alpha_i(\Delta))$
 
 $\alpha^{'}_{max} = max(\alpha_i^{'}(\Delta))$
 
 $\alpha_{max} < \alpha^{'}_{max}$
+\end{center}
 
 \bigskip
 MaxMin podmínka:
 Eliminace trojúhelníků s příliš ostrými úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl od triangulace $\Delta^{'}(P)$ optimální, je–li nejmenší úhel $\alpha$ generovaný triangulací $\Delta(P)$ větší než nejmenší úhel $\alpha^{'}$ generovaný triangulací $\Delta^{'}(P)$.
-
+\begin{center}
 $\alpha_{min} = min(\alpha_i(\Delta))$
 
 $\alpha^{'}_{min} = min(\alpha_i^{'}(\Delta))$
 
 $\alpha_{min} > \alpha^{'}_{min}$
+\end{center}
 
 \paragraph{Neutrální případ pro MaxMin podmínku}
 
-Problém nastává ve chvíli, kdy některé body, mezi kterými chceme triangulaci provést, leží na kružnici nebo se tomu limitně blíží. v takových chvílí nastává takzvaný neutrální případ pro MaxMin podmínku. V některých případech to může vést k nejednoznačnému určení, která z triangulací je optimální a musíme si pomoci hodnocením na základě nejen MaxMin ale i MinMax podmínky.
+Problém nastává ve chvíli, kdy některé body, mezi kterými chceme triangulaci provést, leží na kružnici nebo se tomu limitně blíží. V takových chvílí nastává takzvaný neutrální případ pro MaxMin podmínku. V některých případech to může vést k nejednoznačnému určení, která z triangulací je optimální a musíme si pomoci hodnocením na základě nejen MaxMin ale i MinMax podmínky.
 
 \begin{figure}[h!]
 \centering
@@ -278,7 +316,7 @@ Problém nastává ve chvíli, kdy některé body, mezi kterými chceme triangul
 \end{figure}
 
 
-Nejčastěji tento jev nastává u čtyřúhelníků, jejichž všechny vrcholy leží na kružnici. Jak můžeme vidět na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2}, maximální minimální úhel triangulace je v obou případech úhel $\alpha$, což je obvodový úhel nejkratší strany čtyřúhelníku. V tomto případě se tedy jedná o neutrální případ pro MaxMin podmínku. Pokud bychom tedy triangulaci vyhodnocovali pouze na základě MaxMin podmínky mohly bychom obě triangulace prohlásit za optimální. Už od pohledu je ale zřejmé, že lepší tvar trojúhelníků poskytujeme triangulace nalevo. Pokud ale triangulace hodnotíme i s ohledem na MinMax podmínknu, můžeme prokázat, že triangulace na Obrázku \ref{fig:neutral_case_2} je optimální.
+Nejčastěji tento jev nastává u čtyřúhelníku, jehož všechny vrcholy leží na kružnici. Jak je vidět na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2}, maximální minimální úhel triangulace je v obou případech úhel $\alpha$, což je obvodový úhel nejkratší strany čtyřúhelníku. V tomto případě se jedná o neutrální případ pro MaxMin podmínku. Pokud by tedy triangulace byla hodnocena pouze na základě MaxMin podmínky, mohly by být obě triangulace prohlášeny za optimální. Už od pohledu je ale zřejmé, že lepší tvar trojúhelníků poskytujeme triangulace na Obrázku \ref{fig:neutral_case_1}. Pokud je ale triangulace hodnocena i s ohledem na MinMax podmínknu, je prokázáno, že triangulace na Obrázku \ref{fig:neutral_case_2} je optimální.
 
 
 \paragraph{Edge swaping, legalizace}
@@ -290,7 +328,7 @@ Triangulace, která je optimální dle Kruhové nebo MaxMin úhlové podmínky a
 \newpage
 \subsection{Voronoiovy diagramy}
 
-Voronoiovy diagramy úzce souvisí s Delaunayovou triangulací. Představme si opět množinu bodů $P = \{p_1,...p_N\} $ v rovině $E^2$ a nechť je $d(p_i,p_j) $ Eukleidovská vzdálenost mezi body $p_i$ a $p_j$. Rovinu po té rozdělíme na oblasti $V(p_i,...,p_N)$, kde každému bodu $p_i$ z množiny $P$ přiřadíme takovou oblast, která splňuje následující podmínku: 
+Voronoiovy diagramy souvisí s Delaunayovou triangulací. Představme si opět množinu bodů $P = \{p_1,...p_N\} $ v rovině $E^2$ a nechť je $d(p_i,p_j) $ Eukleidovská vzdálenost mezi body $p_i$ a $p_j$. Rovinu po té rozdělíme na oblasti $V(p_i,...,p_N)$, kde každému bodu $p_i$ z množiny $P$ přiřadíme takovou oblast, která splňuje následující podmínku: 
 
 $V(p_i) = \{ x: d(x, p_i) < d(x, p_j), j = 1,...,N\}$.
 
@@ -325,6 +363,7 @@ Občas se můžeme setkat i s označením \emph{Thiessenovy polygony} podle klim
 
 \newpage
 \subsection{Voronoiovy diagramy a Delaunayova triangulace}
+\label{sub:VDaDT}
 
 DT je planární graf, který je duální k VD. Jedna konstrukce tedy může být odvozena od druhé a naopak. 
 Pokud pro množinu bodů v rovině provedeme rozdělení do Voronoiových diagramů a následně spojíme úsečkami všechny Voronoiovi sousedy získáme Delaunayovu triangulaci.
@@ -332,19 +371,22 @@ Pokud pro množinu bodů v rovině provedeme rozdělení do Voronoiových diagra
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.45\textwidth]{img/vd_vor.png}}{\caption{Voronoiův diagram souboru bodů}}{\label{fig:vd_vor}}
-\ffigbox{\includegraphics[width=0.45\textwidth]{img/vd_del.png}}{\caption{Voronoiův diagram a Delaunayova trinagulace}}{\label{fig:vd_del}}
+\ffigbox{\includegraphics[width=0.45\textwidth]{img/vd_vor.png}}
+{\caption{Voronoiův diagram souboru bodů}\label{fig:vd_vor}}
+\ffigbox{\includegraphics[width=0.45\textwidth]{img/vd_del.png}}
+{\caption{Voronoiův diagram a Delaunayova trinagulace}\label{fig:vd_del}}
 \end{floatrow}
 \end{figure}
 
-Na Obrázku \ref{fig:vd_vor} můžeme vidět Voronoiův diagram pro množinu bodů. Pokud každou dvojici Voronoiových sousedů spojíme spojnicí, jak je vidět na Obrázku \ref{fig:vd_del} získáme několik trojúhelníků, které se nepřekrývají a tvoří trojúhelníkovou síť. Spojnice mezi body, které jsou přiřazeny k neuzavřeným oblastím, tvoří konvexní obal. Pro trojúhelníkovou síť uvnitř tohoto konvexního obalu se jedná o Delaunayovu triangulaci.
+Na Obrázku \ref{fig:vd_vor} můžeme vidět Voronoiův diagram pro množinu bodů. Pokud každou dvojici Voronoiových sousedů spojíme spojnicí, jak je vidět na Obrázku \ref{fig:vd_del}, získáme několik trojúhelníků, které se nepřekrývají a tvoří trojúhelníkovou síť. Spojnice mezi body, které jsou přiřazeny k neuzavřeným oblastím, tvoří konvexní obal. Pro trojúhelníkovou síť uvnitř tohoto konvexního obalu se jedná o Delaunayovu triangulaci.
 
 Trojúhelníky této sítě se nazývají \emph{Delaunayovi trojúhelníky}, které jsou tvořeny spojnicemi tzv. \emph{Delaunayvými hranami}. Dále je také zřejmé, že Voronoiovy hrany leží na ose Delaunayových hran.
 
 
 \newpage
 \section{Algoritmy pro tvorbu DT}
-Triangulační algoritmy jsou poměrně dobře matematicky prozkoumaná oblast, ke které máme k dispozici široký teoretický základ. Při hledání vhodného algoritmu musíme zohlednit následující požadavky:
+\label{sec:algoritmy}
+Triangulační algoritmy jsou poměrně dobře matematicky prozkoumaná oblast, ke kterým je k dispozici široký teoretický základ. Při hledání vhodného algoritmu mje třeba zohlednit následující požadavky:
 \begin{itemize}
 \item Jednoduchost algoritmu a jeho snadná implementace.
 \item Dostatečná rychlost i pro velké množiny bodů (n>1E6), ideálně aby se výpočetní čas blížil $O(n . log(n))$.
@@ -352,13 +394,13 @@ Triangulační algoritmy jsou poměrně dobře matematicky prozkoumaná oblast, 
 \item Převod do vyšších dimenzí.
 \item Možnost paralelizace algoritmu.
 \end{itemize}
-Vhodný algoritmus je třeba vybírat na základe datových struktur a konkrétním případu. Ne vždy lze dokonale splnit všechny požadavky, např. jednoduché implementace mají delší výpočetní čas. Naopak algoritmy s kratším výpočetním časem jsou dost náročné na implementaci.
+Vhodný algoritmus je vhodné vybírat na základe datových struktur a konkrétním případu. Ne vždy lze dokonale splnit všechny požadavky, např. jednoduché implementace mají delší výpočetní čas. Naopak algoritmy s kratším výpočetním časem jsou dost náročné na implementaci.
 
 \newpage
 \subsection{Lokální optimalizace}
 \emph{Lokální optimalizace (LO)} je proces přetvoření libovolné triangulace na DT. Proces je prováděn pomocí prohazování nelegálních hran v dvojicích trojúhelníků tvořících konvexní čtyřúhelník na základě Kruhové nebo MaxMin podmínky.
 
-Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čtyřúhelník tvořený dvěma trojúhelníky se společnou hranou $e_i$. Pomineme možnost, že čtyřúhelník je nekonvexní nebo že všechny body leží na kružnici. Po té za použití MaxMin nebo Kruhové podmínky rozhodněme, zda je třeba prohodit hranu $e_i$. V případě, že po použití Lokální optimalizace není potřeba prohodit hranu, můžeme ji prohlásit za lokálně optimální. V případě, že  budeme lokální optimalizaci používat opakovaně pro všechny hrany v triangulaci, dokud nebudou všechny hrany lokálně optimální, získáme optimální triangulaci.
+Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čtyřúhelník tvořený dvěma trojúhelníky se společnou hranou $e_i$. Možnost, že čtyřúhelník je nekonvexní nebo že všechny body leží na kružnici, nebude nyní brán v úvahu. Po té je za použití MaxMin nebo Kruhové podmínky rozhodnuto, zda je třeba prohodit hranu $e_i$. V případě, že po použití Lokální optimalizace není potřeba prohodit hranu, můžeme dvojici trojúhelníků a jejich společnou hranu prohlásit za lokálně optimální. V případě, že  budeme lokální optimalizaci používat opakovaně pro všechny hrany v triangulaci, dokud nebudou všechny hrany lokálně optimální, získáme optimální triangulaci.
 
 \begin{algorithm}
 \caption{LOP}
@@ -382,7 +424,7 @@ Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je čty�
 \newpage
 \subsection{Paprskovitý algoritmus}
 
-Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný postup, jak nalézt počáteční triangulaci $\Delta$. Na začátku se nalezne bod $p$ z množiny $P$, takový který je nejbližší jejímu středu. Po té jej paprskovitě spojíme se všemi zbývajícími body množiny $P$. Tyto body se následně seřadí podle orientace a vzdálenosti od bodu $p$ a v tomto pořadí se spojí hranami. Potom se vytvoří hrany na hranici triangulace. Vzniklá triangulace se dále postupně po jednotlivých hranách legalizuje stejně jako v předchozím případě.
+Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný postup, jak nalézt počáteční triangulaci $\Delta$. Na začátku se nalezne bod $p$ z množiny $P$ takový, který je nejbližší jejímu středu. Po té je paprskovitě spojen se všemi zbývajícími body množiny $P$. Tyto body se následně seřadí podle orientace a vzdálenosti od bodu $p$ a v tomto pořadí se spojí hranami. Potom se vytvoří hrany na hranici triangulace. Vzniklá triangulace se dále postupně po jednotlivých hranách legalizuje stejně jako v předchozím případě.
 
 \begin{figure}[h!]
 \centering
@@ -429,7 +471,7 @@ Tento algoritmus je poměrně jednoduchý a snadný na implementaci, obzvlášť
 \newpage
 \subsection{Algoritmus inkrementální konstrukce (Step-by-Step)}
 
-Tento postup je založen na postupném přidávání bodů do již vytvořené DT, tvoří triangulaci postupně, trojúhelník po trojúhelníku. Na začátku jsou vybrány dva body $p_1, p_2$, které jsou sami sobě Voronoiovými sousedy a mezi nimi je vytvořena základní Delaunayova hrana $e$. K této hraně $e$ se hledá další bod 	$p$, tak aby vyhovoval kruhové podmínce a který společně s hranou $e$ vytvoří Delaunayův trojúhelník s vrcholy $p_1, p_2$ a $p$, který se zapíše do DT. Každá Delaunayovská hrana je orientována, bod $p$ hledáme pouze vlevo od ní. Pro konstrukci se používá modifikovaná datová struktura AEL (Active Edge List). Obsahuje hrany $e$, ke kterým hledáme body $p$, do struktury se neukládá topologický model, viz kapitola \ref{sec:data_struct}.
+Tento postup, který je založen na postupném přidávání bodů do již vytvořené DT, tvoří triangulaci postupně, trojúhelník po trojúhelníku. Na začátku jsou vybrány dva body $p_1, p_2$, které jsou sami sobě Voronoiovými sousedy, a mezi nimi je vytvořena základní Delaunayova hrana $e$. K této hraně $e$ se hledá další bod 	$p$ tak, aby vyhovoval kruhové podmínce a který společně s hranou $e$ vytvoří Delaunayův trojúhelník s vrcholy $p_1, p_2$ a $p$, který se zapíše do DT. Každá Delaunayovská hrana je orientována, bod $p$ hledáme pouze vlevo od ní. Pro konstrukci se používá modifikovaná datová struktura AEL (Active Edge List). Obsahuje hrany $e$, ke kterým hledáme body $p$, do struktury se neukládá topologický model, viz kapitola \ref{sec:data_struct}.
 
 Základní vlastnost toho postupu je, že se v každém kroku ke stávající triangulaci připojí další bod a triangulaci tak rozšíří. Vznikající triangulace je už v procesu tvoření Delaunayova a není tedy třeba žádné následující optimalizace.
 
@@ -472,7 +514,7 @@ Základní vlastnost toho postupu je, že se v každém kroku ke stávající tr
 
 Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovské triangulaci nabízí nejlepší výsledky, co se výkonnosti týče. Tento přístup je založený na jednoduchých krocích:
 
-1. Rekurzivní dělení množiny bodů $P$ až do stavu, kdy se pro podmnožinu nabízí jednoduché geometrické řešení. Při postupném dělení množiny $P$ se nakonec dostaneme do stavu, kdy nám zbudou buď tři body, v tom případě vytvoříme trojúhelník, nebo dva body, kdy vytvoříme hranu.
+\noindent 1. Rekurzivní dělení množiny bodů $P$ až do stavu, kdy se pro podmnožinu nabízí jednoduché geometrické řešení. Při postupném dělení množiny $P$ se nakonec dostaneme do stavu, kdy nám zbudou buď tři body, v tom případě vytvoříme trojúhelník, nebo dva body, kdy vytvoříme hranu.
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.8\textwidth]{img/div_n_conq.png}
@@ -480,9 +522,9 @@ Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu Delaunayovs
 \label{fig:div_n_conq}
 \end{figure}
 
-2. Vytvoření prozatimní triangulace, která nemusí být Delaunayovská.
+\noindent 2. Vytvoření prozatimní triangulace, která nemusí být Delaunayovská.
 
-3. Připojení ke stávající triangulaci a její legalizace na Delaunayovskou. Právě propojování podmnožin na jednotlivých vrstvách je nejnáročnější část tohoto algoritmu.
+\noindent 3. Připojení ke stávající triangulaci a její legalizace na Delaunayovskou. Právě propojování podmnožin na jednotlivých vrstvách je nejnáročnější část tohoto algoritmu.
 
 \bigskip
 Algoritmus Divide and Conquer využívá modul \emph{v.delaunay}, o kterém budeme mluvit později, viz kapitola \ref{subsec:v.delaunay}.
@@ -693,23 +735,23 @@ Dart-based datová struktura nabízí extrémně rychlé procházení topologie 
 
 Interpolace metodou přirozeného souseda je deterministická interpolační metoda pro prostorová data. Poskytuje spojitý, vyhlazený výstup, bez extrapolovaných hodnot. 
 
-Pro výpočet vah využívá Voronoiových diagramů. Do VD pro měřené body vkládá body určené k interpolaci. Vložením nového bodu dojde v jeho okolí k přetvoření VD. K vypočtení váhy se používá jak VD před vložením bodu, tak VD po vložení bodu. Voronoiova buňka nově vloženého bodu překrývá několik buněk z původního VD. Právě tento překryv, který nově vložený bod "ukradne" z plochy původních buněk slouží k výpočtu váhy pro interpolaci.
+Pro výpočet vah využívá Voronoiových diagramů. Do VD pro měřené body vkládá body určené k interpolaci. Vložením nového bodu dojde v jeho okolí k přetvoření VD. K vypočtení váhy se používá jak VD před vložením bodu, tak VD po vložení bodu. Voronoiova buňka nově vloženého bodu překrývá několik buněk z původního VD. Právě tento překryv, který nově vložený bod \uv{ukradne} z plochy původních buněk slouží k výpočtu váhy pro interpolaci.
 
 \subsection{Lineární interpolace}
 \bigskip
 Matematicky tedy můžeme zapsat:
 \newline
-$$V(p)=\sum_{i=1}^n V_i$$
+$$V(p)=\sum_{i=1}^n V_i$$,
 
-kde $V(p)$ je plocha nově vloženého bodu a $V_i$ je část plochy původních buněk, o kterou byly vložením buňky "okradeny".
+\noindent kde $V(p)$ je plocha nově vloženého bodu a $V_i$ je část plochy původních buněk, o kterou byly vložením buňky \uv{okradeny}.
 
 \bigskip
-Váha pro jednotlivé sousedy se vypočte:
+\noindent Váha pro jednotlivé sousedy se vypočte:
 \newline
 $$\lambda_i = \frac{V_i}{\sum_{i=1}^n V_i}$$
 
 \bigskip
-A konečně samotná hodnota pro interpolovaný bod není nic jiného než vážený průměr:
+\noindent A konečně samotná hodnota pro interpolovaný bod není nic jiného než vážený průměr:
 \newline
 $$G(x,y) = \sum_{i=1}^{n} \lambda_i  f(x_i, y_i)$$
 
@@ -729,7 +771,7 @@ $$G(x,y) = \sum_{i=1}^{n} \lambda_i  f(x_i, y_i)$$
 \end{figure}
 
 \newpage
-Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka "ukradla" nejvíce plochy ze žlutého polygonu, nejméně ze zeleného. Při výpočtu funkční hodnoty vloženého bodu bude mít tedy hodnota žlutého polygonu největší váhu, zatímco hodnota zeleného bodu váhu nejmenší.\footnote{Vytvořeno pomocí http://alexbeutel.com/webgl/voronoi.html}
+Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka \uv{ukradla} nejvíce plochy ze žlutého polygonu, nejméně ze zeleného. Při výpočtu funkční hodnoty vloženého bodu bude mít tedy hodnota žlutého polygonu největší váhu, zatímco hodnota zeleného bodu váhu nejmenší.\footnote{Vytvořeno pomocí http://alexbeutel.com/webgl/voronoi.html}
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/canvas_2.png}
@@ -746,15 +788,15 @@ Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka "ukradla" n
 \newpage
 \section{Postup řešení}
 \subsection{Bash}
-Při řešení otázky, jak implementovat metodu přirozeného souseda pro GRASS 7, jsem vycházel z modulu napsaného pro GRASS GIS 6, který jsem měl k dispozici. Jednalo se o modul \emph{v.surf.nnbathy} pro vektorová data. Tento modul byl napsán v Bashi. Pro novou verzi GRASS GISu 7, ve které si vývojáři kladou za cíl zpřístupnit tento software širší veřejnosti, tento modul v Bashi ovšem nebylo možno použít, neboť do nové verze se počítá pouze s moduly v jazyce Python a C.
+Při řešení otázky, jak implementovat metodu přirozeného souseda pro GRASS 7, se vycházelo z modulu napsaného pro GRASS GIS 6. Jednalo se o modul \emph{v.surf.nnbathy} pro vektorová data. Tento modul byl napsán v Bashi. Pro novou verzi GRASS GISu 7, ve které si vývojáři kladou za cíl zpřístupnit tento software širší veřejnosti, tento modul v Bashi ovšem nebylo možno použít, neboť do nové verze se počítá pouze s moduly v jazyce Python a C.
 
 \subsubsection{v.surf.nnbathy}\footnote{\url{http://svn.osgeo.org/grass/grass-addons/grass6/raster/v.surf.nnbathy/description.html}}
-\emph{v.surf.nnbathy} je modul napsaný v bashi. Slouží jako interface mezi \emph{nnbathy} z externí knihovny \emph{nn-c} a GRASS GISem. \emph{v.surf.nnbathy} nabízí celkem tři algoritmy interpolace. Defaultně je nastaven \emph{Watsonův algoritmus 	pro Sibsonovu interpolaci}. Další možností je \emph{Delaunayova triangulace} a poslední \emph{Bělikovův a Semenovův algoritmus pro nesibsonovu interpolaci}. Pro Delaunayvou triangulaci, která je základem pro všechny tři algoritmy, se využívá knihovny \emph{Triangle} napsanou Jonathanem Richardem Schewchukem. Parametry pro spuštění modulu jsou tyto (nepovinné v hranatých závorkách):
+\emph{v.surf.nnbathy} je modul napsaný v bashi. Slouží jako interface mezi \emph{nnbathy} z externí knihovny \emph{nn-c} a GRASS GISem. \emph{v.surf.nnbathy} nabízí celkem tři algoritmy interpolace. Defaultně je nastaven \emph{Watson's algortithm for Sibson natural neighbor interpolation}. Další možností je \emph{linear Delaunay interpolation} a poslední \emph{Belikov and Semenov's algorithm for	non-Sibsonian natural neighbor interpolation}. Pro Delaunayvou triangulaci, která je základem pro všechny tři algoritmy, se využívá knihovny \emph{Triangle} napsanou Jonathanem Richardem Schewchukem. Parametry pro spuštění modulu jsou tyto (nepovinné v hranatých závorkách):
 \begin{description}
-\item[output] Proměnná typu \emph{string}, název výstupní rastrové mapy, jediný povinný parametr.
+\item[output] Proměnná typu \emph{string}, název výstupní rastrové mapy.
 \item[input] Proměnná typu \emph{string}, název vstupní vektorové mapy.
 \item[[file]] Proměnná typu \emph{string}, název vstupního souboru.
-\item[[zcolumn]] Proměnná typu \emph{string}, název sloupce z atributové tabulky, jehož data budou použity pro interpolaci.
+\item[[column]] Proměnná typu \emph{string}, název sloupce z atributové tabulky, jehož data budou použity pro interpolaci.
 \item[[layer]] Proměnná typu \emph{integer}, nastavení, zda se jedná od 2D nebo 3D vektorová data.
 \item[[where]] Proměnná typu \emph{string}, SQL where podmínka.
 \item[[alg]] Proměnná typu \emph{string}, název použitého algoritmu.
@@ -785,14 +827,14 @@ user@my_comp:~$ v.surf.nnbathy input=elevation_lid792_randpts@PERMANENT output=r
 
 \newpage
 \subsection{Python}
-Jako první krok pro implementaci interpolace přirozeného souseda pro GRASS GIS 7 bylo potřeba stávající modul v bashi přepsat do podporovaného programovacího jazyka. Pro verzi 7 bylo možné napsat moduly buďto v jazyce C nebo Python. Z důvodu nepříliš velké zkušenosti v programování byl pro začátek zvolen jazyk Python.
+Jako první krok pro implementaci interpolace přirozeného souseda pro GRASS GIS 7 bylo potřeba stávající modul v Bashi přepsat do podporovaného programovacího jazyka. Pro verzi 7 bylo možné napsat moduly buďto v jazyce C nebo Python. Z důvodu nepříliš velké zkušenosti v programování byl pro začátek zvolen jazyk Python.
 
 \subsubsection{v.surf.nnbathy.py}
 
-V následující části této práce bude popsáno jak pythoní modul funguje, jaká jsou vstupní a výstupní data, jaké vytváří dočasné soubory.
+V následující části této práce bude popsáno, jak pythoní modul funguje, jaká jsou vstupní a výstupní data, jaké vytváří dočasné soubory.
 
 \paragraph{Vstupní data}
-Stejně jako původní bashový modul, i tento modul pracuje se vstupními daty buď v podobě textového ASCII souboru nebo vektorové mapy. 
+Stejně jako původní bashový modul, i tento modul pracuje se vstupními daty buď v podobě textového ASCII souboru, nebo vektorové mapy. 
 
 V případě použití vstupní vektorové mapy s body je pak při volání modulu použit parametr \emph{column}, který určuje z jakého sloupce atributové tabulky se budou brát hodnoty k interpolaci.
 
@@ -804,7 +846,7 @@ V případě použití vstupní vektorové mapy s body je pak při volání modu
 \end{figure}
 
 \newpage
-Druhou možností je použít textový ASCII soubor, který musí obsahovat $n$ bodů na $n$ řádcích ve třech sloupcích. V prvních dvou sloupcích je uložen údaj o poloze v podobě x a y souřadnice. Ve třetím sloupci jsou pak uloženy hodnoty veličiny, kterou chceme interpolovat, a v posledním sloupci nalezneme id bodu.
+Druhou možností je použít textový ASCII soubor, který musí obsahovat $n$ bodů na $n$ řádcích ve čtyřech sloupcích. V prvních dvou sloupcích je uložen údaj o poloze v podobě x a y souřadnice. Ve třetím sloupci jsou pak uloženy hodnoty veličiny, kterou chceme interpolovat, a v posledním sloupci nalezneme id bodu.
 
 %ukazka TMPXYZ
 \begin{lstlisting}[caption={Příklad vstupního souboru}]
@@ -825,7 +867,7 @@ Funkce \emph{region()} všechna nastavení uloží do proměných. Dále vypočt
 
 \bigskip
 \paragraph{Funkce initials\_controls()}
-Ve chvíli, kdy je nastavený výpočetní region, můžeme provést úvodní kontroly a přípravy před samotným výpočtem. Zejména zda plocha výpočetního regionu není nulová a je kde provádět interpolaci. Dále je třeba zajistit jednoznačné určení vstupních dat, tedy zda se bude pracovat s ASCII souborem nebo vektorovou mapou, a jejich kontrolu, popřípadě SQL podmínku. Také kontrolujeme zda z knihovny \emph{nn-c} máme nainstalovaný program \emph{nnbathy}, který interpolaci provádí. Také je třeba vytvořit dočasné pomocné soubory, které využijeme při práci s daty. 
+Ve chvíli, kdy je nastavený výpočetní region, můžeme provést úvodní kontroly a přípravy před samotným výpočtem. Zejména zda plocha výpočetního regionu není nulová a je kde provádět interpolaci. Dále je třeba zajistit jednoznačné určení vstupních dat, tedy zda se bude pracovat s ASCII souborem, nebo vektorovou mapou, a jejich kontrolu, popřípadě SQL podmínku. Také kontrolujeme, zda z knihovny \emph{nn-c} máme nainstalovaný program \emph{nnbathy}, který interpolaci provádí. Též je třeba vytvořit dočasné pomocné soubory, které využijeme při práci s daty. 
 
 V případě, že pracujeme s vektorovou mapu, uložíme informace o bodových datech do dočasného proměnné \emph{TMPcat} pomocí modulu \emph{v.out.ascii}. Výstupem toho modulu je ASCII soubor o $n$ řádcích a čtyřech sloupcích. V prvních dvou sloupcích je uložená poloha bodu, ve třetím jeho id a ve čtvrtém hodnota k interpolaci. 
 
@@ -863,7 +905,7 @@ Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné \
 \paragraph{Funkce compute()}
 V této části kódu je volán program \emph{nnbathy} s následujícími vstupními paramatry:
 \begin{description}
-\item[-w]{proměnná typu \emph{double}, omezuje extrapolaci přiřezením minimální váhy pro vrchol Delaunayovi sítě. V našem případě nastavena nula, což zamezuje extrapolaci.}
+\item[-w]{proměnná typu \emph{double}, omezuje extrapolaci přiřezením minimální váhy pro vrchol Delaunayovi sítě. Defaultně je nastavena nula, což zamezuje extrapolaci.}
 \item[-i]{proměnná typu \emph{string}, název vstupního souboru o $n$ řádcích, se třemi sloupci, x a y souřadnicí a hodnotou k interpolaci}
 \item[-x]{dvojice $x_{min}$, $x_{max}$ typu \emph{double}, mezní hodnoty výstupní mřížky}
 \item[-y]{dvojice $y_{min}$, $y_{max}$ typu \emph{double}, mezní hodnoty výstupní mřížky}
@@ -957,7 +999,7 @@ I v tomto modulu zůstala část, která vytváří GUI. Protože ale modul prac
 
 \newpage
 \subsubsection{nnbathy}
-V knihovně nnbathy, které oba moduly volají tedy zůstala hlavní výpočetní část kódu. 
+V knihovně nnbathy, které oba moduly volají, tedy zůstala hlavní výpočetní část kódu. 
 
 \paragraph{Rodičovská třída Nnbathy} V rodičovské třídě Nnbathy bylo vytvořeno několik objektů, které přebraly funkce jednotlivých procedur z předchozího kódu. Navíc byly vytvořeny tyto objekty:
 
@@ -976,6 +1018,10 @@ Tato třída slouží pro vektorová vstupní data a je dědičná z rodičovsk�
 \paragraph{Třída Nnbathy\_file}
 Tato třída slouží pro vstupní data v podobě ASCII souboru a je dědičná z rodičovské třídy Nnbathy.
 
+
+
+
+
 \newpage
 \section{Možnosti budoucí implementace}
 V současné době jsou oba moduly k dispozici v rámci balíčků Add-Ons\footnote{http://grass.osgeo.org/download/addons/}. V adresáři \emph{GRASS7/vector/v.surf.nnbathy} můžeme  naleznout hlavní knihovnu \emph{nnbathy.py}, modul \emph{v.surf.nnbathy.py} a dokumentaci \emph{v.surf.nnbathy.html}. 
@@ -988,7 +1034,7 @@ g.extension extension=v.surf.nnbathy
 \end{lstlisting}
 
 \bigskip
-Cílem do budoucna však není nechat tyto moduly pouze v rámci Add-Ons. Jelikož interpolace metodou přirozeného souseda poskytuje spojité, hladké výstupy bez extrapolovaných hodnot může být její použití v praxi poměrně využívané. Právě proto je snaha dostat tento interpolační nástroj do základní distribuce GRASS GISu. Tomu však brání vnitřní závislost na knihovně Triangle, která nespadá pod volně šiřitelnou licenci GNU GPL. V následujících kapitolách rozebereme možnosti vyhnutí se této knihovně a možnostem, které se do budoucna nabízejí.
+Cílem do budoucna však není nechat tyto moduly pouze v rámci Add-Ons. Jelikož interpolace metodou přirozeného souseda poskytuje spojité, hladké výstupy bez extrapolovaných hodnot může být její použití v praxi poměrně využívané. Právě proto je snaha dostat tento interpolační nástroj do základní distribuce GRASS GISu. Tomu však brání vnitřní závislost na knihovně Triangle, která nespadá pod volně šiřitelnou licenci GNU GPL. V následujících kapitolách rozebereme možnosti vyhnutí se této knihovně a následné implementace.
 
 \newpage
 \subsection{Knihovna Triangle}
@@ -996,23 +1042,30 @@ Knihovna Triangle verze 1.4\footnote{http://www.cs.cmu.edu/~quake/triangle.html}
 
 Triangle pro tvorbu triangulace využívá Divide and Conquer algoritmus, viz kapitola \ref{subsec:DnC_alg}, v kombinaci s Inkrementálním algoritmem, kapitola \ref{subsec:Inc_alg}. Pro ukládání dat využívá svoji vlastní, poměrně obsáhlou datovou strukturu \emph{delaunay} (Příloha \ref{app:delaunay_struct}), do které si ukládá hraniční body regionu, všechny body triangulace, všechny trojúhelníky s hranami a jejich opsanými kružnicemi, včetně jejich sousedů. 
 
-Tuto datovou strukturu delaunay dále využívá i samotný program \emph{nnbathy}, který provádí interpolaci metodou přirozeného souseda. Právě převod na tuto datovou strukturu bude v budoucnosti klíčový v případě, že se podaří najít vhodný triangulační nástroj, který nahradí knihovnu Triangle.
+Tuto datovou strukturu \emph{delaunay} dále využívá i samotný program \emph{nnbathy}, který provádí interpolaci metodou přirozeného souseda. Právě převod na tuto datovou strukturu bude v budoucnosti klíčový v případě, že se podaří najít vhodný triangulační nástroj, který nahradí knihovnu Triangle.
 
 \newpage
 \subsection{Modul \emph{v.delaunay}}
 \label{subsec:v.delaunay}
-Modul \emph{v.delaunay}\footnote{http://grass.osgeo.org/grass71/manuals/v.delaunay.html} je součást oficiální distribuce GRASS GISu. Tento modul poskytuje Delaunayovu triangulaci nad vektorovou mapou s body nebo centroidy. Pro vytvoření triangulace používá modul algoritmus Rozděl a panuj, viz kapitola \ref{subsec:DnC_alg}. Data ukládá do datové struktury winged-edge, kapitola \ref{subsec:HE_struct}.
+Modul \emph{v.delaunay}\footnote{http://grass.osgeo.org/grass71/manuals/v.delaunay.html} je součástí oficiální distribuce GRASS GISu. Tento modul poskytuje Delaunayovu triangulaci nad vektorovou mapou s body nebo centroidy. Pro vytvoření triangulace používá modul algoritmus Rozděl a panuj, viz kapitola \ref{subsec:DnC_alg}. Data ukládá do datové struktury winged-edge, kapitola \ref{subsec:HE_struct}.
+
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/b20.png}}{\caption{Množina bodů pro triangulaci}}{\label{fig:b20}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/b20_del.png}}{\caption{Triangulace pomocí v.delaunay}}{\label{fig:b20_del}}
+\end{floatrow}
+\end{figure}
 
 Ovládání modulu je velmi jednoduché na výběr máme pouze z několika flagů a několika paramatrů:
 
-\bigskip
-Flagy:
+\noindent Flagy:
 \begin{description}
 \item[-r] Počítej pouze s body v aktuálním regionu.
 \item[-l] Vytvoř výstupní triangulaci pomocí linií, ne ploch.
 \end{description}
-\bigskip
-Parametry:
+
+\noindent Parametry:
 \begin{description}
 \item[[input]] Povinný parametr. Název vstupní vektorové mapy.
 \item[layer] Název nebo číslo vrstvy. Slouží k připojení do databáze.
@@ -1023,33 +1076,50 @@ Parametry:
 v.delaunay input=elev_lid792_randpts output=elev_lid792_randpts_delaunay
 \end{lstlisting}
 
-\begin{figure}[h!]
-\centering
-\begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/b20.png}}{\caption{Množina bodů pro triangulaci}}{\label{fig:b20}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/b20_del.png}}{\caption{Triangulace pomocí v.delaunay}}{\label{fig:b20_del}}
-\end{floatrow}
-\end{figure}
-
+\bigskip
 \subsection{Převod mezi strukturami}
-Z hlediska rychlosti se modul \emph{v.delaunay} jeví jako adekvátní náhrada za knihovnu Triangle. Při testech bylo dokázáno, že pro náhodné konfigurace miliónu bodů dokáže triangulaci provést za méně než 15 s, což se jeví jako dostatečně efektivní.
+Z hlediska rychlosti se modul \emph{v.delaunay} jeví jako adekvátní náhrada za knihovnu Triangle. Při testech bylo dokázáno, že pro náhodné konfigurace miliónu bodů dokáže triangulaci provést za méně než 15 s, což se dá považovat za dostatečně efektivní.
 
 Jako problémová se jeví část převodu dat mezi strukturami. \emph{Nnbathy} počítá interpolaci nad daty uloženými ve struktuře \emph{delaunay} (Příloha \ref{app:delaunay_struct}), která je poměrně netypická, protože data ukládá do polí za pomocí pointerů a indexů zároveň. 
 
-Nicméně naplnění struktury \emph{delaunay} možné je,  byť vyžaduje několikerý průchod přes všechny hrany triangulace. Na jeden průchod je možné získat celkový počet bodů \emph{n}, získat id jednotlivých trojúhelníků, \emph{id} jejich vrcholů a vypočítat středy opsaných kružnic. Dále je nutné označit pro každý trojúhelník, jeho sousedy, tedy trojúhelníky, který s ním sdílí hranu. Opět je třeba projít celou triangulaci. Během tohoto průchodu je pravděpodobné, že se dostaneme k již zpracovanému trojúhelníku. Proto bude třeba vytvořit např. pomocný vektor typu boolean, do kterého se bude ukládat, zda trojúhelník už byl zpracován či nikoliv. Nejsložitější je naplnění struktur \emph{n\_point\_triangles} a \emph{point\_triangles} (viz Příloha \ref{app:delaunay_struct}). Zde je ke každému bodu přiřazen počet trojúhelníků, do kterých náleží a jejich \emph{id}. Opět je zapotřebí několikerý průchod strukturou winged-edge a pomocná struktura, do které budeme ukládat seznam \emph{previous edge}.
+Nicméně naplnění struktury \emph{delaunay} možné je,  byť vyžaduje několikerý průchod přes všechny hrany triangulace. Na jeden průchod je možné získat celkový počet bodů \emph{n}, získat \emph{id} jednotlivých trojúhelníků, \emph{id} jejich vrcholů a vypočítat středy opsaných kružnic. Dále je nutné označit pro každý trojúhelník, jeho sousedy, tedy trojúhelníky, který s ním sdílí hranu. Opět je třeba projít celou triangulaci. Během tohoto průchodu je pravděpodobné, že se dostaneme k již zpracovanému trojúhelníku. Proto bude třeba vytvořit např. pomocný vektor typu boolean, do kterého se bude ukládat, zda trojúhelník už byl zpracován či nikoliv. Nejsložitější je naplnění struktur \emph{n\_point\_triangles} a \emph{point\_triangles} (viz Příloha \ref{app:delaunay_struct}). Zde je ke každému bodu přiřazen počet trojúhelníků, do kterých náleží a jejich \emph{id}. Opět je zapotřebí několikerý průchod strukturou winged-edge a pomocná struktura, do které budeme ukládat seznam \emph{previous edge}.
 
-Po delším zkoumání tedy bylo zjištěno, že převod mezi strukturami možný je. Nicméně časová i výpočetní náročnost společně s faktem, že se jedná o dost "kostrbaté" řešení, ukázaly, že samotná náhrada knihovny \emph{Triangle} jiným nástrojem, který bude zajišťovat DT, není správnou cestou. Největším problémem tohoto řešení je, že \emph{Nnbathy} využívá strukturu \emph{Delaunay}, která je poměrně netypická, takže je hůře kompatibilní s jakýmikoliv jinými triangulačními nástroji, které používají běžné datové struktury.
+Po delším zkoumání tedy bylo zjištěno, že převod mezi strukturami možný je. Nicméně časová i výpočetní náročnost společně s faktem, že se jedná o dost \uv{kostrbaté} řešení, ukázaly, že samotná náhrada knihovny \emph{Triangle} jiným nástrojem, který bude zajišťovat DT, není správnou cestou. Největším problémem tohoto řešení je, že \emph{Nnbathy} využívá strukturu \emph{delaunay}, která je poměrně netypická, takže je hůře kompatibilní s jakýmikoliv jinými triangulačními nástroji, které používají běžné datové struktury.
 
 Pro další řešení se tedy hledal takový nástroj, který by se nestaral pouze o DT ale i o samotnou interpolaci. Tak by se bylo možné vyhnout závislosti nejen na triangulačním nástroji, ale i na knihovně \emph{nn-c}.
 
+\newpage
 \subsection{Knihovna CGAL}
-\todo[inline]{Dopsat na základě toho, co se zjisti.}
-Knihovna CGAL (The Computational Geometry Algorithms Library)\footnote{http://www.cgal.org/} je projekt, který poskytuje snadný přístup k efektivním a spolehlivým geometrickým algoritmům ve formě C++ knihovny. CGAL se používá v různých oblastech, které potřebují geometrické výpočty, jako např. v GISech, CADu, molekulární biologii, počítačové grafice a robotice. Jeden z jeho balíčků se přímo zabývá interpolací a nabízí funkce pro výpočet souřadnic přirozeného souseda. Tato knihovna je třeba ještě dále prozkoumat a zjistit její možnosti, neboť možnost její budoucí implementace do GRASS GISu se nejeví nereálně.
+\todo[inline]{Dopsat na základě toho, co se zjistí.}
+Knihovna CGAL (The Computational Geometry Algorithms Library)\footnote{http://www.cgal.org/} je open source projekt, který poskytuje snadný přístup k efektivním a spolehlivým geometrickým algoritmům ve formě C++ knihovny. CGAL se používá v různých oblastech, které potřebují geometrické výpočty, jako např. v GISech, CADu, molekulární biologii, počítačové grafice a robotice. Knihovna CGAL je distribuována pod licencí GNU GPL, což perfektně vyhovuje pro jeho použítí pro GRASS GIS.
+
+Jeden z balíčků této knihovny se přímo zabývá interpolací obecně ve 2D i 3D, implementací funkcí na výpočet souřadnic přirozeného souseda a různými metodami interpolace pro roztroušená prostorová data, z nichž většina je založena právě na metodě přirozeného souseda. K dispozici jsou celkem 4 interpolační metody a sice tyto:
+\begin{itemize}
+\item Linear Precision Interpolation
+\item Sibson's Continuous Interpolant
+\item Farin's Continuous Interpolant
+\item Quadratic Precision Interpolants
+\end{itemize}
+
+V současné chvíli probíhá vývoj nového modulu \emph{v.surf.nn}, který zatím využívá pouze metodu \emph{Linear Precision Interpolation}, tedy pouze lineární interpolaci bez ohledu na gradient. Do budoucna se však uvažuje o přidání i ostatních metod a možnosti nechat uživateli volbu, kterou metodu chce použít. 
+
+\newpage
+\section{Závěr}
+Cílem této bakalářské práce byla implementace nástroje pro interpolaci metodou přirozeného souseda do GRASS GISu. Jako první krok byly tedy v Pythonu napsány dva moduly \emph{v.surf.nnbathy} pro vektorová data a \emph{r.surf.nnbathy} pro rastrová data. Tyto moduly jsou v současnosti k dispozici v GRASS GISu v rámci balíčků Add-Ons a uživatel může po instalaci těchto rozšíření bez problému využívat interpolaci metodou přirozeného souseda. Nicméně tyto moduly jsou stále závislé na knihovně \emph{nn-c}, která provádí samotnou interpolaci a hlavně na knihovně \emph{Triangle}, která se stará o provedení DT a která je pod licencí MIT.
+
+Dále se tato práce zabývala možností využít modulu \emph{v.delaunay}, který je už v oficiální distribuci GRASS GISu, jako náhradu za knihovnu \emph{Triangle}. V rámci zjišťování, zda je možné modul \emph{v.delaunay} použít, byly detailně prostudovány jednotlivé algoritmy, jak DT provést, a dále byly podrobně zkoumány datové struktury, které se pro ukládání triangulací běžně využívají. Všechny tyto poznatky byly zpracovány v teoretické části v kapitolách \ref{sec:algoritmy} a \ref{sec:data_struct}. Nicméně se ukázalo, že ačkoliv náhrada knihovny \emph{Triangle} za modul \emph{v.delaunay} je možná, tak převod mezi jednotlivými strukturami je příliš náročný a neefektivní, zejména kvůli netypické struktuře \emph{delaunay}, kterou knihovna \emph{nn-c} využívá.
+
+Jako vhodné řešení se tedy ukázalo použití knihovny \emph{CGAL}. Tato knihovna dokáže nejen vytvořit Delaunayho triangulaci, ale nabízí i několik metod pro interpolaci metodou přirozeného souseda. Díky použítí knihovny \emph{CGAL} dojde k zbavení se závislosti na knihovnách \emph{nn-c} a \emph{Triangle}. Vývoj samotného modulu \emph{v.surf.nn} a jeho implementace je aktuálně v procesu.
+
+V rámci této bakalářské práce bylo též provedeno porovnání výkonu a výstupu mezi GRASS GISem, zástupcem open source softwaru, a ArcGISem, komerčním softwarem. Za GRASS GIS byl testován modul \emph{v.surf.nnbathy} se závislostí na knihovně \emph{nn-c} a dále modul \emph{v.surf.nn}, který je postavený na knihovně \emph{CGAL}. Za ArcGIS byl testován nástroj \emph{Natural Neighbour}, který se nachází v toolboxu Spatial Analyst. Výsledky jsou uvedeny v Příloze \ref{app:srovnani}
+
+
 
 \newpage
 \necislovana{Seznam použitých zkratek}
 
 \begin{tabular}{ll}
+\textbf{CGAL}& The Computational Geometry Algorithms Library\\
 \textbf{DMT}& Digitální model terénu\\
 \textbf{DT}& Delaunayova triangulace\\
 \textbf{DPZ}& Dálkový průzkum Země\\
@@ -1122,7 +1192,7 @@ URL: \textless\url{http://graphics.zcu.cz/files/DP_2002_Kohout_Josef.pdf}
 \textgreater
 
 \bibitem{Delaunay}
-Wikipedie\textit{Boris Delaunay} [online].
+WIKIPEDIE. \textit{Boris Delaunay} [online].
 URL: \textless\url{http://en.wikipedia.org/wiki/Boris_Delaunay}
 \textgreater
 
@@ -1131,8 +1201,9 @@ URL: \textless\url{http://en.wikipedia.org/wiki/Boris_Delaunay}
 \appendix
 \newpage
 \section{Srovnání GRASS GIS a ArcGIS}
+\label{app:srovnani}
 
-V následující kapitole se budeme věnovat srovnání GRASS GISu a ArcGISu při interpolaci metodou přirozeného souseda. GRASS GIS bude zastupovat modul \emph{v.surf.nnbathy}, o kterém byla řeč v předchozích kapitolách. Za ArcGIS budeme zkoumat nástroj \emph{Natural Neighbour}, který se nachází v toolboxu Spatial Analyst. 
+Následující kapitola se bude věnovat srovnání GRASS GISu a ArcGISu při interpolaci metodou přirozeného souseda. GRASS GIS bude zastupovat modul \emph{v.surf.nnbathy}, o kterém byla řeč v předchozích kapitolách. Za ArcGIS budeme zkoumat nástroj \emph{Natural Neighbour}, který se nachází v toolboxu \emph{Spatial Analyst}. 
 
 Pro porovnání byly zvoleny tři situace. Na území o velikosti deset krát deset kilometrů, s rozlišením buňky deset metrů byly vygenerována bodová pole o počtu tisíc, sto tisíc a milion bodů. Nad těmito soubory byla po té provedena interpolace v obou softwarech. Interpolace byla pro každou datovou sadu provedena v deseti opakováních, výsledný čas je průměrem. Testy byly provedeny na notebooku HP Pavilion dv6000 s procesorem Intel\copyright  Core\texttrademark 2 Duo CPU T5550 @ 1.83GHz $\times$ 2 a RAM pamětí 4 GB. Výsledky jsou uvedeny v Tabulce \ref{tab:GRASSxArc}.
 
@@ -1142,9 +1213,9 @@ Pro porovnání byly zvoleny tři situace. Na území o velikosti deset krát de
 \begin{tabular}{|c|c|c|}
 \hline
 Počet bodů & GRASS GIS  & ArcGIS     \\ \hline
-1000       & 13,5 s     & 7,6 s      \\ \hline
-100000     & 58,9 s     & 14,1 s     \\ \hline
-1000000    & 8 min 25 s & 1 min 24 s \\ \hline
+1 000       & 13,5 s     & 7,6 s      \\ \hline
+100 000     & 58,9 s     & 14,1 s     \\ \hline
+1 000 000    & 8 min 25 s & 1 min 24 s \\ \hline
 \end{tabular}
 \caption{Porovnání časů}
 \label{tab:GRASSxArc}
