@@ -98,7 +98,6 @@ int main(int argc, char *argv[])
 
 
      //coordinate computation in grid
-    /*
     double coor_x, coor_y;
     coor_x = window.west;
     coor_y = window.north;        
@@ -114,7 +113,6 @@ int main(int argc, char *argv[])
             coor_y -= nsres;
             } 
 
-    */
     /* create output */
     /* TODO */
 
