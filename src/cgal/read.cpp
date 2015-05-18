@@ -3,14 +3,16 @@ extern "C" {
 #include <grass/glocale.h>
 }
 
+#include <stdlib.h> 
 #include "local_proto.h"
 
 int read_points(struct Map_info *Map, int field, std::vector<Point>& OutPoints)
 {
     int npoints;
-    double x, y, z;
+    double x, y, func_val;
     
     struct line_pnts *Points;
+    struct line_cats *Cats;
     
     Points = Vect_new_line_struct();
 
@@ -23,7 +25,7 @@ int read_points(struct Map_info *Map, int field, std::vector<Point>& OutPoints)
     npoints = 0;
     G_message(_("Reading points..."));
     while(TRUE) {
-        if (Vect_read_next_line(Map, Points, NULL) < 0)
+        if (Vect_read_next_line(Map, Points, Cats) < 0)
             break;
 
         G_progress(npoints, 1e3);
@@ -35,10 +37,11 @@ int read_points(struct Map_info *Map, int field, std::vector<Point>& OutPoints)
         
         x = Points->x[0];
         y = Points->y[0];
-        z = Points->z[0];
+                
         
-        G_debug(3, "new point added: %f, %f, %f", x, y, z);
-        OutPoints.push_back(Point(x, y, z));
+        G_debug(3, "new point added: %f, %f", x, y);
+        G_message("new point added: %f, %f", x, y);
+        OutPoints.push_back(Point(x, y));
         npoints++;
     }
     G_progress(1, 1);
