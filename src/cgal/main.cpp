@@ -103,17 +103,19 @@ int main(int argc, char *argv[])
 
     for (int rows=0 ; rows<window.rows ; rows++) {
         G_percent(rows, window.rows, 5);
+
+        coor_x = window.west;
         for (int cols=0 ; cols<window.cols ; cols++) {
             K::Point_2 p(coor_x,coor_y);
             std::vector< std::pair< Point, Coord_type > > coords;
             Coord_type norm = CGAL::natural_neighbor_coordinates_2(T, p,std::back_inserter(coords)).second;
             Coord_type res =  CGAL::linear_interpolation(coords.begin(), coords.end(), norm, Value_access(function_values));
-
+            //G_debug(5, "x: %f y: %f -> res: %f", coor_x, coor_y, res);
             coor_x += ewres;
-            coor_y -= nsres;
             std::cout << res << " ";
-      }
-      std::cout << std::endl;
+        }
+        coor_y -= nsres;
+        std::cout << std::endl;
     }
     G_percent(1, 1, 1);
     
