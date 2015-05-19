@@ -6,14 +6,15 @@ extern "C" {
 #include <stdlib.h> 
 #include "local_proto.h"
 
-int read_points(struct Map_info *Map, int field, std::vector<Point>& OutPoints)
+int read_points(struct Map_info *Map, int field, std::map<Point, Coord_type, K::Less_xy_2>& function_values,
+    std::vector<K::Point_2>& OutPoints)
 {
     int npoints;
-    double x, y, func_val;
+    double x, y, z;
+    Point p;
     
     struct line_pnts *Points;
-    struct line_cats *Cats;
-    
+        
     Points = Vect_new_line_struct();
 
     /* set constraints */
@@ -25,7 +26,7 @@ int read_points(struct Map_info *Map, int field, std::vector<Point>& OutPoints)
     npoints = 0;
     G_message(_("Reading points..."));
     while(TRUE) {
-        if (Vect_read_next_line(Map, Points, Cats) < 0)
+        if (Vect_read_next_line(Map, Points, NULL) < 0)
             break;
 
         G_progress(npoints, 1e3);
@@ -37,11 +38,15 @@ int read_points(struct Map_info *Map, int field, std::vector<Point>& OutPoints)
         
         x = Points->x[0];
         y = Points->y[0];
+        z = Points->z[0];
+
+        p = Point(x,y);
+        OutPoints.push_back(p);
+        function_values.insert(std::make_pair(p,z));
                 
         
-        G_debug(3, "new point added: %f, %f", x, y);
-        G_message("new point added: %f, %f", x, y);
-        OutPoints.push_back(Point(x, y));
+        G_debug(3, "new point added: %f, %f, %f", x, y, z);
+        //G_message("new point added: %f, %f, %f", x, y, z);
         npoints++;
     }
     G_progress(1, 1);

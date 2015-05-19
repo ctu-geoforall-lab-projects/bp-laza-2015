@@ -18,7 +18,7 @@ typedef K::FT                                         Coord_type;
 typedef K::Point_2                                    Point;
 
 /* read.cpp */
-int read_points(struct Map_info *, int, std::vector<Point>&);
+int read_points(struct Map_info *, int, std::map<Point, Coord_type, K::Less_xy_2>&, std::vector<K::Point_2>&);
 
 /* write.cpp */
 void write_lines();
