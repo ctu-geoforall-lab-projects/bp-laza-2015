@@ -80,31 +80,36 @@ bottom=35mm]
   knihovna obsahuje knihovnu \emph{Triangle}, která nedovoluje
   zařazení tohoto nástroje do oficiální distribuce GRASS GISu.
 
-  V rámci této bakalářské práce byl modul přepsán do jazyka Python,
+  V rámci bakalářské práce byl tento modul přepsán do jazyka Python,
   tak aby vyhovoval verzi 7. Práce se dále zabývá možnostmi budoucí
   implementace bez závislosti na knihovně \emph{Triangle}, tak aby
-  mohl tento interpolační nástroj zařazen do oficiální distribude
+  mohl být tento interpolační nástroj zařazen do oficiální distribude
   GRASS GISu.  Část textu této práce se dále zabývá porovnání
+%%% ML: porovnavas to pouze s ArcGISem a tady zminujes "ostatni" softwary...
   rychlosti a kvality výstupu mezi GRASS GISem a ostatními gisovými
   softwary.
 
 \bigskip
+%% ML: Voronoiovy diagramy (a ne polygony)
 \keywords{Klíčová slova}{GIS, GRASS GIS, interpolace, přirozený soused, Delaunayho triangulace, Voronoiovy polygony}
 
 \end{abstract}
 
 \selectlanguage{english}
 \begin{abstract}
+%% ML: project ? mel jsi na mysli design
+%% ML: popros nekoho o korekci anglictiny, posledni vetu preformulovat
   \bigskip The aim of this bachelor thesis is the project and the
-  implementation of a tool for a natural neighbour interpolation pro
-  GRASS GIS 7. Previous version GRASS GIS 6 contains such a tool as a
-  optional package of Add-Ons, but this modul is written in Bash and
+  implementation of a tool for a natural neighbour interpolation in
+  GRASS GIS 7. Previous version GRASS GIS 6 contains such a tool as an
+  Add-Ons package, but this modul is written in Bash and
   with inner dependency on \emph{nn-c} library. Due to this library
   contains \emph{Triangle} library which is not under the GNU GPL
   licence it is not possible to add the interpolation tool into
   official GRASS GIS distribution.
 
 \bigskip
+%%% ML: polygon -> diagram
 \keywords{Keywords}{GIS, GRASS GIS, natural neighbour interpolation, Delaunay triangulation, Voronoi's polygons}
 
 \end{abstract}
@@ -115,7 +120,7 @@ bottom=35mm]
 \newcommand{\odsaditodzhora}{\hskip1pt\vfill}
 \newpage
 \odsaditodzhora
-\noindent Prohlášení
+\noindent {\bf Prohlášení}
 
 Prohlašuji, že bakalářskou práci na téma „Implementace nástroje pro
 interpolaci metodou přirozeného souseda do GRASS GIS“ jsem vypracoval
@@ -138,8 +143,10 @@ V Praze dne .................
 \newpage
 
 \odsaditodzhora
-\noindent Poděkování
+\noindent {\bf Poděkování}
 
+%%% ML: Mozna zminit i Tomase Bayera, ale tak aby to nebylo v
+%%% konfliktu s oponetskym posudkem
 Chtěl bych poděkovat mému vedoucímu bakalářské práce, Ing. Martinu
 Landovi, Ph.D., za cenné rady a čas, který mi věnoval při
 konzultacích. Dále bych rád poděkoval své rodině, přátelům a okolí za
@@ -163,7 +170,7 @@ takovéto sítě a sběr dalších dat může být časově či finančně náro
 příliš obtížné nebo v rámci možností metod zcela nereálné.
 
 Obvykle ovšem potřebujeme znát hodnotu daného jevu i mimo měřené body,
-nejčastěji pro celé zájmové území. V takovéto chvíli se musíme použít
+nejčastěji pro celé zájmové území. V takovéto chvíli je nutné použít
 nějaký interpolační nástroj, který vypočte přibližnou hodnotu v území
 mezi měřenými body. Jako příklad může být uvedeno vytvoření výškopisu,
 či DMT pro území, kde máme k dispozici data o výšce v pravidelné
@@ -173,10 +180,10 @@ meteostanic.
 \bigskip
 
 Tato práce se zabývá interpolací přirozeného souseda a její
-implementací do GRASS GISu 7.\footnote{\url{http://grass.osgeo.org}}
+implementací do GRASS GISu 7 (\url{http://grass.osgeo.org}).
 Toto téma bakalářské práce jsem si vybral z několika důvodů. Za prvé,
 mě zajímají geografické informační systémy, zejména pak open-source
-projekty. Dle mého názoru je to právě cesta open-source softwarů,
+projekty. Dle mého názoru je to právě cesta open-source software,
 kterou se budou v~budoucnosti soukromé firmy, vývoj a věda ubírat, a
 je proto dobré s nimi získávat zkušenost už během studia. Za druhé,
 práce na tomto tématu mi umožnila proniknout do GISů nejen z pohledu
@@ -185,13 +192,15 @@ za třetí, interpolace metodou přirozeného souseda je nástroj, který
 poskytuje kvalitní výstupy, a jeho začlenění do standardní distribuce
 GRASS GISu by mohlo být hojně využito.
 
+%%% ML: mozna by se tu hodil vice minuly cas, ale je to jedno
+%%% ML: mozna by se hodily odkazy na jednotlive kapitoly v textu
 V současné době je interpolace metodou přirozeného souseda prováděna
 pomocí modulů \emph{v.surf.nnbathy} a \emph{r.surf.nnbathy} z
+%%% ML: tady by se hodila poznamka pod carou, vysvetlit co je Bash
 rozšíření Add-Ons, které jsou navíc napsané v Bashi. Tyto moduly jsou
-však podporované pouze pro GRASS GIS do verze 6. Od 22. února 2015
-ovšem byla uvolněná verze 7, která nepodporuje moduly psané v
-Bashi. Jako první krok, je tedy nutné moduly přepsat do podporovaného
-jazyka- Pythonu.
+však podporované pouze pro GRASS GIS do verze 6. Nová verze GRASS GIS
+7 již moduly psané v Bashi nepodroruje. Jako první krok, je tedy
+nutné moduly přepsat do podporovaného programovacího jazyka -- Pythonu.
 
 \newpage
 
@@ -199,9 +208,9 @@ Dále je třeba zjistit, jak postupovat, aby mohl být interpolační
 nástroj začleněn do oficiální distribuce GRASS GISu. Jednou z cest by
 mohlo být zbavení se závislosti knihovny \emph{nn-c}, která provádí
 samotnou interpolaci, na knihovně \emph{Triangle}, která konstruuje
-Delaunayovu triangulaci, ale kterou kvůli nevyhovující licenci není
-možné použít do standardní distribuce GRASS GISu. V tomto případě je
-nutné vyzkoumat, jaké nástroje by mohly knihovnu \emph{Triangle}
+Delaunayovu triangulaci. Tuto knihovnu nelze vzhledem k nevyhovující
+licenci začlenit do standardní distribuce GRASS GISu. V tomto případě
+je nutné vyzkoumat, jaké nástroje by mohly knihovnu \emph{Triangle}
 nahradit. Bude zjištěno jaké prostředky má k dispozici samotný GRASS
 GIS, nebo zda je možné použít nějaký jiný open source nástroj, který
 by triangulaci provedl.
@@ -209,7 +218,7 @@ by triangulaci provedl.
 Jako další cesta se jeví možnost využítí knihovny \emph{CGAL}. Tato
 knihovna už přímo v sobě obsahuje jak Delaunayovu triangulaci, tak
 samotnou interpolaci. Knihovna \emph{CGAL} je špička v oblasti
-výpočetní geomterie a o jejím začlenění do GRASS GISu už se uvažuje.
+výpočetní geometrie a o jejím začlenění do GRASS GISu se již uvažuje.
 
 \newpage
 \part{Teoretická část}

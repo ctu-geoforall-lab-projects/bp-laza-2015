@@ -113,10 +113,10 @@ int main(int argc, char *argv[])
             G_debug(5, "x: %f y: %f -> res: %f (row=%d; col=%d)",
                     coor_x, coor_y, res, rows, cols);
             coor_x += ewres;
-            std::cout << res << " ";
+            //std::cout << res << " ";
         }
         coor_y -= nsres;
-        std::cout << std::endl;
+        //std::cout << std::endl;
     }
     G_percent(1, 1, 1);
     
