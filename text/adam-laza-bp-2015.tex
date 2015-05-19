@@ -16,6 +16,7 @@
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{titletoc}
+\usepackage{pdfpages}
 
 \usepackage{listings}			%vkladani kodu
 \lstset{basicstyle=\ttfamily,
@@ -68,7 +69,7 @@ bottom=35mm]
 \input{titulbp}
 
 \newpage
-\todo[inline]{Zde vložit oskenované zadání}
+\includepdf[pages={1}]{../formulare/zadani.pdf}
 
 \newpage
 \begin{abstract}
@@ -86,31 +87,34 @@ bottom=35mm]
   mohl být tento interpolační nástroj zařazen do oficiální distribude
   GRASS GISu.  Část textu této práce se dále zabývá porovnání
 %%% ML: porovnavas to pouze s ArcGISem a tady zminujes "ostatni" softwary...
-  rychlosti a kvality výstupu mezi GRASS GISem a ostatními gisovými
-  softwary.
+%%% AL: upraveno pouze na ArcGIS
+  rychlosti a kvality výstupu mezi GRASS GISem a ArcGISem.
 
 \bigskip
 %% ML: Voronoiovy diagramy (a ne polygony)
-\keywords{Klíčová slova}{GIS, GRASS GIS, interpolace, přirozený soused, Delaunayho triangulace, Voronoiovy polygony}
+%% AL: To budu mit spatne v cele praci, pouzil jsem schvalne jednotne cislo
+\keywords{Klíčová slova}{GIS, GRASS GIS, interpolace, přirozený soused, Delaunayho triangulace, Voronoiův diagram}
 
 \end{abstract}
 
 \selectlanguage{english}
 \begin{abstract}
 %% ML: project ? mel jsi na mysli design
+%% AL: opraveno
 %% ML: popros nekoho o korekci anglictiny, posledni vetu preformulovat
-  \bigskip The aim of this bachelor thesis is the project and the
+  \bigskip The aim of this bachelor thesis is the design and the
   implementation of a tool for a natural neighbour interpolation in
-  GRASS GIS 7. Previous version GRASS GIS 6 contains such a tool as an
+  GRASS GIS 7. Previous version of GRASS GIS 6 contains such a tool as an
   Add-Ons package, but this modul is written in Bash and
-  with inner dependency on \emph{nn-c} library. Due to this library
+  with inner dependency on \emph{nn-c} library. This library
   contains \emph{Triangle} library which is not under the GNU GPL
-  licence it is not possible to add the interpolation tool into
+  licence. Because of that it is not possible to add the interpolation tool into
   official GRASS GIS distribution.
 
 \bigskip
 %%% ML: polygon -> diagram
-\keywords{Keywords}{GIS, GRASS GIS, natural neighbour interpolation, Delaunay triangulation, Voronoi's polygons}
+%%% AL: opraveno
+\keywords{Keywords}{GIS, GRASS GIS, natural neighbour interpolation, Delaunay triangulation, Voronoi's diagram}
 
 \end{abstract}
 \selectlanguage{czech}
@@ -147,9 +151,10 @@ V Praze dne .................
 
 %%% ML: Mozna zminit i Tomase Bayera, ale tak aby to nebylo v
 %%% konfliktu s oponetskym posudkem
-Chtěl bych poděkovat mému vedoucímu bakalářské práce, Ing. Martinu
+%%% AL: TB pridan
+Chtěl bych poděkovat mému vedoucímu bakalářské práce, Ing. Martinovi
 Landovi, Ph.D., za cenné rady a čas, který mi věnoval při
-konzultacích. Dále bych rád poděkoval své rodině, přátelům a okolí za
+konzultacích. Dál bych chtěl poděkovat Ing. Tomášovi Bayerovi, Ph.D. za konzultace a za vhled, který mi do problematiky triangulací poskytl. Také bych rád poděkoval své rodině, přátelům a okolí za
 podporu po celou dobu studia.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -193,14 +198,18 @@ poskytuje kvalitní výstupy, a jeho začlenění do standardní distribuce
 GRASS GISu by mohlo být hojně využito.
 
 %%% ML: mozna by se tu hodil vice minuly cas, ale je to jedno
+%%% AL: zmeneno na minuly cas
 %%% ML: mozna by se hodily odkazy na jednotlive kapitoly v textu
-V současné době je interpolace metodou přirozeného souseda prováděna
+%%% AL: pridany odkazy
+Až doposud byla interpolace metodou přirozeného souseda prováděna
 pomocí modulů \emph{v.surf.nnbathy} a \emph{r.surf.nnbathy} z
 %%% ML: tady by se hodila poznamka pod carou, vysvetlit co je Bash
-rozšíření Add-Ons, které jsou navíc napsané v Bashi. Tyto moduly jsou
+%%% AL: pridan footnote.
+%%% AL: mam pouzivat termin "napsany v Bashi" nebo spis "shellovy skript"?
+rozšíření Add-Ons, které jsou navíc napsané v Bashi\footnote{Bash je unixový shell a v linuxových systémech slouží jako příkazový interpret.} (kapitola \ref{sub:Bash}). Tyto moduly jsou
 však podporované pouze pro GRASS GIS do verze 6. Nová verze GRASS GIS
 7 již moduly psané v Bashi nepodroruje. Jako první krok, je tedy
-nutné moduly přepsat do podporovaného programovacího jazyka -- Pythonu.
+nutné moduly přepsat do podporovaného programovacího jazyka - Pythonu.
 
 \newpage
 
@@ -229,8 +238,9 @@ výpočetní geometrie a o jejím začlenění do GRASS GISu se již uvažuje.
 %%% ML: url GRASS bych z uvodu odstranil, otazka je zda poznamky pod
 %%% carou nedat primo do textu do zavorek, kazdopadne Ti tam chybi
 %%% \url{}
+%%% AL: URL z uvodu odstraneno, footnoty presunuty do textu do zavorek
 GRASS (Geographic Resources Analysis Support System)
-GIS\footnote{http://grass.osgeo.org/} je geografický informační systém
+GIS je geografický informační systém
 pro správu a analýzu prostorových dat, obrazových záznamů, produkci
 map a grafických výstupů, prostorové modelování a 3D vizualizaci. Na
 mnoha platformách (GNU/Linux, MS Windows, MAC OS) umožňuje práci s
@@ -256,13 +266,13 @@ světě.
 
 \subsection{GRASS GIS Add-Ons}
 
-GRASS GIS je od roku 1982 v neustálem vývoji. Síla a úspěch GRASS GISu
+GRASS GIS{\url{http://grass.osgeo.org/} je od roku 1982 v neustálem vývoji. Síla a úspěch GRASS GISu
 je založená hlavně na komunitě uživatelů. S ohledem na to, je
 filozofií vývojového týmu GRASS GISu vést uživatele k tvorbě jejich
 vlastních nástrojů a aplikací pro GRASS GIS. Pokud uživatel vyvine
 nějaký nástroj, který by mohl být užitečný ostatním uživatelům, má
 možnost svůj kód zveřejnit a zpřístupnit ostatním uživatelům pomocí
-Add-Ons\footnote{http://grass.osgeo.org/download/addons/}.
+Add-Ons(\url{http://grass.osgeo.org/download/addons/}).
 
 \newpage
 \section{Delaunayova triangulace}
@@ -300,6 +310,7 @@ kterýmikoliv body množiny bodů $P$ leží uvnitř obalu.
 
 %%% ML: zakomentovano (\newpage), tak aby se veslo na jednu stranu
 %%% ML: linky mi prijdou prilis tenke, je vubec neco videt kdyz to vytisknes?
+%%% AL: tlustsi linie
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
@@ -312,8 +323,9 @@ kterýmikoliv body množiny bodů $P$ leží uvnitř obalu.
 \subsection{Validní a regulérní triangulace}
 
 %%% ML: neni triangulace proces, postup?
-V podstatě by se dalo říct, že triangulace je jakákoli trojúhelníková
-síť mezi body v prostoru. Tato práce se však bude zabývat triangulační
+%%% AL: opraveno
+Triangulace je proces vytváření trojúhelníkové
+sítě mezi body v prostoru. Ne všechny trojúhelníkové sítě jsou pro nás ale zajímavé. Proto se tato práce bude zabývat triangulační
 sítí se specifickými vlastnostmi.
 
 \begin{itemize}
@@ -373,11 +385,13 @@ mluvit o \emph{regulérní} triangulaci.
 %%% ML: osobne bych psal na techto mistech Obrazek s malym pismenem,
 %%% predpokladam, ze vychazis z Figure, v cestine jsou jina pravidla,
 %%% to je ale detail
-V případě triangulace na Obrázku \ref{fig:trian_valid_not_reg} se
+%%% AL: prepsano na obrazek
+V případě triangulace na obrázku \ref{fig:trian_valid_not_reg} se
 jedná o triangulaci validní, neboť splňuje všechny z prvních čtyř
 %%% ML: odkazujes na podminky cislem, potom bych pro jejich vycet
 %%% pouzil enumerate a ne itemize
-podmínek. Nicméně nesplňuje podmínku č. 7, neboť existují více jak
+%%% AL: puvodne tam byl enumerate, ale mel jsem problem s vkladanim obrazku do seznamu. Prepsal jsem odkazy na cisla
+podmínek. Nicméně nesplňuje poslední podmínku, neboť existují více jak
 právě dvě hraniční hrany, které vstupují do jednoho vrcholu na
 konvexním obalu, a triangulaci tedy nelze nazvat i regulérní.
 
@@ -390,7 +404,7 @@ konvexním obalu, a triangulaci tedy nelze nazvat i regulérní.
 
 \newpage
 
-Triangulace na Obrázku \ref{fig:train_not_valid} není validní, protože
+Triangulace na obrázku \ref{fig:train_not_valid} není validní, protože
 nesplňuje podmínku č. 3. Tím pádem se nejedná ani o triangulaci
 regulérní.
 
@@ -401,7 +415,7 @@ regulérní.
 \label{fig:triangulace}
 \end{figure}
 
-Na Obrázku \ref{fig:triangulace} už můžeme vidět validní a regulérní
+Na obrázku \ref{fig:triangulace} už můžeme vidět validní a regulérní
 triangulaci. Jedná se též o triangulaci \emph{optimální}, což je
 termín, kterým se budeme zabývat v kapitole \ref{subsec:Optim_trian}.
 
@@ -498,22 +512,22 @@ základě nejen MaxMin ale i MinMax podmínky.
 
 
 Nejčastěji tento jev nastává u čtyřúhelníku, jehož všechny vrcholy
-leží na kružnici. Jak je vidět na Obrázcích \ref{fig:neutral_case_1} a
+leží na kružnici. Jak je vidět na obrázcích \ref{fig:neutral_case_1} a
 \ref{fig:neutral_case_2}, maximální minimální úhel triangulace je
 v~obou případech úhel $\alpha$, což je obvodový úhel nejkratší strany
 čtyřúhelníku. V~tomto případě se jedná o neutrální případ pro MaxMin
 podmínku. Pokud by tedy triangulace byla hodnocena pouze na základě
 MaxMin podmínky, mohly by být obě triangulace prohlášeny za
 optimální. Už od pohledu je ale zřejmé, že lepší tvar trojúhelníků
-poskytujeme triangulace na Obrázku \ref{fig:neutral_case_1}. Pokud je
+poskytujeme triangulace na obrázku \ref{fig:neutral_case_1}. Pokud je
 ale triangulace hodnocena i s ohledem na MinMax podmínknu, je
-prokázáno, že triangulace na Obrázku \ref{fig:neutral_case_2} je
+prokázáno, že triangulace na obrázku \ref{fig:neutral_case_2} je
 optimální.
 
 
 \paragraph{Edge swaping, legalizace}
 
-Na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} jsme
+Na obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} jsme
 si ukázali případ neutrálního případu pro MinMax podmínku. Proces, při
 kterém jsme zaměnili diagonálu čtyřúhelníku tak, aby byli oba
 trojúhelníky lokálně optimální, se nazývá \emph{Edge swaping.} Pokud
@@ -529,9 +543,9 @@ nazývá \emph{Delaunayova triangulace}\footnote{Delaunayova triangulace
   Delaunayho\cite{Delaunay}, který ji definoval v roce 1934.}.
 
 \newpage
-\subsection{Voronoiovy diagramy}
+\subsection{Voronoiův diagram}
 
-Voronoiovy diagramy souvisí s Delaunayovou triangulací. Představme si
+Voronoiův diagram souvisí s Delaunayovou triangulací. Představme si
 opět množinu bodů $P = \{p_1,...p_N\} $ v rovině $E^2$ a nechť je
 $d(p_i,p_j) $ Eukleidovská vzdálenost mezi body $p_i$ a $p_j$. Rovinu
 poté rozdělíme na oblasti $V(p_i,...,p_N)$, kde každému bodu $p_i$ z
@@ -569,11 +583,12 @@ kde každá oblast má maximálně $N-1$ stran.
 \centering
 \includegraphics[width=0.7\textwidth]{img/vor_pol.png}
 %%% ML: Opravdu polygony, nepouziva se termin bunka?
-\caption{Voronoivy polygony}
+%%% AL: Resil jsem s TB, existuje termin polygon, ale v tomhle pripade to maji byt bunky, opraveno
+\caption{Voronoivy buňky}
 \label{fig:vor_pol}
 \end{figure}
 
-Z Obrázku \ref{fig:vor_pol} je vidět, že oblasti přiřazené pro body na
+Z obrázku \ref{fig:vor_pol} je vidět, že oblasti přiřazené pro body na
 okraji konvexního obalu nejsou zcela ohraničené a uzavřené. Jednotlivé
 hranice oblastí nazýváme \emph{Voronoiovy polygony}, které jsou
 složeny z takzvaných \emph{Voronoiových hran a bodů}. O dvou bodech
@@ -590,7 +605,8 @@ meteorologických stanic.
 \label{sub:VDaDT}
 
 %%% ML: poznamka pod carou, co je planarni graf (nebo je to vysvetleno jinde?)
-DT je planární graf, který je duální k VD. Jedna konstrukce tedy může
+%%% AL: pridan footnote, staci takhle?
+DT je planární graf\footnote{Planární graf je takový graf, který lze v rovině nakreslit bez křížení hran.}, který je duální k VD. Jedna konstrukce tedy může
 být odvozena od druhé a naopak.  Pokud pro množinu bodů v rovině
 provedeme rozdělení do Voronoiových diagramů a následně spojíme
 úsečkami všechny Voronoiovi sousedy získáme Delaunayovu triangulaci.
@@ -605,9 +621,9 @@ provedeme rozdělení do Voronoiových diagramů a následně spojíme
 \end{floatrow}
 \end{figure}
 
-Na Obrázku \ref{fig:vd_vor} můžeme vidět Voronoiův diagram pro množinu
+Na obrázku \ref{fig:vd_vor} můžeme vidět Voronoiův diagram pro množinu
 bodů. Pokud každou dvojici Voronoiových sousedů spojíme spojnicí, jak
-je vidět na Obrázku \ref{fig:vd_del}, získáme několik trojúhelníků,
+je vidět na obrázku \ref{fig:vd_del}, získáme několik trojúhelníků,
 které se nepřekrývají a tvoří trojúhelníkovou síť. Spojnice mezi body,
 které jsou přiřazeny k neuzavřeným oblastím, tvoří konvexní obal. Pro
 trojúhelníkovou síť uvnitř tohoto konvexního obalu se jedná o
@@ -1027,7 +1043,7 @@ trojici $(v_i, e_j, t_k)$, kde $v_i$ je vrchol hrany $e_j$ v
 trojúhelníku $t_k$. V jednom trojúhelníky tedy můžeme definovat celkem
 šest dartů. Každý dart $d \in D$ odkazuje k jednomu vrcholu a třem
 dalším dartům z $D$ pomocí takzvaných $\alpha$\emph{- iteratorů}. Tyto
-iterátory jsou definovány takto (Obrázek \ref{fig:iterators}(b)):
+iterátory jsou definovány takto (obrázek \ref{fig:iterators}(b)):
 \begin{itemize}
 \item $\alpha_0(d)$ odkazuje k trojici s rozdílným vrcholem $v$, ale stejnou hranou $e$ a trojúhelníkem $t$,
 \item $\alpha_1(d)$ odkazuje k trojici s rozdílnou hranou $e$, ale stejným vrcholem $v$ a trojúhelníkem $t$,
@@ -1121,7 +1137,7 @@ $$G(x,y) = \sum_{i=1}^{n} \lambda_i  f(x_i, y_i)$$
 \label{fig:fig:canvas1}
 \end{figure}
 
-Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka \uv{ukradla} nejvíce plochy ze žlutého polygonu, nejméně ze zeleného. Při výpočtu funkční hodnoty vloženého bodu bude mít tedy hodnota žlutého polygonu největší váhu, zatímco hodnota zeleného bodu váhu nejmenší.\footnote{Vytvořeno pomocí \url{http://alexbeutel.com/webgl/voronoi.html}}
+Na obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka \uv{ukradla} nejvíce plochy ze žlutého polygonu, nejméně ze zeleného. Při výpočtu funkční hodnoty vloženého bodu bude mít tedy hodnota žlutého polygonu největší váhu, zatímco hodnota zeleného bodu váhu nejmenší.\footnote{Vytvořeno pomocí \url{http://alexbeutel.com/webgl/voronoi.html}}
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.7\textwidth]{img/canvas_2.png}
@@ -1142,6 +1158,7 @@ Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka \uv{ukradla
 \newpage
 \section{Postup řešení}
 \subsection{Bash}
+\label{sub:Bash}
 
 Při řešení otázky, jak implementovat metodu přirozeného souseda pro
 GRASS 7, se vycházelo z modulu napsaného pro GRASS GIS 6. Jednalo se o
