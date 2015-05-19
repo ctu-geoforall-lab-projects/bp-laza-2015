@@ -110,7 +110,8 @@ int main(int argc, char *argv[])
             std::vector< std::pair< Point, Coord_type > > coords;
             Coord_type norm = CGAL::natural_neighbor_coordinates_2(T, p,std::back_inserter(coords)).second;
             Coord_type res =  CGAL::linear_interpolation(coords.begin(), coords.end(), norm, Value_access(function_values));
-            //G_debug(5, "x: %f y: %f -> res: %f", coor_x, coor_y, res);
+            G_debug(5, "x: %f y: %f -> res: %f (row=%d; col=%d)",
+                    coor_x, coor_y, res, rows, cols);
             coor_x += ewres;
             std::cout << res << " ";
         }
