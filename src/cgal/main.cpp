@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     G_get_window(&window);
     nsres = window.ns_res;
     ewres = window.ew_res;
-
+    G_message("cols %i, rows %i", window.cols, window.rows);
 
     /* perform NN interpolation */
     G_message(_("Computing..."));
