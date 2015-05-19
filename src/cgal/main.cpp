@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     coor_y = window.north;        
 
     for (int rows=0 ; rows<window.rows ; rows++) {
-        G_percent(rows, window.rows, 5);
+        G_percent(rows, window.rows, 2);
 
         coor_x = window.west;
         for (int cols=0 ; cols<window.cols ; cols++) {
