@@ -226,6 +226,9 @@ výpočetní geometrie a o jejím začlenění do GRASS GISu se již uvažuje.
 \newpage
 \section{GRASS GIS}
 
+%%% ML: url GRASS bych z uvodu odstranil, otazka je zda poznamky pod
+%%% carou nedat primo do textu do zavorek, kazdopadne Ti tam chybi
+%%% \url{}
 GRASS (Geographic Resources Analysis Support System)
 GIS\footnote{http://grass.osgeo.org/} je geografický informační systém
 pro správu a analýzu prostorových dat, obrazových záznamů, produkci
@@ -240,16 +243,16 @@ vyvíjen U.S. Army Corps of Enginneer/CERL (Construction Engineering
 Research Lab) pro vojenské účely. Nicméně koncem osmdesátých let byly
 veškeré zdrojové kódy dány k dispozici veřejnosti. Na začátku
 devadesátých let se začal pomocí internetu celosvětově rozšiřovat. V
-roce 1995 CERL odstoupil od projektu a vývoje se ujal GRASS
+roce 1995 CERL odstoupil od projektu a vývoje se později ujal GRASS
 Development Team, který zahrnoval odborníky z celého světa.
 
 GRASS je jeden z nejznámějších open-source GIS softwarů, jehož vývoj
 trvá déle než třicet let. Jádro softwaru je napsáno v jazyce C. Avšak
 snahou vývojářů je rozšíření GRASSu mezi širší odbornou veřejnost a
 proto v rámci snadnějšího použití jsou do programu začleněny moduly
-napsané v jazyce Python nebo C. Aktuálně je k dispozici verze 7, na
+napsané v jazyce Python nebo C/C++. Aktuálně je k dispozici verze 7, na
 jejímž vývoji se podílí několik vývojářů z řad dobrovolníků po celém
-světe.
+světě.
 
 \subsection{GRASS GIS Add-Ons}
 
@@ -265,50 +268,53 @@ Add-Ons\footnote{http://grass.osgeo.org/download/addons/}.
 \section{Delaunayova triangulace}
 
 Interpolace metodou přirozeného souseda vychází z Delanayovi
-triangulace(DT) či Voronoiova diagramu(VD). Jak DT či VD jsou důležité
+triangulace (DT) či Voronoiova diagramu (VD). Jak DT tak VD jsou důležité
 konstrukce ve výpočetní geometrii. Delaunayova triangulace lze odvodit
 z Voronoiova diagramu a stejně tak Voronoiův diagram se dá naopak
 odvodit z Dalunayovi triangulace.
 
 \subsection{Triangulace obecně}
-\textbf{Definice\cite{TB1}:}
-
-Triangulace $\Delta$ nad množinou bodu $P$ představuje takové planární
-rozdělení, které vytvoří soubor $m$ trojúhelníků
-$t = \{ t_1, t_2,...,t_m \}$ a hran tak, aby platilo:
+\textbf{Definice\cite{TB1}:} Triangulace $\Delta$ nad množinou bodu
+$P$ představuje takové planární rozdělení, které vytvoří soubor $m$
+trojúhelníků $t = \{ t_1, t_2,...,t_m \}$ a hran tak, aby platilo:
 
 Libovolné dva trojúhelníky $t_i$,$t_j \in \Delta, (i \neq j)$, mají
 společnou nejvýše hranu.
 
 Sjednocení všech trojúhelníků $t \in \Delta$ tvoří doménu $\Omega$.
 
-Uvnitř žádného trojúhelníku neleží žádný další bod z P.
+Uvnitř žádného trojúhelníku neleží žádný další bod z $P$.
 
 \bigskip
 
 Triangulace má širokou škálu aklikací. V kartografii a GISech se
-využívá pro tvorbu DMT. V DPZ lze využít pro tvorbu prostorových
+využívá pro tvorbu DMT. V DPZ ji lze využít pro tvorbu prostorových
 modelů, své uplatnění najde také v počítačové grafice a vizualizaci
 prostorových dat a mnoho dalších.
 
 V našem případě budeme triangulaci provádět uvnitř takzvaného
 \emph{konvexního obalu}. Konvexní obal množiny bodů $P$ představuje
 takový konvexní mnohoúhelník, který obsahuje všechny body množiny bodů
-P, má co nejmenší plochu a ve kterém zároveň spojnice mezi
+$P$, má co nejmenší plochu a ve kterém zároveň spojnice mezi
 kterýmikoliv body množiny bodů $P$ leží uvnitř obalu.
 
-\newpage
+%%% ML: zakomentovano (\newpage), tak aby se veslo na jednu stranu
+%%% ML: linky mi prijdou prilis tenke, je vubec neco videt kdyz to vytisknes?
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body.png}}{\caption{Soubor bodů}}{\label{fig:soubor_bodu}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/domain.png}}{\caption{Konvexní obal nad doménou $\Omega$ }}{\label{fig:domena}}
+\ffigbox{\includegraphics[width=0.35\textwidth]{img/body.png}}{\caption{Soubor bodů}}{\label{fig:soubor_bodu}}
+\ffigbox{\includegraphics[width=0.35\textwidth]{img/domain.png}}{\caption{Konvexní obal nad doménou $\Omega$ }}{\label{fig:domena}}
 \end{floatrow}
 \end{figure}
 
 \newpage
 \subsection{Validní a regulérní triangulace}
-V podstatě by se dalo říct, že triangulace je jakákoli trojúhelníková síť mezi body v prostoru. Tato práce se však bude zabývat triangulační sítí se specifickými vlastnostmi.
+
+%%% ML: neni triangulace proces, postup?
+V podstatě by se dalo říct, že triangulace je jakákoli trojúhelníková
+síť mezi body v prostoru. Tato práce se však bude zabývat triangulační
+sítí se specifickými vlastnostmi.
 
 \begin{itemize}
 \item Žádný z trojúhelníků $t_{ijk}$ není zdegenerovaný, tzn. že vrcholy $i, j, k$ neleží na přímce.
@@ -320,7 +326,7 @@ V podstatě by se dalo říct, že triangulace je jakákoli trojúhelníková s�
 \label{fig:podm_1}
 \end{figure}
 \begin{itemize}
-\item Žádná dvojice trojúhelníků se nepřekrývá, tzn $Int(t_{ijk}) \cap Int(t_{lmn}) = \emptyset$.
+\item Žádná dvojice trojúhelníků se nepřekrývá, tzn. $Int(t_{ijk}) \cap Int(t_{lmn}) = \emptyset$.
 \end{itemize}
 \begin{figure}[h!]
 \centering
@@ -352,7 +358,7 @@ mluvit o \emph{regulérní} triangulaci.
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.25\textwidth]{img/podm_domena.png}
+\includegraphics[width=0.35\textwidth]{img/podm_domena.png}
 \caption{Nespojitá doména, triangulace obsahující díry}
 \label{fig:podm_domena}
 \end{figure}
@@ -364,8 +370,13 @@ mluvit o \emph{regulérní} triangulaci.
 \label{fig:trian_valid_not_reg}
 \end{figure}
 
+%%% ML: osobne bych psal na techto mistech Obrazek s malym pismenem,
+%%% predpokladam, ze vychazis z Figure, v cestine jsou jina pravidla,
+%%% to je ale detail
 V případě triangulace na Obrázku \ref{fig:trian_valid_not_reg} se
 jedná o triangulaci validní, neboť splňuje všechny z prvních čtyř
+%%% ML: odkazujes na podminky cislem, potom bych pro jejich vycet
+%%% pouzil enumerate a ne itemize
 podmínek. Nicméně nesplňuje podmínku č. 7, neboť existují více jak
 právě dvě hraniční hrany, které vstupují do jednoho vrcholu na
 konvexním obalu, a triangulaci tedy nelze nazvat i regulérní.
@@ -415,7 +426,7 @@ podlouhlým, štíhlým nebo téměř degenerovaným trojúhelníkům, tedy
 trojúhelníkům s příliš ostrými nebo s příliš tupými úhly.
 
 \paragraph{Kruhová podmínka}
-
+~\newline
 Definice: Nechť hrana $\overline{p_ip_j}$ inciduje s trojúhelníkem
 $t_1$ tvořeným vrcholy $p_i,p_j,p_k$ a trojúhelníkem $t_2$ tvořeným
 vrcholy $p_i,p_j,p_l$ a kružnice $k$ procházející body
@@ -433,17 +444,17 @@ Pokud nad množinou bodů P provedeme všechny možné triangulace, můžeme
 nejoptimálnější triangulaci určit pomocí MaxMin popř. MinMax
 podmínky. V případě MaxMin podmínky je pro každou možnou triangulaci
 nalezen největší minimální vnitřní úhel trojúhelníku a ten je porovnán
-s největším minimálním úhel ostatních triangulací, což vede k
+s největším minimálním úhlem ostatních triangulací, což vede k
 eliminaci trojúhelníků s velmi tupými úhly. U MinMax podmínky se
 postupuje obdobně, pouze se porovnávají nejmenší maximální vnitřní
 úhly trojúhelníků a eliminují se tak trojúhelníky s velmi ostrými
 úhly.
 
 \newpage
-MinMax podmínka: Eliminace trojúhelníků s příliš tupými
+{\bf MinMax podmínka} Eliminace trojúhelníků s příliš tupými
 úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl
 od triangulace $\Delta^{'}(P)$ optimální, je–li největší úhel $\alpha$
-generovaný triangulací $\Delta(P)$ menší než největší úhel
+generovaný triangulací $\Delta(P)$ je menší než největší úhel
 $\alpha^{'}$ generovaný triangulací $\Delta^{'}(P)$.
 \begin{center}
 $\alpha_{max} = max(\alpha_i(\Delta))$
@@ -455,10 +466,10 @@ $\alpha_{max} < \alpha^{'}_{max}$
 
 \bigskip
 
-MaxMin podmínka: Eliminace trojúhelníků s příliš ostrými
+{\bf MaxMin podmínka} Eliminace trojúhelníků s příliš ostrými
 úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl
 od triangulace $\Delta^{'}(P)$ optimální, je–li nejmenší úhel $\alpha$
-generovaný triangulací $\Delta(P)$ větší než nejmenší úhel
+generovaný triangulací $\Delta(P)$ je větší než nejmenší úhel
 $\alpha^{'}$ generovaný triangulací $\Delta^{'}(P)$.
 \begin{center}
 $\alpha_{min} = min(\alpha_i(\Delta))$
@@ -474,23 +485,23 @@ Problém nastává ve chvíli, kdy některé body, mezi kterými chceme
 triangulaci provést, leží na kružnici nebo se tomu limitně blíží. V
 takových chvílí nastává takzvaný neutrální případ pro MaxMin
 podmínku. V některých případech to může vést k nejednoznačnému určení,
-která z triangulací je optimální a musíme si pomoci hodnocením na
+která z~triangulací je optimální a musíme si pomoci hodnocením na
 základě nejen MaxMin ale i MinMax podmínky.
 
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/minmax2_pokus.png}}{\caption{Případ1}\label{fig:neutral_case_1}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/minmax1_pokus.png}}{\caption{Případ2}\label{fig:neutral_case_2}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/minmax2_pokus.png}}{\caption{Případ 1}\label{fig:neutral_case_1}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/minmax1_pokus.png}}{\caption{Případ 2}\label{fig:neutral_case_2}}
 \end{floatrow}
 \end{figure}
 
 
 Nejčastěji tento jev nastává u čtyřúhelníku, jehož všechny vrcholy
 leží na kružnici. Jak je vidět na Obrázcích \ref{fig:neutral_case_1} a
-\ref{fig:neutral_case_2}, maximální minimální úhel triangulace je v
-obou případech úhel $\alpha$, což je obvodový úhel nejkratší strany
-čtyřúhelníku. V tomto případě se jedná o neutrální případ pro MaxMin
+\ref{fig:neutral_case_2}, maximální minimální úhel triangulace je
+v~obou případech úhel $\alpha$, což je obvodový úhel nejkratší strany
+čtyřúhelníku. V~tomto případě se jedná o neutrální případ pro MaxMin
 podmínku. Pokud by tedy triangulace byla hodnocena pouze na základě
 MaxMin podmínky, mohly by být obě triangulace prohlášeny za
 optimální. Už od pohledu je ale zřejmé, že lepší tvar trojúhelníků
@@ -505,7 +516,7 @@ optimální.
 Na Obrázcích \ref{fig:neutral_case_1} a \ref{fig:neutral_case_2} jsme
 si ukázali případ neutrálního případu pro MinMax podmínku. Proces, při
 kterém jsme zaměnili diagonálu čtyřúhelníku tak, aby byli oba
-trojúhelníky lokálně optimální, se nazýva \emph{Edge swaping.} Pokud
+trojúhelníky lokálně optimální, se nazývá \emph{Edge swaping.} Pokud
 budeme tento proces aplikovat pro celou triangulaci dojde k takzvané
 \emph{legalizaci} triangulace.
 
@@ -523,13 +534,13 @@ nazývá \emph{Delaunayova triangulace}\footnote{Delaunayova triangulace
 Voronoiovy diagramy souvisí s Delaunayovou triangulací. Představme si
 opět množinu bodů $P = \{p_1,...p_N\} $ v rovině $E^2$ a nechť je
 $d(p_i,p_j) $ Eukleidovská vzdálenost mezi body $p_i$ a $p_j$. Rovinu
-po té rozdělíme na oblasti $V(p_i,...,p_N)$, kde každému bodu $p_i$ z
+poté rozdělíme na oblasti $V(p_i,...,p_N)$, kde každému bodu $p_i$ z
 množiny $P$ přiřadíme takovou oblast, která splňuje následující
 podmínku:
 
 $V(p_i) = \{ x: d(x, p_i) < d(x, p_j), j = 1,...,N\}$.
 
-Pro každou takovouto oblast přiřazenou bodu $p_i$ po té platí, že
+Pro každou takovouto oblast přiřazenou bodu $p_i$ platí, že
 všechny body uvnitř této oblasti jsou k bodu $p_i$ blíž než ke
 kterémukoliv jinému bodu z množiny $P$. Toto rozdělení roviny se
 nazývá \emph{Voronoiův diagram (VD)} množiny bodů a každá uzavřená
@@ -549,14 +560,15 @@ Voronoiův diagram má následující vlastnosti:
 
 Nechť $H(p_i,P_j)$ je polorovina obsahující všechny body v rovině,
 jejichž vzdálenost od bodu $p_i$ je menší než od bodu $p_j$. Potom
-Voronoiova oblast $V(p_i)$ je průnikem N-1 polorovin,
+Voronoiova oblast $V(p_i)$ je průnikem $N-1$ polorovin,
 $V(p_i)= \bigcap\limits_{\substack{j=1,...,N \\ i\not=j}}H(p_i,p_j)$,
-kde každá oblast má maximálně N-1 stran.
+kde každá oblast má maximálně $N-1$ stran.
 
 \newpage
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.9\textwidth]{img/vor_pol.png}
+\includegraphics[width=0.7\textwidth]{img/vor_pol.png}
+%%% ML: Opravdu polygony, nepouziva se termin bunka?
 \caption{Voronoivy polygony}
 \label{fig:vor_pol}
 \end{figure}
@@ -577,6 +589,7 @@ meteorologických stanic.
 \subsection{Voronoiovy diagramy a Delaunayova triangulace}
 \label{sub:VDaDT}
 
+%%% ML: poznamka pod carou, co je planarni graf (nebo je to vysvetleno jinde?)
 DT je planární graf, který je duální k VD. Jedna konstrukce tedy může
 být odvozena od druhé a naopak.  Pokud pro množinu bodů v rovině
 provedeme rozdělení do Voronoiových diagramů a následně spojíme
@@ -610,7 +623,7 @@ je také zřejmé, že Voronoiovy hrany leží na ose Delaunayových hran.
 \label{sec:algoritmy}
 Triangulační algoritmy jsou poměrně dobře matematicky prozkoumaná
 oblast, ke kterým je k dispozici široký teoretický základ. Při hledání
-vhodného algoritmu mje třeba zohlednit následující požadavky:
+vhodného algoritmu je třeba zohlednit následující požadavky:
 \begin{itemize}
 \item Jednoduchost algoritmu a jeho snadná implementace.
 \item Dostatečná rychlost i pro velké množiny bodů (n>1E6), ideálně aby se výpočetní čas blížil $O(n . log(n))$.
@@ -618,7 +631,7 @@ vhodného algoritmu mje třeba zohlednit následující požadavky:
 \item Převod do vyšších dimenzí.
 \item Možnost paralelizace algoritmu.
 \end{itemize}
-Vhodný algoritmus je vhodné vybírat na základe datových struktur a
+Vhodný algoritmus je vhodné vybírat na základě datových struktur a
 konkrétním případu. Ne vždy lze dokonale splnit všechny požadavky,
 např. jednoduché implementace mají delší výpočetní čas. Naopak
 algoritmy s kratším výpočetním časem jsou dost náročné na
@@ -629,12 +642,16 @@ implementaci.
 \emph{Lokální optimalizace (LO)} je proces přetvoření libovolné
 triangulace na DT. Proces je prováděn pomocí prohazování nelegálních
 hran v dvojicích trojúhelníků tvořících konvexní čtyřúhelník na
+%%% ML: v cestine se na techto mistech pise male pismeno, ale je
+%%% mozne, ze se to podle novych pravidel pravopisu zmenilo a je mozne
+%%% i psat velka pismena v tomto kontextu (je to na vice mistech v
+%%% textu)
 základě Kruhové nebo MaxMin podmínky.
 
 Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je
 čtyřúhelník tvořený dvěma trojúhelníky se společnou hranou
-$e_i$. Možnost, že čtyřúhelník je nekonvexní nebo že všechny body leží
-na kružnici, nebude nyní brán v úvahu. Po té je za použití MaxMin nebo
+$e_i$. Možnost, že čtyřúhelník je nekonvexní nebo že všechny jeho body leží
+na kružnici, nebude nyní brán v úvahu. Poté je za použití MaxMin nebo
 Kruhové podmínky rozhodnuto, zda je třeba prohodit hranu $e_i$. V
 případě, že po použití Lokální optimalizace není potřeba prohodit
 hranu, můžeme dvojici trojúhelníků a jejich společnou hranu prohlásit
@@ -642,6 +659,7 @@ za lokálně optimální. V případě, že budeme lokální optimalizaci
 používat opakovaně pro všechny hrany v triangulaci, dokud nebudou
 všechny hrany lokálně optimální, získáme optimální triangulaci.
 
+%%% ML: Nelze pocestit titulek (?) - detail
 \begin{algorithm}
 \caption{LOP}
 \begin{algorithmic}[1]
@@ -667,7 +685,7 @@ všechny hrany lokálně optimální, získáme optimální triangulaci.
 Tento algoritmus je podobný tomu předchozímu, pouze využívá jiný
 postup, jak nalézt počáteční triangulaci $\Delta$. Na začátku se
 nalezne bod $p$ z množiny $P$ takový, který je nejbližší jejímu
-středu. Po té je paprskovitě spojen se všemi zbývajícími body množiny
+středu. Poté je paprskovitě spojen se všemi zbývajícími body množiny
 $P$. Tyto body se následně seřadí podle orientace a vzdálenosti od
 bodu $p$ a v tomto pořadí se spojí hranami. Potom se vytvoří hrany na
 hranici triangulace. Vzniklá triangulace se dále postupně po
@@ -686,7 +704,7 @@ jednotlivých hranách legalizuje stejně jako v předchozím případě.
 
 Tento algoritmus je poměrně jednoduchý a snadný na implementaci,
 obzvlášť pokud je zvolena vhodná datová struktura. Jeho složitost je
-$0.(n^2)$, kterou lze úpravami zlepšit až na $0.(n.log(n))$. Tato
+$O(n^2)$, kterou lze úpravami zlepšit až na $O(n.log(n))$. Tato
 metoda je tvořena třemi kroky. Na začátku je vytvořen konvexní obal
 množiny bodů $P$ a pro jeho lomové body se provede triangulace. Do
 vzniklé triangulace se postupně vkládají body z množiny $P$. Tato nově
@@ -750,6 +768,7 @@ triangulace je už v procesu tvoření Delaunayova a není tedy třeba
 \label{fig:stepbystep}
 \end{figure}
 
+%%% ML: tady nemas nektere veci prelozene (Add ... do)
 \newpage
 \begin{algorithm}[h!]
 \caption{A step-by-step algorithm}
@@ -791,7 +810,7 @@ tři body, v tom případě vytvoříme trojúhelník, nebo dva body, kdy
 vytvoříme hranu.
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.8\textwidth]{img/div_n_conq.png}
+\includegraphics[width=0.65\textwidth]{img/div_n_conq.png}
 \caption{Rekurzivní dělení na dílčí podmnožiny, zdroj: \cite{triangulation}}
 \label{fig:div_n_conq}
 \end{figure}
@@ -805,16 +824,18 @@ je nejnáročnější část tohoto algoritmu.
 
 \bigskip
 
-Algoritmus Divide and Conquer využívá modul \emph{v.delaunay}, o
-kterém budeme mluvit později, viz kapitola \ref{subsec:v.delaunay}.
-
-\newpage
+%%% ML: dal jsem to na jednu stranku\newpage
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.8\textwidth]{img/merge.png}
+\includegraphics[width=0.65\textwidth]{img/merge.png}
 \caption{Propojování dílčích triangulací, zdroj: \cite{triangulation}}
 \label{fig:merge}
 \end{figure}
+
+%%% ML: tady pouzivas rovnou anglicky termin, predtim ho nemas uveden
+%%% ani v zavorce
+Algoritmus Divide and Conquer využívá GRASS modul \emph{v.delaunay}, o
+kterém budeme mluvit později, viz kapitola \ref{subsec:v.delaunay}.
 
 
 \newpage
@@ -925,18 +946,21 @@ Tato struktura uchovává topologický model na základě orientovaných
 polovičních hran. Princip je rozdělit každou hranu na dvě orientované
 \emph{půl-hrany}, z nichž každá směřuje opačným směrem. Každému
 trojúhelníku můžeme tak přiřadit tři půl-hrany, které jsou orientované
-v protisměru hodinových ručiček. Každá půl-hrana začíná v
-\emph{počátečním vrcholu} a směřuje do \emph{cílového vrcholu}. V
+v protisměru hodinových ručiček. Každá půl-hrana začíná
+v~\emph{počátečním vrcholu} a směřuje do \emph{cílového vrcholu}. V
+%%% ML: misto poiter spise ukazatel - detail
 half-edge struktuře si každá půl-hrana uchovává pointer na svůj
 počáteční bod, na svůj koncový bod, na předchozí i následující
 půl-hranu, patřící stejnému trojúhelníku a nakonec pointer na opačně
 orientovanou hranu, tzv. \emph{twin-edge}. Pointer na twin-edge hranu
+%%% ML: pomlcka pul-hrana nepusobi prilis cesky, lepe vypada
+%%% "pulhrana", otrocky prepisovat z anglictiny neni nutne - detail
 nemají pouze půl-hrany ležící na konvexním obalu triangulace.
 
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/half_edge.png}
-\caption{Half-edge struktura (Zdroj: http://pointclouds.org/blog/nvcs/martin/index.php)}
+\caption{Half-edge struktura (Zdroj: \url{http://pointclouds.org/blog/nvcs/martin/index.php})}
 \label{fig:half_edge}
 \end{figure}
 
@@ -988,8 +1012,8 @@ GISu, kapitola \ref{subsec:v.delaunay}.
 \begin{lstlisting}[caption={Definice datové struktury}]
 class Half-edge
 {
-	Point *originating_vertex
-	Half-edge *edge *next_edge *twin_edge
+	Point *originating_vertex;
+	Half-edge *edge, *next_edge, *twin_edge;
 	
 };
 \end{lstlisting}
@@ -1059,7 +1083,7 @@ Pro výpočet vah využívá Voronoiových diagramů. Do VD pro měřené body
 vkládá body určené k interpolaci. Vložením nového bodu dojde v jeho
 okolí k přetvoření VD. K vypočtení váhy se používá jak VD před
 vložením bodu, tak VD po vložení bodu. Voronoiova buňka nově vloženého
-bodu překrývá několik buněk z původního VD. Právě tento překryv, který
+bodu překrývá několik buněk z~původního VD. Právě tento překryv, který
 nově vložený bod \uv{ukradne} z plochy původních buněk slouží k
 výpočtu váhy pro interpolaci.
 
@@ -1067,7 +1091,7 @@ výpočtu váhy pro interpolaci.
 \bigskip
 Matematicky tedy můžeme zapsat:
 \newline
-$$V(p)=\sum_{i=1}^n V_i$$,
+$$V(p)=\sum_{i=1}^n V_i$$
 
 \noindent kde $V(p)$ je plocha nově vloženého bodu a $V_i$ je část
 plochy původních buněk, o kterou byly vložením buňky \uv{okradeny}.
@@ -1085,28 +1109,31 @@ $$G(x,y) = \sum_{i=1}^{n} \lambda_i  f(x_i, y_i)$$
 \newpage
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.9\textwidth]{img/canvas_0.png}
+\includegraphics[width=0.7\textwidth]{img/canvas_0.png}
 \caption{Původní VD}
 \label{fig:fig:canvas0}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.9\textwidth]{img/canvas_1.png}
+\includegraphics[width=0.7\textwidth]{img/canvas_1.png}
 \caption{Ukradené plochy}
 \label{fig:fig:canvas1}
 \end{figure}
 
-\newpage
-Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka \uv{ukradla} nejvíce plochy ze žlutého polygonu, nejméně ze zeleného. Při výpočtu funkční hodnoty vloženého bodu bude mít tedy hodnota žlutého polygonu největší váhu, zatímco hodnota zeleného bodu váhu nejmenší.\footnote{Vytvořeno pomocí http://alexbeutel.com/webgl/voronoi.html}
+Na Obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka \uv{ukradla} nejvíce plochy ze žlutého polygonu, nejméně ze zeleného. Při výpočtu funkční hodnoty vloženého bodu bude mít tedy hodnota žlutého polygonu největší váhu, zatímco hodnota zeleného bodu váhu nejmenší.\footnote{Vytvořeno pomocí \url{http://alexbeutel.com/webgl/voronoi.html}}
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.9\textwidth]{img/canvas_2.png}
+\includegraphics[width=0.7\textwidth]{img/canvas_2.png}
 \caption{Nově vzniklý VD}
 \label{fig:fig:canvas2}
 \end{figure}
 
+\newpage
+
 \subsection{Nelineární interpolace na základě gradientu}
+
+%%% ML: jak to dopadlo?
 \todo[inline]{Konzultace doc. Mayer}
 
 \newpage	
