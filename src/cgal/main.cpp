@@ -36,8 +36,9 @@ extern "C" {
 
 int main(int argc, char *argv[])
 {
-    int field;
+    char field;
     int npoints;
+    char *column;
 
     int fd, maskfd;
     CELL *mask;
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
     struct GModule *module;
     
     struct {
-        struct Option *input, *field, *output;
+        struct Option *input, *field, *output, *column;
     } opt;
 
     struct Map_info In;
@@ -73,6 +74,13 @@ int main(int argc, char *argv[])
     opt.field = G_define_standard_option(G_OPT_V_FIELD_ALL);
 
     opt.output = G_define_standard_option(G_OPT_V_OUTPUT);
+    
+    opt.column = G_define_standard_option(G_OPT_DB_COLUMN);
+    opt.column->required = NO;
+    opt.column->label = _("Name of attribute column with values to interpolate");
+    opt.column->description = _("If not given and input is 2D vector map then category values are used. "
+                               "If input is 3D vector map then z-coordinates are used.");
+    opt.column->guisection = _("Values");
 
     if (G_parser(argc, argv)) {
         exit(EXIT_FAILURE);
@@ -83,9 +91,11 @@ int main(int argc, char *argv[])
     Vect_set_error_handler_io(&In, NULL);
 
     field = Vect_get_field_number(&In, opt.field->answer);
+    column = opt.column->answer;
 
     /* read points */
-    npoints = read_points(&In, field, function_values, points);
+    npoints = read_points(opt.input->answer, opt.field->answer,
+	       opt.column->answer, function_values, points);
     Vect_close(&In);
 
     /* get the window */
