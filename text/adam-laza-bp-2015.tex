@@ -536,7 +536,7 @@ budeme tento proces aplikovat pro celou triangulaci dojde k takzvané
 
 \paragraph{Delaunayova triangulace}
 
-Triangulace, která je optimální dle Kruhové nebo MaxMin úhlové
+Triangulace, která je optimální dle kruhové nebo MaxMin úhlové
 podmínky a která je definována nad konvexním obalem množiny bodů, se
 nazývá \emph{Delaunayova triangulace}\footnote{Delaunayova triangulace
   je pojmenována podle ruského matematika Borise Nikolaeviche
@@ -662,13 +662,14 @@ hran v dvojicích trojúhelníků tvořících konvexní čtyřúhelník na
 %%% mozne, ze se to podle novych pravidel pravopisu zmenilo a je mozne
 %%% i psat velka pismena v tomto kontextu (je to na vice mistech v
 %%% textu)
-základě Kruhové nebo MaxMin podmínky.
+%%% Nad tim jsem uvazoval. Nakonec tedy pisu s malym k. MaxMin a MinMax jsem nechal, prijde mi to prehlednejsi
+základě kruhové nebo MaxMin podmínky.
 
 Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je
 čtyřúhelník tvořený dvěma trojúhelníky se společnou hranou
 $e_i$. Možnost, že čtyřúhelník je nekonvexní nebo že všechny jeho body leží
 na kružnici, nebude nyní brán v úvahu. Poté je za použití MaxMin nebo
-Kruhové podmínky rozhodnuto, zda je třeba prohodit hranu $e_i$. V
+kruhové podmínky rozhodnuto, zda je třeba prohodit hranu $e_i$. V
 případě, že po použití Lokální optimalizace není potřeba prohodit
 hranu, můžeme dvojici trojúhelníků a jejich společnou hranu prohlásit
 za lokálně optimální. V případě, že budeme lokální optimalizaci
@@ -677,7 +678,7 @@ všechny hrany lokálně optimální, získáme optimální triangulaci.
 
 %%% ML: Nelze pocestit titulek (?) - detail
 \begin{algorithm}
-\caption{LOP}
+\caption{Lokální optimalizace}
 \begin{algorithmic}[1]
 \State Vytvoř pomocnou triangulaci $\Delta(P)$
 \State legal=false
@@ -785,9 +786,10 @@ triangulace je už v procesu tvoření Delaunayova a není tedy třeba
 \end{figure}
 
 %%% ML: tady nemas nektere veci prelozene (Add ... do)
+%%% AL: prelozeno do cestiny
 \newpage
 \begin{algorithm}[h!]
-\caption{A step-by-step algorithm}
+\caption{Step-by-step algoritmus}
 \begin{algorithmic}[1]
 \State $p_1$=náhodný bod z $P$, $p_2$=nejbližší bod k $p_1$
 \State Vytvoř hranu $\overline{e=p_1p_2}$
@@ -796,15 +798,15 @@ triangulace je už v procesu tvoření Delaunayova a není tedy třeba
 	\State prohod’ orientaci $\overline{e=p_1p_2} \Rightarrow \overline{e=p_2p_1}$
 \EndIf
 \State $e_2=\overline{p_2p}$, $e_3=\overline{pp_1}$
-\State  Add $e, e_2, e_3$ do AEL
-\While {AEL not empty}
+\State  Přidej $e, e_2, e_3$ do AEL
+\While {AEL není prázdný}
 	\State $e=\overline{p_1p_2}$ první hrana AEL
 	\State Změna orientace hrany $e=\overline{p_1p_2} \Rightarrow e=\overline{p_2p_1}$
 	\State Bod $p$ s nejmenší Delaunay vzdáleností $d_D(e)$ vlevo od $e$
 	\If {$p! =NULL$}
 		\State $e_2=\overline{p_2p}, e_3=\overline{pp_1}$
-		\State Add $e, e_2, e_3$ do AEL
-		\State Add $e$ do DT
+		\State Přidej $e, e_2, e_3$ do AEL
+		\State Přidej $e$ do DT
 	\EndIf
 	\State pop(e)
 \EndWhile
@@ -815,7 +817,7 @@ triangulace je už v procesu tvoření Delaunayova a není tedy třeba
 \subsection{Algoritmus Rozděl a panuj}
 \label{subsec:DnC_alg}
 
-Rozděl a panuj je přístup, který vede k paralelizaci. Pro tvorbu
+Rozděl a panuj (Divide and Conquer) je přístup, který vede k paralelizaci. Pro tvorbu
 Delaunayovské triangulaci nabízí nejlepší výsledky, co se výkonnosti
 týče. Tento přístup je založený na jednoduchých krocích:
 
@@ -850,7 +852,8 @@ je nejnáročnější část tohoto algoritmu.
 
 %%% ML: tady pouzivas rovnou anglicky termin, predtim ho nemas uveden
 %%% ani v zavorce
-Algoritmus Divide and Conquer využívá GRASS modul \emph{v.delaunay}, o
+%%% AL: pouzit cesky termin, anglicky pridan do zavorky
+Algoritmus Rozděl a panuj využívá GRASS modul \emph{v.delaunay}, o
 kterém budeme mluvit později, viz kapitola \ref{subsec:v.delaunay}.
 
 
@@ -960,18 +963,20 @@ Vrchol & \multicolumn{6}{|c|}{Sousední vrcholy} & Suma vrcholů \\ \hline \hlin
 
 Tato struktura uchovává topologický model na základě orientovaných
 polovičních hran. Princip je rozdělit každou hranu na dvě orientované
-\emph{půl-hrany}, z nichž každá směřuje opačným směrem. Každému
-trojúhelníku můžeme tak přiřadit tři půl-hrany, které jsou orientované
-v protisměru hodinových ručiček. Každá půl-hrana začíná
+\emph{půlhrany}, z nichž každá směřuje opačným směrem. Každému
+trojúhelníku můžeme tak přiřadit tři půlhrany, které jsou orientované
+v protisměru hodinových ručiček. Každá půlhrana začíná
 v~\emph{počátečním vrcholu} a směřuje do \emph{cílového vrcholu}. V
 %%% ML: misto poiter spise ukazatel - detail
-half-edge struktuře si každá půl-hrana uchovává pointer na svůj
+%%% AL:opraveno
+half-edge struktuře si každá půlhrana uchovává ukazatel na svůj
 počáteční bod, na svůj koncový bod, na předchozí i následující
 půl-hranu, patřící stejnému trojúhelníku a nakonec pointer na opačně
 orientovanou hranu, tzv. \emph{twin-edge}. Pointer na twin-edge hranu
 %%% ML: pomlcka pul-hrana nepusobi prilis cesky, lepe vypada
 %%% "pulhrana", otrocky prepisovat z anglictiny neni nutne - detail
-nemají pouze půl-hrany ležící na konvexním obalu triangulace.
+%%% AL: prepsano na pulhrana
+nemají pouze půlhrany ležící na konvexním obalu triangulace.
 
 \begin{figure}[h!]
 \centering
@@ -1165,15 +1170,16 @@ GRASS 7, se vycházelo z modulu napsaného pro GRASS GIS 6. Jednalo se o
 modul \emph{v.surf.nnbathy} pro vektorová data. Tento modul byl napsán
 %%% ML: to neni presne, spise se jedna po POSIX shell skript, skript
 %%% muze bezet i v jinych interpretech, jako napr. csh ci zsh.
-v Bashi. Pro novou verzi GRASS GISu 7, ve které si vývojáři kladou za
-cíl zpřístupnit tento software širší veřejnosti, tento modul v Bashi
-ovšem nebylo možno použít, neboť do nové verze se počítá pouze s
+%%% AL: pouziti terminu shellovy skript
+jako shellový skript. Pro novou verzi GRASS GISu 7, ve které si vývojáři kladou za
+cíl zpřístupnit tento software širší veřejnosti, ovšem tento shellový skript nebylo možno použít, neboť do nové verze se počítá pouze s
 moduly v jazyce Python a C/C++.
 
 \subsubsection{v.surf.nnbathy}
 %%% ML: viz poznamka k Bashi vyse
+%%% AL: pouzit shellovy skript
 \emph{v.surf.nnbathy}\footnote{\url{http://grass.osgeo.org/grass64/manuals/addons/v.surf.nnbathy.html}}
-je modul napsaný v Bashi. Slouží jako interface mezi příkazem \emph{nnbathy} z
+je shellový skript. Slouží jako interface mezi příkazem \emph{nnbathy} z
 externí knihovny \emph{nn-c} a GRASS GISem. \emph{v.surf.nnbathy}
 nabízí celkem tři algoritmy interpolace. Defaultně je nastaven
 %%% ML: jsou nekde tyto metody rozepsany v teoreticke casti?
