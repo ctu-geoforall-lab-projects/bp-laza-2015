@@ -28,6 +28,8 @@
 extern "C" {
 #include <grass/vector.h>
 #include <grass/glocale.h>
+#include <grass/raster.h>
+#include <grass/gis.h>
 }
 
 #include "local_proto.h"
@@ -36,6 +38,12 @@ int main(int argc, char *argv[])
 {
     int field;
     int npoints;
+
+    int fd, maskfd;
+    CELL *mask;
+    DCELL *dcell;
+
+    struct History history;    
 
     double ewres, nsres;
 
@@ -64,7 +72,7 @@ int main(int argc, char *argv[])
 
     opt.field = G_define_standard_option(G_OPT_V_FIELD_ALL);
 
-    // opt.output = G_define_standard_option(G_OPT_V_OUTPUT);
+    opt.output = G_define_standard_option(G_OPT_V_OUTPUT);
 
     if (G_parser(argc, argv)) {
         exit(EXIT_FAILURE);
@@ -84,15 +92,25 @@ int main(int argc, char *argv[])
     G_get_window(&window);
     nsres = window.ns_res;
     ewres = window.ew_res;
-    G_message("cols %i, rows %i", window.cols, window.rows);
+    //G_message("cols %i, rows %i", window.cols, window.rows);
+
+    /* allocate buffers, etc. */
+    dcell = Rast_allocate_d_buf();
+
+    if ((maskfd = Rast_maskfd()) >= 0)
+        mask = Rast_allocate_c_buf();
+    else
+        mask = NULL;
+    fd = Rast_open_new(opt.output->answer, DCELL_TYPE);
 
     /* perform NN interpolation */
     G_message(_("Computing..."));
 
+
+    /* triangulation */
     Delaunay_triangulation T;
     typedef CGAL::Data_access< std::map<Point, Coord_type, K::Less_xy_2 > >
                                             Value_access;
-
     T.insert(points.begin(), points.end());
 
 
@@ -104,8 +122,17 @@ int main(int argc, char *argv[])
     for (int rows=0 ; rows<window.rows ; rows++) {
         G_percent(rows, window.rows, 2);
 
+        if (mask)
+            Rast_get_c_row(maskfd, mask, rows);
+
         coor_x = window.west;
         for (int cols=0 ; cols<window.cols ; cols++) {
+
+            /* don't interpolate outside of the mask */
+            if (mask && mask[cols] == 0) {
+            Rast_set_d_null_value(&dcell[cols], 1);
+            continue;}
+
             K::Point_2 p(coor_x,coor_y);
             std::vector< std::pair< Point, Coord_type > > coords;
             Coord_type norm = CGAL::natural_neighbor_coordinates_2(T, p,std::back_inserter(coords)).second;
@@ -114,14 +141,24 @@ int main(int argc, char *argv[])
                     coor_x, coor_y, res, rows, cols);
             coor_x += ewres;
             //std::cout << res << " ";
+            dcell[cols] = (DCELL) res;
         }
         coor_y -= nsres;
         //std::cout << std::endl;
+
+        Rast_put_d_row(fd, dcell);
     }
     G_percent(1, 1, 1);
     
-    /* create output */
-    /* TODO */
+    Rast_close(fd);
+
+    /* writing history file */
+    Rast_short_history(opt.output->answer, "raster", &history);
+    Rast_command_history(&history);
+    Rast_write_history(opt.output->answer, &history);
+
+
+    G_done_msg("Raster map %s created.", opt.output->answer);
    
     exit(EXIT_SUCCESS);
 }
