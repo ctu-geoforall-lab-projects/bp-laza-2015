@@ -71,10 +71,8 @@ int main(int argc, char *argv[])
 
     opt.input = G_define_standard_option(G_OPT_V_INPUT);
 
-    opt.field = G_define_standard_option(G_OPT_V_FIELD_ALL);
+    opt.field = G_define_standard_option(G_OPT_V_FIELD);
 
-    opt.output = G_define_standard_option(G_OPT_V_OUTPUT);
-    
     opt.column = G_define_standard_option(G_OPT_DB_COLUMN);
     opt.column->required = NO;
     opt.column->label = _("Name of attribute column with values to interpolate");
@@ -82,6 +80,8 @@ int main(int argc, char *argv[])
                                "If input is 3D vector map then z-coordinates are used.");
     opt.column->guisection = _("Values");
 
+    opt.output = G_define_standard_option(G_OPT_V_OUTPUT);
+    
     if (G_parser(argc, argv)) {
         exit(EXIT_FAILURE);
     }
@@ -97,7 +97,11 @@ int main(int argc, char *argv[])
     npoints = read_points(opt.input->answer, opt.field->answer,
 	       opt.column->answer, function_values, points);
     Vect_close(&In);
-
+    if (npoints < 1) {
+        G_warning(_("No points loaded. Exiting."));
+        exit(EXIT_SUCCESS);
+    }
+    
     /* get the window */
     G_get_window(&window);
     nsres = window.ns_res;

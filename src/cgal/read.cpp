@@ -89,7 +89,7 @@ int read_points(const char *name, const char *field_name, const char *col, std::
     G_message(_("Reading points..."));
     while(TRUE) {
         double dval;
-        if (Vect_read_next_line(&Map, Points, NULL) < 0)
+        if (Vect_read_next_line(&Map, Points, Cats) < 0)
             break;
 
         G_progress(npoints, 1e3);
@@ -115,14 +115,14 @@ int read_points(const char *name, const char *field_name, const char *col, std::
                 else {		/* DB_C_TYPE_DOUBLE */
                     ret = db_CatValArray_get_value_double(&cvarr, cat, &dval);
                 }
+
+                if (ret != DB_OK) {
+                  G_warning(_("No record for point (cat = %d)"), cat);
+                  continue;
+                }
             }
             else {
                 dval = cat;
-            }
-
-            if (ret != DB_OK) {
-                G_warning(_("No record for point (cat = %d)"), cat);
-                continue;
             }
         }
         else
@@ -135,8 +135,7 @@ int read_points(const char *name, const char *field_name, const char *col, std::
         OutPoints.push_back(p);
         function_values.insert(std::make_pair(p, dval));       
         
-        G_debug(3, "new point added: %f, %f, %f", x, y, z);
-        //G_message("new point added: %f, %f, %f", x, y, z);
+        G_debug(3, "new point added: %f, %f, %f", x, y, dval);
         npoints++;
     }
     G_progress(1, 1);
