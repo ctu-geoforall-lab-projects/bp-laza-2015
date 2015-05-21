@@ -206,9 +206,9 @@ pomocí modulů \emph{v.surf.nnbathy} a \emph{r.surf.nnbathy} z
 %%% ML: tady by se hodila poznamka pod carou, vysvetlit co je Bash
 %%% AL: pridan footnote.
 %%% AL: mam pouzivat termin "napsany v Bashi" nebo spis "shellovy skript"?
-rozšíření Add-Ons, které jsou navíc napsané v Bashi\footnote{Bash je unixový shell a v linuxových systémech slouží jako příkazový interpret.} (kapitola \ref{sub:Bash}). Tyto moduly jsou
+rozšíření Add-Ons, které jsou navíc napsané jako shellový skript pro Bash\footnote{Bash je unixový shell a v linuxových systémech slouží jako příkazový interpret.} (kapitola \ref{sub:Bash}). Tyto moduly jsou
 však podporované pouze pro GRASS GIS do verze 6. Nová verze GRASS GIS
-7 již moduly psané v Bashi nepodporuje. Jako první krok, je tedy
+7 již moduly psané jako shellový skript nepodporuje. Jako první krok, je tedy
 nutné moduly přepsat do podporovaného programovacího jazyka - Pythonu.
 
 \newpage
@@ -452,7 +452,7 @@ $\overline{p_ip_j}$ a tedy diagonála čtyřúhelníku nelegální, stejně
 tak jako oba trojúhelníky $t_1$ a $t_2$. K jejich legalizaci je
 provést tzv. \emph{Edge swaping}.
 
-\paragraph{MaxMin a MinMax úhlová podmínka}\cite{TB1}
+\paragraph{MaxMin a MinMax úhlová podmínka}
 
 Pokud nad množinou bodů P provedeme všechny možné triangulace, můžeme
 nejoptimálnější triangulaci určit pomocí MaxMin popř. MinMax
@@ -465,7 +465,7 @@ postupuje obdobně, pouze se porovnávají nejmenší maximální vnitřní
 úhly.
 
 \newpage
-{\bf MinMax podmínka} Eliminace trojúhelníků s příliš tupými
+{\bf MinMax podmínka}\cite{TB1} Eliminace trojúhelníků s příliš tupými
 úhly. Triangulace $\Delta(P)$ je vzhledem k tomuto kritériu na rozdíl
 od triangulace $\Delta^{'}(P)$ optimální, je–li největší úhel $\alpha$
 generovaný triangulací $\Delta(P)$ je menší než největší úhel
@@ -730,7 +730,7 @@ vzniklá triangulace nemusí být nutně DT a proto se provede ještě její
 legalizace.
 
 \begin{algorithm}
-\caption{Incremental algorithm}
+\caption{Algoritmus inkrementálního vkládání}
 \begin{algorithmic}[1]
 \State Vytvoření konvexního obalu $\Omega$ nad množinou bodů $P$
 \State Vytvoř DT pro lomové body konvexního obalu
@@ -1034,8 +1034,8 @@ GISu, kapitola \ref{subsec:v.delaunay}.
 \begin{lstlisting}[caption={Definice datové struktury}]
 class Half-edge
 {
-	Point *originating_vertex;
-	Half-edge *edge, *next_edge, *twin_edge;
+	Point *originating_vertex, *terminating_vertex;
+	Half-edge  *edge, *prev_edge, *next_edge, *twin_edge;
 	
 };
 \end{lstlisting}
@@ -1059,7 +1059,7 @@ iterátory jsou definovány takto (obrázek \ref{fig:iterators}(b)):
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.8\textwidth]{img/iterators.png}
-\caption{$\alpha-iterátory $, zdroj: \cite{triangulation}}
+\caption{$\alpha$-iterátory, zdroj: \cite{triangulation}}
 \label{fig:iterators}
 \end{figure}
 
@@ -1194,7 +1194,7 @@ nabízí celkem tři algoritmy interpolace. Defaultně je nastaven
 %%% AL: doplneno v teorii, pridany odkazy
 \emph{Watson's algortithm for Sibson natural neighbor
   interpolation}, viz kapitola \ref{sub:Sibson}. Další možností je \emph{linear Delaunay
-  interpolation}, kapitola \ref{sub:Sibson} a poslední \emph{Belikov and Semenov's algorithm for
+  interpolation}, kapitola \ref{sub:linear} a poslední \emph{Belikov and Semenov's algorithm for
   non-Sibsonian natural neighbor interpolation}. Pro Delaunayvou
 triangulaci, která je základem pro všechny tři algoritmy, se využívá
 knihovny \emph{Triangle} napsanou Jonathanem Richardem
@@ -1226,10 +1226,11 @@ user@my_comp:~$ v.surf.nnbathy input=input_vector_map output=output_raster_map z
 \label{sec:python}
 
 Jako první krok pro implementaci interpolace přirozeného souseda pro
-GRASS GIS 7 bylo potřeba stávající modul v Bashi přepsat do
+GRASS GIS 7 bylo potřeba stávající shellový skript přepsat do
 podporovaného programovacího jazyka. Pro verzi 7 bylo možné přepsat
 modul buďto do jazyka C/C++ nebo Python. Z důvodu nepříliš velké
 zkušenosti s programováním byl pro začátek zvolen jazyk Python.
+
 Nicméně ačkoliv byl modul přepsán do Pythonu, takže už mohl být 
 použit i pro GRASS GIS 7, stále přetrvávala závislost na knihovně \emph{nn-c}.
 %%% ML: tady bych jeste zminil, ze zavislost zustala stejne jako u
@@ -1332,7 +1333,7 @@ Jelikož id bodu k dalším výpočtům nepotřebujeme do dočasné proměnné
 interpolaci. V případě, že nepracujeme s vektorovou mapou, ale ASCII
 souborem, tak tento soubor rovnou uložíme do proměnné \emph{TMPXYZ}.
 
-\bigskip
+\newpage
 %ukazka souboru TMPxyz
 \lstset{basicstyle=\footnotesize}
 \begin{lstlisting}[caption={Pomocný soubor TMPXYZ}]
@@ -1366,7 +1367,7 @@ x a y souřadnice, ve třetím vyinterpolovaná hodnota. V případě buňek
 mimo oblast, kde probíhala interpolace, je ve třetím sloupci uložena
 hodnota NaN.
 
-\bigskip
+\newpage
 %ukazka XYZout
 \lstset{basicstyle=\footnotesize}
 \begin{lstlisting}[caption={XYZout}]
@@ -1389,7 +1390,6 @@ soubor \emph{TMP}. Při vytváření na začátku tohoto souboru vznikne
 hlavička, která obsahuje data o hraničních souřadnicích, prostorovém
 rozlišení, datovém typu a hodnotě žádná data (null či NaN).
 
-\newpage
 %Ukázka hlavičky
 \lstset{basicstyle=\ttfamily}
 \begin{lstlisting}[caption={Hlavička souboru TMP}]
@@ -1495,7 +1495,6 @@ výpočetní část kódu.
 
 \paragraph{Rodičovská třída Nnbathy} V rodičovské třídě Nnbathy bylo
 vytvořeno několik objektů, které přebraly funkce jednotlivých procedur
-
 %%% To nejsou objekty, ale metody, resp. konstruktor a desktruktor
 %%% AL: opraveno
 z předchozího kódu. Navíc byly vytvořeny tyto metody:
@@ -1503,10 +1502,10 @@ z předchozího kódu. Navíc byly vytvořeny tyto metody:
 \paragraph{Metoda \_\_init\_\_}
 %%% ML: objekt -> metoda
 %%% AL: opraveno
-Tato metoda- konstruktor inicializuje dočasné soubory a volá objekt region().
+Tato metoda (konstruktor) inicializuje dočasné soubory a volá objekt region().
 
 \paragraph{Metoda \_\_del\_\_}
-Tato metoda- destruktor slouží k odstranění dočasných souborů.
+Tato metoda (destruktor) slouží k odstranění dočasných souborů.
 
 \paragraph{Třída Nnbathy\_raster}
 %%% ML: je dedicka z - nezni moc cesky...
@@ -1635,7 +1634,7 @@ náhodné konfigurace miliónu bodů dokáže triangulaci provést za méně
 než 15 s, což se dá považovat za dostatečně efektivní. 
 
 Jako problémová se jeví část převodu dat mezi
-strukturami. \emph{v.delaunay} používá strukturu edge (příloha \ref{app:edge_struct}),
+strukturami. \emph{v.delaunay} používá strukturu \emph{edge} (příloha \ref{app:edge_struct}),
 což je běžná datová struktura typu winged-edge, viz kapitola \ref{subsec:HE_struct}. Naproti tomu \emph{Nnbathy} počítá interpolaci nad daty uloženými ve
 %%% ML: uvadis nekde strukturu, kterou pouziva GRASS modul?
 %%% AL: struktura winged-edge pridana do priloh
@@ -1676,9 +1675,6 @@ závislosti nejen na triangulačním nástroji, ale i na knihovně
 
 \newpage
 \subsection{Knihovna CGAL}
-
-\todo[inline]{Dopsat na základě toho, co se zjistí.} 
-
 Knihovna CGAL (The Computational Geometry Algorithms
 Library)\footnote{\url{http://www.cgal.org}} je open source projekt, který
 poskytuje snadný přístup k efektivním a spolehlivým geometrickým
@@ -1702,25 +1698,61 @@ jsou celkem 4 interpolační metody a sice tyto:
 
 \subsubsection{v.surf.nn}
 \label{subsub:v.surf.nn}
-V současné chvíli probíhá vývoj nového modulu \emph{v.surf.nn}, který
-zatím využívá pouze metodu \emph{Linear Precision Interpolation}, tedy
-pouze lineární interpolaci bez ohledu na gradient. Do budoucna se však
-uvažuje o přidání i ostatních metod a možnosti nechat uživateli volbu,
+V současné chvíli probíhá vývoj nového modulu \emph{v.surf.nn} (příloha \ref{app:v.surf.nn}), který
+využívá knihovny \emph{CGAL}. Modul zatím používá metodu \emph{Linear Precision
+Interpolation}, tedy pouze lineární interpolaci bez ohledu na gradient, viz kapitola \ref{sub:linear}. Do budoucna se
+však uvažuje o přidání i ostatních metod a možnosti nechat uživateli volbu,
 kterou metodu chce použít.
 
+Momentálně je modul \emph{v.surf.nn} funkční a provádí jak DT (kapitola \ref{subsec:Optim_trian}),
+tak lineární interpolaci metodou přirozeného souseda (kapitola \ref{sub:linear}).
+Modul je tedy zbavený závislosti na knihovně \emph{nn-c} a hlavně na knihovně \emph{Triangle}.
+Jedná se však pouze o experimentální modul, neboť možnosti knihovny \emph{CGAL} musí být ještě hlouběji prozkoumány a na vývoji modulu je třeba strávit ještě mnoho času.
+
+Tento experimetnální modul \emph{v.surf.nn} má zatím dva zásadní problémy,
+kterými se bude zabývat další vývoj. Za prvé je to jeho rychlost. 
+Jak je vidět v příloze \ref{app:srovnani}, rychlost modulu \emph{v.surf.nn} je 
+několikanásobně pomalejší než modulu \emph{v.surf.nnbathy} nebo nástroje 
+\emph{Natural neighbor interpolation} v ArcGISu. Při řešení tohoto problému se hledalo, 
+která část kódu nejvíce brzdí celý modul. Po analýze kódu bylo objeveno, 
+že kritická část je volání funkcí \emph{CGAL::natural\_neighbor\_coordinates\_2()} a
+ \emph{CGAL::linear\_interpolation()}. Problém je, že vstupním parametrem po obě tyto 
+ funkce je pouze jediný bod, v našem případě jediná buňka rastru. To znamená, že 
+třeba v případě uvedeném v příloze \ref{app:srovnani}, kde je modul volán nad územím 
+deset $\times$ deset kilometrů s rozlišením buňky deset metrů, je každá funkce volána
+celkem milionkrát. Snahou dalšího vývoje tedy bude nalézt možnost, jak zpracovávat 
+data dávkově a zrychlit tak celý proces.
+
+Druhým problémem je rastrový výstup, který modul \emph{v.surf.nn} tvoří. Jak je zřejmé 
+z přílohy \ref{app:srovnani}, výstupní rastrová mapa modulu \emph{v.surf.nn} je naprosto 
+odlišná od výstupních map jak modulu \emph{v.surf.nnbathy}, tak i ArcGIS nástroje 
+\emph{Natural Neighbor Interpolation}. Tento problém je naprosto zásadní a pokud nebude vyřešen,
+tak se nedá uvažovat o zařazení modulu \emph{v.surf.nn} mezi ostatní moduly GRASS GISu. 
+V takovém případě, by se ukázalo použití knihovny \emph{CGAL} jako slepá ulička.
+
+V době odevzdání této práce ještě nebyly odhaleny příčiny, proč modul interpoluje chybně.
+Na oba výše zmíněné problémy byla upozorněna i komunita vývojářů CGALu a to jednak pomocí 
+mailing listu\footnote{\url{http://cgal-discuss.949826.n4.nabble.com/}} \emph{cgal-discuss@inria.fr}, dále pak pomocí webové stránky
+\emph{StackOverflow}\footnote{\url{http://stackoverflow.com/questions/30354284/cgal-natural-neighbor-interpolation}},\footnote{\url{http://stackoverflow.com/questions/30379735/cgallinear-interpolation-different-output}}.
+
+
 \newpage
-\section{Závěr}
+\necislovana{Závěr}
 
 Cílem této bakalářské práce byla implementace nástroje pro interpolaci
-metodou přirozeného souseda do GRASS GISu. Jako první krok byly tedy v
-Pythonu napsány dva moduly \emph{v.surf.nnbathy} pro vektorová data a
-\emph{r.surf.nnbathy} pro rastrová data. Tyto moduly jsou v
+metodou přirozeného souseda do GRASS GISu. Na začátku byly tedy v
+Pythonu napsány dva procedurální moduly \emph{v.surf.nnbathy} pro vektorová data a
+\emph{r.surf.nnbathy} pro rastrová data.
+
+Následně byly oba moduly přepsány jako objektově orientované a 
+hlavní výpočetní část byla přesunuta do knihovny \emph{nnbathy}, 
+kterou oba moduly volají. Tyto moduly jsou v
 současnosti k dispozici v GRASS GISu v rámci balíčků Add-Ons a
 uživatel může po instalaci těchto rozšíření bez problému využívat
 interpolaci metodou přirozeného souseda. Nicméně tyto moduly jsou
 stále závislé na knihovně \emph{nn-c}, která provádí samotnou
 interpolaci a hlavně na knihovně \emph{Triangle}, která se stará o
-provedení DT a která je pod licencí MIT.
+provedení DT.
 
 Dále se tato práce zabývala možností využít modulu \emph{v.delaunay},
 který je už v~oficiální distribuci GRASS GISu, jako náhradu za
@@ -1735,12 +1767,17 @@ možná, tak převod mezi jednotlivými strukturami je příliš náročný a
 neefektivní, zejména kvůli netypické struktuře \emph{delaunay}, kterou
 knihovna \emph{nn-c} využívá.
 
-Jako vhodné řešení se tedy ukázalo použití knihovny \emph{CGAL}. Tato
+Jako další řešení se tedy nabízelo použití knihovny \emph{CGAL}. Tato
 knihovna dokáže nejen vytvořit Delaunayho triangulaci, ale nabízí i
 několik metod pro interpolaci metodou přirozeného souseda. Díky
 použítí knihovny \emph{CGAL} dojde k zbavení se závislosti na
-knihovnách \emph{nn-c} a \emph{Triangle}. Vývoj samotného modulu
-\emph{v.surf.nn} a jeho implementace je aktuálně v procesu.
+knihovnách \emph{nn-c} a \emph{Triangle}. 
+
+V současné chvíli je hotová
+experimetnální verze modulu \emph{v.surf.nn}, který sice funguje,
+nicméně je velmi pomalý a zdá se, že jeho výstupy nejsou přesné.
+Řešení těchto problémů je otázkou budoucího vývoje, na problémy
+byla upozorněna i komunita vývojářů CGALu.
 
 V rámci této bakalářské práce bylo též provedeno porovnání výkonu a
 výstupu mezi GRASS GISem, zástupcem open source softwaru, a Esri ArcGIS,
@@ -1750,8 +1787,6 @@ modul \emph{v.surf.nn}, který je postavený na knihovně \emph{CGAL}. Za
 Esri ArcGIS byl testován nástroj \emph{Natural Neighbour}, který se nachází
 v toolboxu Spatial Analyst. Výsledky jsou uvedeny v Příloze
 \ref{app:srovnani}
-
-
 
 \newpage
 \necislovana{Seznam použitých zkratek}
@@ -1875,13 +1910,14 @@ kapitolách \ref{sec:python}, dále modul \emph{v.surf.nn} využívající CGAL,
 který se nachází v toolboxu \emph{Spatial Analyst}.
 
 Pro porovnání byly zvoleny tři situace. Na území o velikosti deset
-$\times$ deset kilometrů, s rozlišením buňky deset metrů byly vygenerována
+$\times$ deset kilometrů, s rozlišením buňky deset metrů (počet buněk celkem tedy jeden milión)
+byly vygenerována
 bodová pole o počtu tisíc, sto tisíc a milion bodů. Nad těmito soubory
 byla po té provedena interpolace v obou softwarech. Interpolace byla
 pro každou datovou sadu provedena v deseti opakováních, výsledný čas
 je průměrem. Testy byly provedeny na notebooku HP Pavilion dv6000 s
 procesorem Intel\copyright Core\texttrademark 2 Duo CPU T5550 @
-1.83GHz $\times$ 2 a RAM pamětí 4 GB. Výsledky jsou uvedeny v Tabulce
+1.83GHz $\times$ 2 a RAM pamětí 4 GB. Výsledky jsou uvedeny v tabulce
 \ref{tab:GRASSxArc}.
 
 %%% ML: porovnaval jsi jeste vysledky???
@@ -1889,12 +1925,12 @@ procesorem Intel\copyright Core\texttrademark 2 Duo CPU T5550 @
 \bigskip
 \begin{table}[h]
 \catcode`\-=12
-\begin{tabular}{|c|c|c|}
+\begin{tabular}{|c|c|c|c|}
 \hline
-Počet bodů & GRASS GIS  & ArcGIS     \\ \hline
-1 000       & 13,5 s     & 7,6 s      \\ \hline
-100 000     & 58,9 s     & 14,1 s     \\ \hline
-1 000 000    & 8 min 25 s & 1 min 24 s \\ \hline
+Počet bodů & v.surf.nnbathy & v.surf.nn & ArcGIS     \\ \hline
+1 000      & 13,5 s         & 1 min 6 s & 7,6 s      \\ \hline
+100 000    & 58,9 s         &           & 14,1 s     \\ \hline
+1 000 000  & 8 min 25 s     &           & 1 min 24 s \\ \hline
 \end{tabular}
 \caption{Porovnání časů}
 \label{tab:GRASSxArc}
@@ -1907,8 +1943,15 @@ Počet bodů & GRASS GIS  & ArcGIS     \\ \hline
 \centering
 \begin{floatrow}
 \ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000.png}}{\caption{ArcGIS: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_Arc}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_grass}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000_grass.png}}{\caption{GRASS GIS, v.surf.nnbathy: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_grass}}
 \end{floatrow}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.48\textwidth]{img/body_1000_nn.png}
+\caption{GRASS GIS, v.surf.nn: Výstupní rastr pro 1000 bodů}
+\label{fig:b1000_nn}
 \end{figure}
 
 \begin{figure}[h!]
@@ -1925,7 +1968,7 @@ Počet bodů & GRASS GIS  & ArcGIS     \\ \hline
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{ArcGIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil.png}}{\caption{ArcGIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_Arc}}
 \ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_grass}}
 \end{floatrow}
 \end{figure}
@@ -1957,6 +2000,10 @@ Počet bodů & GRASS GIS  & ArcGIS     \\ \hline
 \subsection{r.surf.nnbathy.py}
 \label{app:r.surf}
 \lstinputlisting[language=Python]{../src/nnbathy/r_red.py}
+
+\subsection{v.surf.nn}
+\label{app:v.surf.nn}
+\lstinputlisting[language=C]{../src/cgal/v.surf.nn_red}
 
 %%% ML: chyby priloha Obsah CD/DVD
 %%% AL: doplneno

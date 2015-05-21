@@ -22,19 +22,20 @@
 \contentsline {figure}{\numberline {19}{\ignorespaces Datov\IeC {\'a} struktura s pou\IeC {\v z}it\IeC {\'\i }m pseudo-uzlu, zdroj: \cite {triangulation}}}{33}{figure.19}
 \contentsline {figure}{\numberline {20}{\ignorespaces Half-edge struktura (Zdroj: \url {http://pointclouds.org/blog/nvcs/martin/index.php})}}{34}{figure.20}
 \contentsline {figure}{\numberline {21}{\ignorespaces Half-edge struktura, zdroj: \cite {triangulation}}}{35}{figure.21}
-\contentsline {figure}{\numberline {22}{\ignorespaces $\alpha -iter\IeC {\'a}tory $, zdroj: \cite {triangulation}}}{36}{figure.22}
+\contentsline {figure}{\numberline {22}{\ignorespaces $\alpha $-iter\IeC {\'a}tory, zdroj: \cite {triangulation}}}{37}{figure.22}
 \contentsline {figure}{\numberline {23}{\ignorespaces Dart-based datov\IeC {\'a} struktura, zdroj: \cite {triangulation}}}{37}{figure.23}
-\contentsline {figure}{\numberline {24}{\ignorespaces P\IeC {\r u}vodn\IeC {\'\i } VD}}{39}{figure.24}
-\contentsline {figure}{\numberline {25}{\ignorespaces Ukraden\IeC {\'e} plochy}}{39}{figure.25}
-\contentsline {figure}{\numberline {26}{\ignorespaces Nov\IeC {\v e} vznikl\IeC {\'y} VD}}{40}{figure.26}
-\contentsline {figure}{\numberline {27}{\ignorespaces Vektorov\IeC {\'a} mapa na vstupu}}{44}{figure.27}
-\contentsline {figure}{\numberline {28}{\ignorespaces V\IeC {\'y}stupn\IeC {\'\i } rastrov\IeC {\'a} mapa}}{49}{figure.28}
-\contentsline {figure}{\numberline {29}{\ignorespaces Mno\IeC {\v z}ina bod\IeC {\r u} pro triangulaci}}{54}{figure.29}
-\contentsline {figure}{\numberline {30}{\ignorespaces Triangulace pomoc\IeC {\'\i } v.delaunay}}{54}{figure.30}
-\contentsline {figure}{\numberline {31}{\ignorespaces ArcGIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 1000 bod\IeC {\r u}}}{62}{figure.31}
-\contentsline {figure}{\numberline {32}{\ignorespaces GRASS GIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 1000 bod\IeC {\r u}}}{62}{figure.32}
-\contentsline {figure}{\numberline {33}{\ignorespaces ArcGIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 100000 bod\IeC {\r u}}}{62}{figure.33}
-\contentsline {figure}{\numberline {34}{\ignorespaces GRASS GIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 100000 bod\IeC {\r u}}}{62}{figure.34}
-\contentsline {figure}{\numberline {35}{\ignorespaces ArcGIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 1000000 bod\IeC {\r u}}}{63}{figure.35}
-\contentsline {figure}{\numberline {36}{\ignorespaces GRASS GIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 1000000 bod\IeC {\r u}}}{63}{figure.36}
+\contentsline {figure}{\numberline {24}{\ignorespaces P\IeC {\r u}vodn\IeC {\'\i } VD}}{40}{figure.24}
+\contentsline {figure}{\numberline {25}{\ignorespaces Ukraden\IeC {\'e} plochy}}{40}{figure.25}
+\contentsline {figure}{\numberline {26}{\ignorespaces Nov\IeC {\v e} vznikl\IeC {\'y} VD}}{41}{figure.26}
+\contentsline {figure}{\numberline {27}{\ignorespaces Vektorov\IeC {\'a} mapa na vstupu}}{45}{figure.27}
+\contentsline {figure}{\numberline {28}{\ignorespaces V\IeC {\'y}stupn\IeC {\'\i } rastrov\IeC {\'a} mapa}}{50}{figure.28}
+\contentsline {figure}{\numberline {29}{\ignorespaces Mno\IeC {\v z}ina bod\IeC {\r u} pro triangulaci}}{55}{figure.29}
+\contentsline {figure}{\numberline {30}{\ignorespaces Triangulace pomoc\IeC {\'\i } v.delaunay}}{55}{figure.30}
+\contentsline {figure}{\numberline {31}{\ignorespaces ArcGIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 1000 bod\IeC {\r u}}}{65}{figure.31}
+\contentsline {figure}{\numberline {32}{\ignorespaces GRASS GIS, v.surf.nnbathy: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 1000 bod\IeC {\r u}}}{65}{figure.32}
+\contentsline {figure}{\numberline {33}{\ignorespaces GRASS GIS, v.surf.nn: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 1000 bod\IeC {\r u}}}{65}{figure.33}
+\contentsline {figure}{\numberline {34}{\ignorespaces ArcGIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 100000 bod\IeC {\r u}}}{66}{figure.34}
+\contentsline {figure}{\numberline {35}{\ignorespaces GRASS GIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 100000 bod\IeC {\r u}}}{66}{figure.35}
+\contentsline {figure}{\numberline {36}{\ignorespaces ArcGIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 1000000 bod\IeC {\r u}}}{66}{figure.36}
+\contentsline {figure}{\numberline {37}{\ignorespaces GRASS GIS: V\IeC {\'y}stupn\IeC {\'\i } rastr pro 1000000 bod\IeC {\r u}}}{66}{figure.37}
 \contentsfinish 
