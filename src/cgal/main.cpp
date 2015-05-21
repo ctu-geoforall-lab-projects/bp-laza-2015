@@ -136,8 +136,9 @@ int main(int argc, char *argv[])
 
             /* don't interpolate outside of the mask */
             if (mask && mask[cols] == 0) {
-            Rast_set_d_null_value(&dcell[cols], 1);
-            continue;}
+                Rast_set_d_null_value(&dcell[cols], 1);
+                continue;
+            }
 
             K::Point_2 p(coor_x,coor_y);
             std::vector< std::pair< Point, Coord_type > > coords;
