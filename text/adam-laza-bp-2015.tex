@@ -95,6 +95,7 @@ bottom=35mm]
 %% ML: Voronoiovy diagramy (a ne polygony)
 %% AL: To budu mit spatne v cele praci, pouzil jsem schvalne jednotne cislo
 %% ML: ja nemyslel mluvnicke cislo, ale Vororoiuv diagram vs. Voronoiuv polygon
+%% AL: to jsem prosel taky,polygon nahrazen za diagram
 \keywords{Klíčová slova}{GIS, GRASS GIS, interpolace, přirozený soused, Delaunayho triangulace, Voronoiův diagram}
 
 \end{abstract}
@@ -106,10 +107,11 @@ bottom=35mm]
 %% ML: OK
 %% ML: popros nekoho o korekci anglictiny, posledni vetu preformulovat
 %% ML: jeste popros aby to nekdo prosel
+%% AL: projito
   \bigskip The aim of this bachelor thesis is the design and the
   implementation of a tool for a natural neighbour interpolation in
   GRASS GIS 7. Previous version of GRASS GIS 6 contains such a tool as an
-  Add-Ons package, but this modul is written in Bash and
+  Add-Ons package, but this module is written in Bash and
   with inner dependency on \emph{nn-c} library. This library
   contains \emph{Triangle} library which is not under the GNU GPL
   licence. Because of that it is not possible to add the interpolation tool into
@@ -207,16 +209,17 @@ GRASS GISu by mohlo být hojně využito.
 %%% ML: mozna by se hodily odkazy na jednotlive kapitoly v textu
 %%% AL: pridany odkazy
 %%% ML: chybi odkaz na dalsi kapitoly (Python)
+%%% AL: pridany odkazy
 Až doposud byla interpolace metodou přirozeného souseda prováděna
-pomocí modulů \emph{v.surf.nnbathy} a \emph{r.surf.nnbathy} z
+pomocí modulů \emph{v.surf.nnbathy}, kapitola \ref{subsub:v.surf.nnbathy}, a \emph{r.surf.nnbathy}, kapitola \ref{subsub:r.surf.nnbathy}, z
 %%% ML: tady by se hodila poznamka pod carou, vysvetlit co je Bash
 %%% AL: pridan footnote.
 %%% AL: mam pouzivat termin "napsany v Bashi" nebo spis "shellovy skript"?
 %%% ML: trosku vaham, lepsi by byl "shellovy skript", ale klidne nech puvodni formulaci "skript pro Bash", za to Ti nikdo hlavu neutrhne
-rozšíření Add-Ons, které jsou navíc napsané jako shellový skript pro Bash\footnote{Bash je unixový shell a v linuxových systémech slouží jako příkazový interpret.} (kapitola \ref{sub:Bash}). Tyto moduly jsou
+rozšíření Add-Ons, viz \ref{sub:addons}, které jsou navíc napsané jako shellový skript pro Bash\footnote{Bash je unixový shell a v linuxových systémech slouží jako příkazový interpret.} (kapitola \ref{sub:Bash}). Tyto moduly jsou
 však podporované pouze pro GRASS GIS do verze 6. Nová verze GRASS GIS
 7 již moduly psané jako shellový skript nepodporuje. Jako první krok, je tedy
-nutné moduly přepsat do podporovaného programovacího jazyka - Pythonu.
+nutné moduly přepsat do podporovaného programovacího jazyka - Pythonu\ref{sec:python}.
 
 \newpage
 
@@ -273,6 +276,7 @@ jejímž vývoji se podílí několik vývojářů z řad dobrovolníků po cel�
 světě.
 
 \subsection{GRASS GIS Add-Ons}
+\label{sub:addons}
 
 GRASS GIS (\url{http://grass.osgeo.org/}) je od roku 1982 v neustálem vývoji. Síla a úspěch GRASS GISu
 je založená hlavně na komunitě uživatelů. S ohledem na to, je
@@ -1181,7 +1185,7 @@ Sibsonova\footnote{Robin Sibson (narozen 1944), britský matematik. Jako první 
 \label{sub:Farin}
 %%% konzultace s Mayrem
 %%% ML: jak to dopadlo?
-%%% AL: ken konzultaci nedoslo, nasel jsem o tom nejake prameny na netu, moc tomu nerozumim,
+%%% AL: ke konzultaci nedoslo, nasel jsem o tom nejake prameny na netu, moc tomu nerozumim,
 %%% dal jsem sem jen par obecnych vet, ale nevim, zda tu nenechat jen tu linearni
 %%% ML: OK, jenom se priprav, ze se Te na to nekdo muze zeptat
 Profesor Gerald Farin přišel s mnohem obecnějším přístupem, který není omezen na souřadnice přirozených sousedů, ale může použita pro všechny lokální souřadnice. Váha $\lambda$ může být vnímána jako barycentrická souřadnice v Bezierovu simplexu. Více zde: \cite{Bobach} \cite{CGAL}.
@@ -1206,6 +1210,7 @@ cíl zpřístupnit tento software širší veřejnosti, ovšem tento shellový s
 moduly v jazyce Python a C/C++.
 
 \subsubsection{v.surf.nnbathy}
+\label{subsub:v.surf.nnbathy}
 %%% ML: viz poznamka k Bashi vyse
 %%% AL: pouzit shellovy skript
 \emph{v.surf.nnbathy}\footnote{\url{http://grass.osgeo.org/grass64/manuals/addons/v.surf.nnbathy.html}}
@@ -1467,6 +1472,7 @@ Výstupem modulu \emph{v.surf.nnbathy} je rastrová mapa.
 
 %%% ML: dal bych jsem alespon legendu
 %%% ML: OK (pokud muzes mit cas a chut, tak tu legendu udelej trosku mensi)
+
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/vystup_rast_map.png}
@@ -1494,7 +1500,6 @@ moduly \emph{v.surf.nnabthy.py} (příloha \ref{app:v.surf}) pro vektorová data
 \emph{nnbathy} volají.
 
 \subsubsection{v.surf.nnbathy}
-
 %%% ML: prilis dlouha veta
 %%% AL: zkraceno
 %%% ML: OK
@@ -1503,6 +1508,7 @@ Z nového objektově orientovaného modulu pro vektorová data \emph{v.surf.nnba
 vektorové mapy nebo ASCII souboru.
 
 \subsubsection{r.surf.nnbathy}
+\label{subsub:r.surf.nnbathy}
 
 Modul \emph{r.surf.nnbathy} pracuje na podobném principu jako modul
 \emph{v.surf.nnbathy}, jen pro rastrová data. Při volání je možnost
@@ -1544,22 +1550,28 @@ Tato metoda (destruktor) slouží k odstranění dočasných souborů.
 %%% ML: je dedicka z - nezni moc cesky...
 %%% AL: opraveno na dedicka
 %%% ML: to nezni moc hezky, co treba "Tato trida ... data, rodičovskou třídou je Nnbathy" nebo treba prijdes na neco lepsiho
-Tato třída slouží pro rastrová vstupní data a je dědická z rodičovské třídy Nnbathy.
+Tato třída slouží pro rastrová vstupní data, její rodičovská třída je Nnbathy.
 
 \paragraph{Třída Nnbathy\_vector}
-Tato třída slouží pro vektorová vstupní data a je dědická z rodičovské třídy Nnbathy.
+Tato třída slouží pro vektorová vstupní data, její rodičovská třída je Nnbathy.
 
 \paragraph{Třída Nnbathy\_file}
-Tato třída slouží pro vstupní data v podobě ASCII souboru a je dědická z rodičovské třídy Nnbathy.
+Tato třída slouží pro vstupní data v podobě ASCII souboru, její rodičovská třída je Nnbathy.
 
 %%% ML: dopln prosim jeste dnes pokud mozno
-
-\todo[inline]{MLU diagram}
+%%% AL: doplneno
+\newpage
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{img/mlu.png}
+\caption{MLU diagram}
+\label{fig:vystup_rast_map}
+\end{figure}
 
 \newpage
 \section{Možnosti budoucí implementace}
 V současné době jsou oba moduly k dispozici v rámci balíčků
-Add-Ons\footnote{http://grass.osgeo.org/download/addons/}. V adresáři
+Add-Ons\footnote{http://grass.osgeo.org/download/addons/}, viz kapitola \ref{sub:addons}. V adresáři
 \emph{grass7/vector/v.surf.nnbathy} můžeme naleznout hlavní knihovnu
 \emph{nnbathy.py}, modul \emph{v.surf.nnbathy.py} a dokumentaci
 \emph{v.surf.nnbathy.html}.
@@ -1578,8 +1590,8 @@ g.extension extension=v.surf.nnbathy
 
 %%% ML: ta prvni veta zni divne
 %%% ML: ?
-V současné chvíli tedy tyto moduly nejsou součástí oficiální distribuce GRASS GISu, 
-ale pouze v rámci Add-Ons. Jelikož interpolace metodou přirozeného souseda poskytuje
+%%% AL: divna veta smazana
+Jelikož interpolace metodou přirozeného souseda poskytuje
 spojité, hladké výstupy bez extrapolovaných hodnot může být její
 použití v praxi poměrně využívané. Právě proto je snaha dostat tento
 interpolační nástroj do základní distribuce GRASS GISu. Tomu však
@@ -1956,7 +1968,7 @@ Pro porovnání byly zvoleny tři situace. Na území o velikosti deset
 $\times$ deset kilometrů, s rozlišením buňky deset metrů (počet buněk celkem tedy jeden milión)
 byly vygenerována
 bodová pole o počtu tisíc, sto tisíc a milion bodů. Nad těmito soubory
-byla po té provedena interpolace v obou softwarech. Interpolace byla
+byla po té provedena interpolace všemi třemi způsoby. Interpolace byla
 pro každou datovou sadu provedena v deseti opakováních, výsledný čas
 je průměrem. Testy byly provedeny na notebooku HP Pavilion dv6000 s
 procesorem Intel\copyright Core\texttrademark 2 Duo CPU T5550 @
@@ -1965,16 +1977,17 @@ procesorem Intel\copyright Core\texttrademark 2 Duo CPU T5550 @
 
 %%% ML: porovnaval jsi jeste vysledky???
 %%% ML: rikal jsi, ze ano (OK)
+%%% AL: pridano
 
 \bigskip
 \begin{table}[h]
 \catcode`\-=12
 \begin{tabular}{|c|c|c|c|}
 \hline
-Počet bodů & v.surf.nnbathy & v.surf.nn & ArcGIS     \\ \hline
-1 000      & 13,5 s         & 1 min 6 s & 7,6 s      \\ \hline
-100 000    & 58,9 s         &           & 14,1 s     \\ \hline
-1 000 000  & 8 min 25 s     &           & 1 min 24 s \\ \hline
+Počet bodů & v.surf.nnbathy & v.surf.nn   & ArcGIS     \\ \hline
+1 000      & 13,5 s         & 1 min 6 s   & 7,6 s      \\ \hline
+100 000    & 58,9 s         & 9 min 52 s  & 14,1 s     \\ \hline
+1 000 000  & 8 min 25 s     & netestováno & 2 min 13 s \\ \hline
 \end{tabular}
 \caption{Porovnání časů}
 \label{tab:GRASSxArc}
@@ -2039,6 +2052,8 @@ Počet bodů & v.surf.nnbathy & v.surf.nn & ArcGIS     \\ \hline
 \end{figure}
 
 \newpage
+Pro tvorbu grafů bylo vygenerováno dalších patnáct datových sad v rozmezí od deseti až po milión bodů. Nad všemi těmi to sadami byly poté spuštěný interpolace pomocí modulu \emph{v.surf.nnbathy} a \emph{Natural neighbor interpolation (nni)} od ESRI ArcGISu. Pouze pro modul \emph{v.surf.nn} byly testy provedeny pouze pro datové sady do sta tisíc bodů. Už pro takto velkou datovou sadu modul počítal téměr deset minut, takže testy pro větší datové sady nebyly považovány za nutné.
+
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/graf.png}
