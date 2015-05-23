@@ -117,8 +117,8 @@ int main(int argc, char *argv[])
     Delaunay_triangulation T;
     typedef CGAL::Data_access< std::map<Point, Coord_type, K::Less_xy_2 > >
                                             Value_access;
-    T.insert(points.begin(), points.end());
-
+    int nvertices = T.insert(points.begin(), points.end());
+    
 
      //coordinate computation in grid
     double coor_x, coor_y;
