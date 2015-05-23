@@ -4,4 +4,6 @@
 adam-laza-bp-2015.pdf
 *.synctex.gz
 *.toc
+*.lof
+*.lot
 *~
