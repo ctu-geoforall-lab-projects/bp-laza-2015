@@ -88,11 +88,13 @@ bottom=35mm]
   GRASS GISu.  Část textu této práce se dále zabývá porovnání
 %%% ML: porovnavas to pouze s ArcGISem a tady zminujes "ostatni" softwary...
 %%% AL: upraveno pouze na ArcGIS
-  rychlosti a kvality výstupu mezi GRASS GISem a ArcGISem.
+%%% ML: upraveno na Esri ArcGIS - OK
+  rychlosti a kvality výstupu mezi GRASS GIS a Esri ArcGIS.
 
 \bigskip
 %% ML: Voronoiovy diagramy (a ne polygony)
 %% AL: To budu mit spatne v cele praci, pouzil jsem schvalne jednotne cislo
+%% ML: ja nemyslel mluvnicke cislo, ale Vororoiuv diagram vs. Voronoiuv polygon
 \keywords{Klíčová slova}{GIS, GRASS GIS, interpolace, přirozený soused, Delaunayho triangulace, Voronoiův diagram}
 
 \end{abstract}
@@ -101,7 +103,9 @@ bottom=35mm]
 \begin{abstract}
 %% ML: project ? mel jsi na mysli design
 %% AL: opraveno
+%% ML: OK
 %% ML: popros nekoho o korekci anglictiny, posledni vetu preformulovat
+%% ML: jeste popros aby to nekdo prosel
   \bigskip The aim of this bachelor thesis is the design and the
   implementation of a tool for a natural neighbour interpolation in
   GRASS GIS 7. Previous version of GRASS GIS 6 contains such a tool as an
@@ -114,11 +118,11 @@ bottom=35mm]
 \bigskip
 %%% ML: polygon -> diagram
 %%% AL: opraveno
+%%% ML: OK
 \keywords{Keywords}{GIS, GRASS GIS, natural neighbour interpolation, Delaunay triangulation, Voronoi diagram}
 
 \end{abstract}
 \selectlanguage{czech}
-
 
 %%%%Prohlaseni a podekovani
 \newcommand{\odsaditodzhora}{\hskip1pt\vfill}
@@ -152,6 +156,7 @@ V Praze dne .................
 %%% ML: Mozna zminit i Tomase Bayera, ale tak aby to nebylo v
 %%% konfliktu s oponetskym posudkem
 %%% AL: TB pridan
+%%% ML: OK
 Chtěl bych poděkovat mému vedoucímu bakalářské práce, Ing. Martinovi
 Landovi, Ph.D., za cenné rady a čas, který mi věnoval při
 konzultacích. Dál bych chtěl poděkovat Ing. Tomášovi Bayerovi, Ph.D. za konzultace a za vhled, který mi do problematiky triangulací poskytl. Také bych rád poděkoval své rodině, přátelům a okolí za
@@ -201,11 +206,13 @@ GRASS GISu by mohlo být hojně využito.
 %%% AL: zmeneno na minuly cas
 %%% ML: mozna by se hodily odkazy na jednotlive kapitoly v textu
 %%% AL: pridany odkazy
+%%% ML: chybi odkaz na dalsi kapitoly (Python)
 Až doposud byla interpolace metodou přirozeného souseda prováděna
 pomocí modulů \emph{v.surf.nnbathy} a \emph{r.surf.nnbathy} z
 %%% ML: tady by se hodila poznamka pod carou, vysvetlit co je Bash
 %%% AL: pridan footnote.
 %%% AL: mam pouzivat termin "napsany v Bashi" nebo spis "shellovy skript"?
+%%% ML: trosku vaham, lepsi by byl "shellovy skript", ale klidne nech puvodni formulaci "skript pro Bash", za to Ti nikdo hlavu neutrhne
 rozšíření Add-Ons, které jsou navíc napsané jako shellový skript pro Bash\footnote{Bash je unixový shell a v linuxových systémech slouží jako příkazový interpret.} (kapitola \ref{sub:Bash}). Tyto moduly jsou
 však podporované pouze pro GRASS GIS do verze 6. Nová verze GRASS GIS
 7 již moduly psané jako shellový skript nepodporuje. Jako první krok, je tedy
@@ -239,6 +246,7 @@ výpočetní geometrie a o jejím začlenění do GRASS GISu se již uvažuje.
 %%% carou nedat primo do textu do zavorek, kazdopadne Ti tam chybi
 %%% \url{}
 %%% AL: URL z uvodu odstraneno, footnoty presunuty do textu do zavorek
+%%% ML: OK
 GRASS (Geographic Resources Analysis Support System)
 GIS je geografický informační systém
 pro správu a analýzu prostorových dat, obrazových záznamů, produkci
@@ -311,6 +319,7 @@ kterýmikoliv body množiny bodů $P$ leží uvnitř obalu.
 %%% ML: zakomentovano (\newpage), tak aby se veslo na jednu stranu
 %%% ML: linky mi prijdou prilis tenke, je vubec neco videt kdyz to vytisknes?
 %%% AL: tlustsi linie
+%%% ML: OK
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
@@ -324,6 +333,7 @@ kterýmikoliv body množiny bodů $P$ leží uvnitř obalu.
 
 %%% ML: neni triangulace proces, postup?
 %%% AL: opraveno
+%%% ML: OK
 Triangulace je proces vytváření trojúhelníkové
 sítě mezi body v prostoru. Ne všechny trojúhelníkové sítě jsou pro nás ale zajímavé. Proto se tato práce bude zabývat triangulační
 sítí se specifickými vlastnostmi.
@@ -386,11 +396,13 @@ mluvit o \emph{regulérní} triangulaci.
 %%% predpokladam, ze vychazis z Figure, v cestine jsou jina pravidla,
 %%% to je ale detail
 %%% AL: prepsano na obrazek
+%%% ML: OK (jenom se podivej, zda je to v celem textu prace)
 V případě triangulace na obrázku \ref{fig:trian_valid_not_reg} se
 jedná o triangulaci validní, neboť splňuje všechny z prvních čtyř
 %%% ML: odkazujes na podminky cislem, potom bych pro jejich vycet
 %%% pouzil enumerate a ne itemize
 %%% AL: puvodne tam byl enumerate, ale mel jsem problem s vkladanim obrazku do seznamu. Prepsal jsem odkazy na cisla
+%%% ML: OK
 podmínek. Nicméně nesplňuje poslední podmínku, neboť existují více jak
 právě dvě hraniční hrany, které vstupují do jednoho vrcholu na
 konvexním obalu, a triangulaci tedy nelze nazvat i regulérní.
@@ -584,6 +596,7 @@ kde každá oblast má maximálně $N-1$ stran.
 \includegraphics[width=0.7\textwidth]{img/vor_pol.png}
 %%% ML: Opravdu polygony, nepouziva se termin bunka?
 %%% AL: Resil jsem s TB, existuje termin polygon, ale v tomhle pripade to maji byt bunky, opraveno
+%%% ML: OK
 \caption{Voronoivy buňky}
 \label{fig:vor_pol}
 \end{figure}
@@ -606,6 +619,7 @@ meteorologických stanic.
 
 %%% ML: poznamka pod carou, co je planarni graf (nebo je to vysvetleno jinde?)
 %%% AL: pridan footnote, staci takhle?
+%%% ML: OK
 DT je planární graf\footnote{Planární graf je takový graf, který lze v rovině nakreslit bez křížení hran.}, který je duální k VD. Jedna konstrukce tedy může
 být odvozena od druhé a naopak.  Pokud pro množinu bodů v rovině
 provedeme rozdělení do Voronoiových diagramů a následně spojíme
@@ -663,6 +677,7 @@ hran v dvojicích trojúhelníků tvořících konvexní čtyřúhelník na
 %%% i psat velka pismena v tomto kontextu (je to na vice mistech v
 %%% textu)
 %%% AL: Nad tim jsem uvazoval. Nakonec tedy pisu s malym k. MaxMin a MinMax jsem nechal, prijde mi to prehlednejsi
+%%% ML: OK (souhlas)
 základě kruhové nebo MaxMin podmínky.
 
 Pro množinu bodu $P$ nechť $e_i$ je vnitřní hrana triangulace a $Q$ je
@@ -678,6 +693,7 @@ všechny hrany lokálně optimální, získáme optimální triangulaci.
 
 %%% ML: Nelze pocestit titulek (?) - detail
 %%% AL: Pocesteno
+%%% ML: OK
 \begin{algorithm}
 \caption{Lokální optimalizace}
 \begin{algorithmic}[1]
@@ -788,6 +804,7 @@ triangulace je už v procesu tvoření Delaunayova a není tedy třeba
 
 %%% ML: tady nemas nektere veci prelozene (Add ... do)
 %%% AL: prelozeno do cestiny
+%%% ML: OK
 \newpage
 \begin{algorithm}[h!]
 \caption{Step-by-step algoritmus}
@@ -854,6 +871,7 @@ je nejnáročnější část tohoto algoritmu.
 %%% ML: tady pouzivas rovnou anglicky termin, predtim ho nemas uveden
 %%% ani v zavorce
 %%% AL: pouzit cesky termin, anglicky pridan do zavorky
+%%% ML: OK
 Algoritmus Rozděl a panuj využívá GRASS modul \emph{v.delaunay}, o
 kterém budeme mluvit později, viz kapitola \ref{subsec:v.delaunay}.
 
@@ -970,6 +988,7 @@ v protisměru hodinových ručiček. Každá půlhrana začíná
 v~\emph{počátečním vrcholu} a směřuje do \emph{cílového vrcholu}. V
 %%% ML: misto poiter spise ukazatel - detail
 %%% AL:opraveno
+%%% ML: OK
 half-edge struktuře si každá půlhrana uchovává ukazatel na svůj
 počáteční bod, na svůj koncový bod, na předchozí i následující
 půl-hranu, patřící stejnému trojúhelníku a nakonec pointer na opačně
@@ -977,6 +996,7 @@ orientovanou hranu, tzv. \emph{twin-edge}. Pointer na twin-edge hranu
 %%% ML: pomlcka pul-hrana nepusobi prilis cesky, lepe vypada
 %%% "pulhrana", otrocky prepisovat z anglictiny neni nutne - detail
 %%% AL: prepsano na pulhrana
+%%% ML: OK
 nemají pouze půlhrany ležící na konvexním obalu triangulace.
 
 \begin{figure}[h!]
@@ -1163,6 +1183,7 @@ Sibsonova\footnote{Robin Sibson (narozen 1944), britský matematik. Jako první 
 %%% ML: jak to dopadlo?
 %%% AL: ken konzultaci nedoslo, nasel jsem o tom nejake prameny na netu, moc tomu nerozumim,
 %%% dal jsem sem jen par obecnych vet, ale nevim, zda tu nenechat jen tu linearni
+%%% ML: OK, jenom se priprav, ze se Te na to nekdo muze zeptat
 Profesor Gerald Farin přišel s mnohem obecnějším přístupem, který není omezen na souřadnice přirozených sousedů, ale může použita pro všechny lokální souřadnice. Váha $\lambda$ může být vnímána jako barycentrická souřadnice v Bezierovu simplexu. Více zde: \cite{Bobach} \cite{CGAL}.
 
 \newpage	
@@ -1179,6 +1200,7 @@ modul \emph{v.surf.nnbathy} pro vektorová data. Tento modul byl napsán
 %%% ML: to neni presne, spise se jedna po POSIX shell skript, skript
 %%% muze bezet i v jinych interpretech, jako napr. csh ci zsh.
 %%% AL: pouziti terminu shellovy skript
+%%% ML: OK
 jako shellový skript. Pro novou verzi GRASS GISu 7, ve které si vývojáři kladou za
 cíl zpřístupnit tento software širší veřejnosti, ovšem tento shellový skript nebylo možno použít, neboť do nové verze se počítá pouze s
 moduly v jazyce Python a C/C++.
@@ -1192,6 +1214,7 @@ externí knihovny \emph{nn-c} a GRASS GISem. \emph{v.surf.nnbathy}
 nabízí celkem tři algoritmy interpolace. Defaultně je nastaven
 %%% ML: jsou nekde tyto metody rozepsany v teoreticke casti?
 %%% AL: doplneno v teorii, pridany odkazy
+%%% ML: OK
 \emph{Watson's algortithm for Sibson natural neighbor
   interpolation}, viz kapitola \ref{sub:Sibson}. Další možností je \emph{linear Delaunay
   interpolation}, kapitola \ref{sub:linear} a poslední \emph{Belikov and Semenov's algorithm for
@@ -1204,6 +1227,7 @@ hranatých závorkách):
 %%% ML: formatovani nic moc, za uzavirajici zavorkou pro nepovinne
 %%% paramatry je navic mezera, neslo by to udelat lepe?
 %%% AL: formatovani pomoci tabulky
+%%% ML: lepsi (OK)
 \bigskip
 \begin{tabular}{ll}
 \textbf{output}& Proměnná typu \emph{string}, název výstupní rastrové mapy.\\
@@ -1211,7 +1235,8 @@ hranatých závorkách):
 \textbf{[file]}& Proměnná typu \emph{string}, název vstupního souboru.\\
 \textbf{[column]}& Proměnná typu \emph{string}, název sloupce z atributové tabulky,\\
 \textbf{}& jehož data budou použity pro interpolaci.\\
-\textbf{[layer]}& Proměnná typu \emph{integer}, nastavení, zda se jedná od 2D nebo 3D vektorová data.\\
+\textbf{[layer]}& Proměnná typu \emph{integer}, nastavení, zda se jedná od 2D \\
+\textbf{}& nebo 3D vektorová data.\\
 \textbf{[where]}& Proměnná typu \emph{string}, SQL where podmínka.\\
 \textbf{[alg]}& Proměnná typu \emph{string}, název použitého algoritmu.\\
 \end{tabular}
@@ -1237,6 +1262,7 @@ použit i pro GRASS GIS 7, stále přetrvávala závislost na knihovně \emph{nn
 %%% shell skriptu, tj. nn-c. To je podstatna informace, ktera by tady
 %%% mela byt zminena.
 %%% AL: Doplněno
+%%% ML: OK
 
 \subsubsection{v.surf.nnbathy.py}
 
@@ -1287,6 +1313,7 @@ Každá operace prováděná v GRASS GISu je prováděna pouze na určitém
 rozsahu území, tzv. \emph{výpočetním regionu}. \emph{Výpočetní region}
 %%% ML: kartograficke souradnice jsou zavadejici, pripadne pouzij zemepisne souradnice
 %%% AL: opraveno
+%%% ML: OK
 je určen jako obdélník daný mezními zeměpisnými souřadnicemi a
 počtem řádků a sloupců.  Funkce \emph{region()} všechna nastavení
 uloží do proměných. Dále vypočte plochu výpočetního regionu. Na rozdíl
@@ -1439,6 +1466,7 @@ mapa.
 Výstupem modulu \emph{v.surf.nnbathy} je rastrová mapa.
 
 %%% ML: dal bych jsem alespon legendu
+%%% ML: OK (pokud muzes mit cas a chut, tak tu legendu udelej trosku mensi)
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/vystup_rast_map.png}
@@ -1447,13 +1475,15 @@ Výstupem modulu \emph{v.surf.nnbathy} je rastrová mapa.
 \end{figure}
 
 \newpage
-\subsection{OOP- Objektově orientované moduly}
+\subsection{OOP --- Objektově orientované moduly}
 %%% ML: mozna bych tu zkratku v nazvu rezepsal
 %%% AL: rozepsano
+%%% ML: OK
 
 V průběhu práce na Python modulu \emph{v.surf.nnbathy} bylo
 %%% ML: v textu bych nahradil Bash skript za shellový skript
 %%% AL: nahrazeno
+%%% ML: OK
 zjištěno, že v GRASS GISu verze 6 je k dispozici také shellový skript
 \emph{r.surf.nnbathy}, který pracuje s rastrovými daty. Jelikož větší
 část kódu byla pro moduly \emph{v.surf.nnbathy} a \emph{r.surf.nnbathy} společná,
@@ -1467,6 +1497,7 @@ moduly \emph{v.surf.nnabthy.py} (příloha \ref{app:v.surf}) pro vektorová data
 
 %%% ML: prilis dlouha veta
 %%% AL: zkraceno
+%%% ML: OK
 Z nového objektově orientovaného modulu pro vektorová data \emph{v.surf.nnbathy} tak zmizela výpočetní část kódu. Zůstala úvodní část, která automaticky generuje GUI,
 úvodní vstupní kontroly a dále podmínka, která vyhodnocovala, zda vstupují data v podobě
 vektorové mapy nebo ASCII souboru.
@@ -1495,13 +1526,15 @@ výpočetní část kódu.
 
 \paragraph{Rodičovská třída Nnbathy} V rodičovské třídě Nnbathy bylo
 vytvořeno několik objektů, které přebraly funkce jednotlivých procedur
-%%% To nejsou objekty, ale metody, resp. konstruktor a desktruktor
+%%% ML: To nejsou objekty, ale metody, resp. konstruktor a desktruktor
 %%% AL: opraveno
+%%% ML: OK
 z předchozího kódu. Navíc byly vytvořeny tyto metody:
 
 \paragraph{Metoda \_\_init\_\_}
 %%% ML: objekt -> metoda
 %%% AL: opraveno
+%%% ML: OK
 Tato metoda (konstruktor) inicializuje dočasné soubory a volá objekt region().
 
 \paragraph{Metoda \_\_del\_\_}
@@ -1510,6 +1543,7 @@ Tato metoda (destruktor) slouží k odstranění dočasných souborů.
 \paragraph{Třída Nnbathy\_raster}
 %%% ML: je dedicka z - nezni moc cesky...
 %%% AL: opraveno na dedicka
+%%% ML: to nezni moc hezky, co treba "Tato trida ... data, rodičovskou třídou je Nnbathy" nebo treba prijdes na neco lepsiho
 Tato třída slouží pro rastrová vstupní data a je dědická z rodičovské třídy Nnbathy.
 
 \paragraph{Třída Nnbathy\_vector}
@@ -1517,6 +1551,8 @@ Tato třída slouží pro vektorová vstupní data a je dědická z rodičovské
 
 \paragraph{Třída Nnbathy\_file}
 Tato třída slouží pro vstupní data v podobě ASCII souboru a je dědická z rodičovské třídy Nnbathy.
+
+%%% ML: dopln prosim jeste dnes pokud mozno
 
 \todo[inline]{MLU diagram}
 
@@ -1541,6 +1577,7 @@ g.extension extension=v.surf.nnbathy
 \bigskip 
 
 %%% ML: ta prvni veta zni divne
+%%% ML: ?
 V současné chvíli tedy tyto moduly nejsou součástí oficiální distribuce GRASS GISu, 
 ale pouze v rámci Add-Ons. Jelikož interpolace metodou přirozeného souseda poskytuje
 spojité, hladké výstupy bez extrapolovaných hodnot může být její
@@ -1561,6 +1598,7 @@ Jonathanem Richardem Shewchuk v roce 2002. Bohužel není distribuována pod
 %%% freely available, it is copyrighted by the author and may not be
 %%% sold or included in commercial products without a license."""
 %%% AL: opraveno
+%%% ML: OK
 volně šiřitelnou licencí která by dovolila její začlenění do oficiální distribuce GRASS
 GISu. V programu \emph{nnbathy} má na starosti Delaunayovu
 triangulaci. Je tedy třeba najít vhodný způsob, jak tuto knihovnu
@@ -1603,10 +1641,12 @@ struktury winged-edge, kapitola \ref{subsec:HE_struct}, též příloha \ref{app
 Ovládání modulu je velmi jednoduché na výběr máme pouze z několika
 %%% ML: flag prekladej jako prepinac
 %%% AL: přeloženo
+%%% ML: OK
 přepínačů a několika paramatrů:
 
 %%% ML: je to tady podstatne vubec uvadet???
 %%% AL: dohodli jsme se, ze to tak nechame
+%%% ML: OK
 \noindent Přepínače:
 \begin{tabular}{ll}
 \textbf{-r}& Počítej pouze s body v aktuálním regionu.\\
@@ -1621,6 +1661,7 @@ přepínačů a několika paramatrů:
 \end{tabular}
 
 %%% ML: chtelo by najit zpusob jako lokalizovat do cestiny Listings
+%%% ML: OK
 \begin{lstlisting}[caption={Volání modulu v.delaunay z příkazové řádky}]
 v.delaunay input=input_map output=output_map
 \end{lstlisting}
@@ -1638,6 +1679,7 @@ strukturami. \emph{v.delaunay} používá strukturu \emph{edge} (příloha \ref{
 což je běžná datová struktura typu winged-edge, viz kapitola \ref{subsec:HE_struct}. Naproti tomu \emph{Nnbathy} počítá interpolaci nad daty uloženými ve
 %%% ML: uvadis nekde strukturu, kterou pouziva GRASS modul?
 %%% AL: struktura winged-edge pridana do priloh
+%%% ML: OK
 struktuře \emph{delaunay} (Příloha \ref{app:delaunay_struct}), která
 je poměrně netypická, protože data ukládá do polí za pomocí pointerů a
 indexů zároveň.
@@ -1818,7 +1860,7 @@ v toolboxu Spatial Analyst. Výsledky jsou uvedeny v Příloze
 %%% ML: nenajdes jeste neco dalsiho co bys do literatury mohl pridat,
 %%% deset kousku je dost malo
 %%% AL: neco jsem pridal
-
+%%% ML: lepsi (OK)
 \begin{thebibliography}{99}
 \label{literatura}
 
@@ -1906,6 +1948,7 @@ interpolaci metodou přirozeného souseda. GRASS GIS bude zastupovat
 Python modul \emph{v.surf.nnbathy}, o kterém byla řeč v 
 %%% ML: uvest, kde presne
 %%% AL: uvedeno
+%%% ML: OK
 kapitolách \ref{sec:python}, dále modul \emph{v.surf.nn} využívající CGAL, viz kapitola \ref{subsub:v.surf.nn}. Za ArcGIS budeme zkoumat nástroj \emph{Natural Neighbour},
 který se nachází v toolboxu \emph{Spatial Analyst}.
 
@@ -1921,6 +1964,7 @@ procesorem Intel\copyright Core\texttrademark 2 Duo CPU T5550 @
 \ref{tab:GRASSxArc}.
 
 %%% ML: porovnaval jsi jeste vysledky???
+%%% ML: rikal jsi, ze ano (OK)
 
 \bigskip
 \begin{table}[h]
@@ -1938,6 +1982,7 @@ Počet bodů & v.surf.nnbathy & v.surf.nn & ArcGIS     \\ \hline
 
 %%% ML: chtelo by sjednotit tabulku barev
 %%% AL: dohodli jsme se, ze nechame rozdilne
+%%% ML: OK
 \newpage
 \begin{figure}[h!]
 \centering
@@ -1953,6 +1998,9 @@ Počet bodů & v.surf.nnbathy & v.surf.nn & ArcGIS     \\ \hline
 \caption{GRASS GIS, v.surf.nn: Výstupní rastr pro 1000 bodů}
 \label{fig:b1000_nn}
 \end{figure}
+
+%%% ML: temhle obrazku nerozumim: to je rozdil mezi v.surf.nn (CGAL) a
+%%% ArcGIS (u v.surf.nnbathy jsi rikal, ze rozdil neni)
 
 \newpage
 \begin{figure}[h!]
@@ -1979,6 +2027,7 @@ Počet bodů & v.surf.nnbathy & v.surf.nn & ArcGIS     \\ \hline
 \end{figure}
 
 %%% ML: pozor, tady mas stale GRASS
+%%% ML: OK
 
 \newpage
 \begin{figure}[h!]
@@ -2016,6 +2065,8 @@ Počet bodů & v.surf.nnbathy & v.surf.nn & ArcGIS     \\ \hline
 
 %%% ML: je otazka zda kompletni zdrove kody uvadet do prilohy, pokud
 %%% ano, tak pouze casti, na ktere se bude odkazovat v textu
+%%% ML: jeste to projdu, zatim to takto nech
+
 \newpage
 \section{Zdrojové kódy}
 \subsection{nnbathy.py}
@@ -2038,6 +2089,8 @@ Počet bodů & v.surf.nnbathy & v.surf.nn & ArcGIS     \\ \hline
 
 %%% ML: chyby priloha Obsah CD/DVD
 %%% AL: doplneno
+%%% ML: OK
+
 \newpage
 \section{Seznam tabulek}
 \listoftables
