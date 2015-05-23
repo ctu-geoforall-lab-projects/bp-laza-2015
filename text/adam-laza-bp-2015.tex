@@ -161,8 +161,9 @@ V Praze dne .................
 %%% ML: OK
 Chtěl bych poděkovat mému vedoucímu bakalářské práce, Ing. Martinovi
 Landovi, Ph.D., za cenné rady a čas, který mi věnoval při
-konzultacích. Dál bych chtěl poděkovat Ing. Tomášovi Bayerovi, Ph.D. za konzultace a za vhled, který mi do problematiky triangulací poskytl. Také bych rád poděkoval své rodině, přátelům a okolí za
-podporu po celou dobu studia.
+konzultacích. Dál bych chtěl poděkovat Ing. Tomášovi Bayerovi, Ph.D. za konzultace a za vhled, 
+který mi do problematiky triangulací poskytl. Také bych rád poděkoval své rodině, přátelům 
+a okolí za podporu po celou dobu studia.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
@@ -1472,7 +1473,7 @@ Výstupem modulu \emph{v.surf.nnbathy} je rastrová mapa.
 
 %%% ML: dal bych jsem alespon legendu
 %%% ML: OK (pokud muzes mit cas a chut, tak tu legendu udelej trosku mensi)
-
+%%% AL: zkousel jsem to, ale vubec nevim, jak to zmenit v cairu. Zatim jsem to nechal stejny.
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/vystup_rast_map.png}
@@ -2014,6 +2015,25 @@ Počet bodů & v.surf.nnbathy & v.surf.nn   & ArcGIS     \\ \hline
 
 %%% ML: temhle obrazku nerozumim: to je rozdil mezi v.surf.nn (CGAL) a
 %%% ArcGIS (u v.surf.nnbathy jsi rikal, ze rozdil neni)
+\newpage
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000.png}}{\caption{ArcGIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_grass}}
+\end{floatrow}
+\end{figure}
+
+%%% ML: pozor, tady mas stale GRASS
+%%% ML: OK
+
+\begin{figure}[h!]
+\centering
+\begin{floatrow}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil.png}}{\caption{ArcGIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_grass}}
+\end{floatrow}
+\end{figure}
 
 \newpage
 \begin{figure}[h!]
@@ -2029,26 +2049,6 @@ Počet bodů & v.surf.nnbathy & v.surf.nn   & ArcGIS     \\ \hline
 \includegraphics[width=0.48\textwidth]{img/diff_mil.png}
 \caption{Rozdíl mezi výstupem GRASS a Arc GISu pro 1000000 bodů}
 \label{fig:dif_mil}
-\end{figure}
-
-\begin{figure}[h!]
-\centering
-\begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000.png}}{\caption{ArcGIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_Arc}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_grass}}
-\end{floatrow}
-\end{figure}
-
-%%% ML: pozor, tady mas stale GRASS
-%%% ML: OK
-
-\newpage
-\begin{figure}[h!]
-\centering
-\begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil.png}}{\caption{ArcGIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_Arc}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_grass}}
-\end{floatrow}
 \end{figure}
 
 \newpage
@@ -2105,7 +2105,7 @@ Pro tvorbu grafů bylo vygenerováno dalších patnáct datových sad v rozmezí
 %%% ML: chyby priloha Obsah CD/DVD
 %%% AL: doplneno
 %%% ML: OK
-
+%%% AL: nejsem si jisty, zda je na tom CD takhle vsechno, co tam ma byt
 \newpage
 \section{Seznam tabulek}
 \listoftables
@@ -2140,13 +2140,13 @@ Pro tvorbu grafů bylo vygenerováno dalších patnáct datových sad v rozmezí
   \put( 16, 130){\line(0, 1){10}}
   \put( 16, 130){\line(1, 0){10} {\textbf{ cgal}}}
   \put(150, 130){ zdrojové kódy cgal}
-  \put(  1, 120){\line(0, 1){50}}
-  \put(  1, 120){\line(1, 0){10} {\textbf{ testing}}}
-  \put( 16, 110){\line(0, 1){8}}
-  \put( 16, 110){\line(1, 0){10} {\textbf{ src}}}
-  \put(150, 110){ zdrojové soubory testovací aplikace}
-  \put( 16, 100){\line(0, 1){10}}
-  \put( 16, 100){\line(1, 0){10} {\textbf{ sample\_data}}}
-  \put(150, 100){ testovací data}
+% \put(  1, 120){\line(0, 1){50}}
+%  \put(  1, 120){\line(1, 0){10} {\textbf{ testing}}}
+%  \put( 16, 110){\line(0, 1){8}}
+%  \put( 16, 110){\line(1, 0){10} {\textbf{ src}}}
+%  \put(150, 110){ zdrojové soubory testovací aplikace}
+%  \put( 16, 100){\line(0, 1){10}}
+%  \put( 16, 100){\line(1, 0){10} {\textbf{ sample\_data}}}
+%  \put(150, 100){ testovací data}
 \end{picture}
 \end{document}
