@@ -211,6 +211,7 @@ GRASS GISu by mohlo být hojně využito.
 %%% AL: pridany odkazy
 %%% ML: chybi odkaz na dalsi kapitoly (Python)
 %%% AL: pridany odkazy
+%%% ML: OK
 Až doposud byla interpolace metodou přirozeného souseda prováděna
 pomocí modulů \emph{v.surf.nnbathy}, kapitola \ref{subsub:v.surf.nnbathy}, a \emph{r.surf.nnbathy}, kapitola \ref{subsub:r.surf.nnbathy}, z
 %%% ML: tady by se hodila poznamka pod carou, vysvetlit co je Bash
@@ -1214,6 +1215,7 @@ moduly v jazyce Python a C/C++.
 \label{subsub:v.surf.nnbathy}
 %%% ML: viz poznamka k Bashi vyse
 %%% AL: pouzit shellovy skript
+%%% ML: OK
 \emph{v.surf.nnbathy}\footnote{\url{http://grass.osgeo.org/grass64/manuals/addons/v.surf.nnbathy.html}}
 je shellový skript. Slouží jako interface mezi příkazem \emph{nnbathy} z
 externí knihovny \emph{nn-c} a GRASS GISem. \emph{v.surf.nnbathy}
@@ -1474,6 +1476,7 @@ Výstupem modulu \emph{v.surf.nnbathy} je rastrová mapa.
 %%% ML: dal bych jsem alespon legendu
 %%% ML: OK (pokud muzes mit cas a chut, tak tu legendu udelej trosku mensi)
 %%% AL: zkousel jsem to, ale vubec nevim, jak to zmenit v cairu. Zatim jsem to nechal stejny.
+%%% ML: zalezi jaky pouzivas prikaz pro renderovani.
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/vystup_rast_map.png}
@@ -1551,6 +1554,7 @@ Tato metoda (destruktor) slouží k odstranění dočasných souborů.
 %%% ML: je dedicka z - nezni moc cesky...
 %%% AL: opraveno na dedicka
 %%% ML: to nezni moc hezky, co treba "Tato trida ... data, rodičovskou třídou je Nnbathy" nebo treba prijdes na neco lepsiho
+%%% ML: OK
 Tato třída slouží pro rastrová vstupní data, její rodičovská třída je Nnbathy.
 
 \paragraph{Třída Nnbathy\_vector}
@@ -1561,6 +1565,8 @@ Tato třída slouží pro vstupní data v podobě ASCII souboru, její rodičovs
 
 %%% ML: dopln prosim jeste dnes pokud mozno
 %%% AL: doplneno
+%%% ML: OK
+
 \newpage
 \begin{figure}[h!]
 \centering
@@ -1592,6 +1598,7 @@ g.extension extension=v.surf.nnbathy
 %%% ML: ta prvni veta zni divne
 %%% ML: ?
 %%% AL: divna veta smazana
+%%% ML: OK
 Jelikož interpolace metodou přirozeného souseda poskytuje
 spojité, hladké výstupy bez extrapolovaných hodnot může být její
 použití v praxi poměrně využívané. Právě proto je snaha dostat tento
@@ -1977,7 +1984,7 @@ procesorem Intel\copyright Core\texttrademark 2 Duo CPU T5550 @
 %%% ML: porovnaval jsi jeste vysledky???
 %%% ML: rikal jsi, ze ano (OK)
 %%% AL: pridano
-
+%%% ML: OK
 \bigskip
 \begin{table}[h]
 \catcode`\-=12
@@ -2104,6 +2111,8 @@ Pro tvorbu grafů bylo vygenerováno dalších patnáct datových sad v rozmezí
 %%% AL: doplneno
 %%% ML: OK
 %%% AL: nejsem si jisty, zda je na tom CD takhle vsechno, co tam ma byt
+%%% ML: jeste bych tam pridal testovaci data a vsechny skript, tak aby to bylo reprodukovatelne
+
 \newpage
 \section{Seznam tabulek}
 \listoftables
