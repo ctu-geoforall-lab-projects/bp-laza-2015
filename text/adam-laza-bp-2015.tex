@@ -78,13 +78,13 @@ bottom=35mm]
   7. Starší verze GRASS GIS 6 sice tuto metodu nabízí v rámci
   volitelně doinstalovatelných balíčků Add-Ons, ale jako modul napsaný
   v Bashi a s vnitřní závislostí na knihovně \emph{nn-c}. Tato
-  knihovna obsahuje knihovnu \emph{Triangle}, která nedovoluje
+  knihovna používá knihovnu \emph{Triangle}, která nedovoluje
   zařazení tohoto nástroje do oficiální distribuce GRASS GISu.
 
-  V rámci bakalářské práce byl tento modul přepsán do jazyka Python,
+  V rámci bakalářské práce byl tento modul přepsán do jazyka Python
   tak, aby vyhovoval verzi 7. Práce se dále zabývá možnostmi budoucí
-  implementace bez závislosti na knihovně \emph{Triangle}, tak, aby
-  mohl být tento interpolační nástroj zařazen do oficiální distribude
+  implementace bez závislosti na knihovně \emph{Triangle} tak, aby
+  mohl být tento interpolační nástroj zařazen do oficiální distribuce
   GRASS GISu.  Část textu této práce se dále zabývá porovnání
 %%% ML: porovnavas to pouze s ArcGISem a tady zminujes "ostatni" softwary...
 %%% AL: upraveno pouze na ArcGIS
@@ -163,7 +163,7 @@ Chtěl bych poděkovat mému vedoucímu bakalářské práce Ing. Martinovi
 Landovi, Ph.D. za cenné rady a čas, který mi věnoval při
 konzultacích. Dál bych chtěl poděkovat Ing. Tomášovi Bayerovi, Ph.D. za konzultace a za vhled, 
 který mi do problematiky triangulací poskytl. Také bych rád poděkoval své rodině, přátelům 
-a okolí za podporu po celou dobu studia.
+a~okolí za podporu po celou dobu studia.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
@@ -178,16 +178,16 @@ V reálném životě se většinou nesetkáváme s
 případem, kdy pro naši oblast zájmu, ať už se jedná o interval, plochu
 nebo prostor, máme dostatek bodových dat o daném jevu. Mnohem častěji
 máme k dispozici pouze soubor bodových dat, která jsou buď náhodně
-nebo uspořádaně rozmístěna po naší oblasti zájmu. Fyzické zhuštění
+nebo uspořádaně rozmístěna v naší oblasti zájmu. Fyzické zhuštění
 takovéto sítě a sběr dalších dat může být časově či finančně náročné,
-příliš obtížné nebo v rámci možností metod zcela nereálné.
+příliš obtížné nebo v~rámci možností metod zcela nereálné.
 
 Obvykle ovšem potřebujeme znát hodnotu daného jevu i mimo měřené body,
 nejčastěji pro celé zájmové území. V takovéto chvíli je nutné použít
 nějaký interpolační nástroj, který vypočte přibližnou hodnotu v území
-mezi měřenými body. Jako příklad může být uvedeno vytvoření výškopisu,
+mezi měřenými body. Jako příklad může být uvedeno vytvoření výškopisu
 či DMT pro území, kde máme k dispozici data o výšce v pravidelné
-mřížce nebo teplotní mapa na základě údajů z nepravidelně rozmístěných
+mřížce nebo teplotní mapy na základě údajů z nepravidelně rozmístěných
 meteostanic.
 
 \bigskip
@@ -202,7 +202,7 @@ je proto dobré s nimi získávat zkušenost už během studia. Za druhé
 práce na tomto tématu mi umožnila proniknout do GISů nejen z pohledu
 uživatele, ale přiučit se alespoň elementární základy jako vývojář. A
 za třetí interpolace metodou přirozeného souseda je nástroj, který
-poskytuje kvalitní výstupy, a jeho začlenění do standardní distribuce
+poskytuje kvalitní výstupy. Jeho začlenění do standardní distribuce
 GRASS GISu by mohlo být hojně využito.
 
 %%% ML: mozna by se tu hodil vice minuly cas, ale je to jedno
@@ -213,27 +213,27 @@ GRASS GISu by mohlo být hojně využito.
 %%% AL: pridany odkazy
 %%% ML: OK
 Až doposud byla interpolace metodou přirozeného souseda prováděna
-pomocí modulů \emph{v.surf.nnbathy}, kapitola \ref{subsub:v.surf.nnbathy}, a \emph{r.surf.nnbathy}, kapitola \ref{subsub:r.surf.nnbathy}, z
+pomocí modulů \emph{v.surf.nnbathy} (kapitola \ref{subsub:v.surf.nnbathy}) a \emph{r.surf.nnbathy} (kapitola \ref{subsub:r.surf.nnbathy}) z
 %%% ML: tady by se hodila poznamka pod carou, vysvetlit co je Bash
 %%% AL: pridan footnote.
 %%% AL: mam pouzivat termin "napsany v Bashi" nebo spis "shellovy skript"?
 %%% ML: trosku vaham, lepsi by byl "shellovy skript", ale klidne nech puvodni formulaci "skript pro Bash", za to Ti nikdo hlavu neutrhne
-rozšíření Add-Ons, viz \ref{sub:addons}, které jsou navíc napsané jako shellový skript pro Bash\footnote{Bash je unixový shell a v linuxových systémech slouží jako příkazový interpret.} (kapitola \ref{sub:Bash}). Tyto moduly jsou
+rozšíření Add-Ons (viz \ref{sub:addons}), které jsou navíc napsané jako shellový skript pro Bash\footnote{Bash je unixový shell a v linuxových systémech slouží jako příkazový interpret.} (kapitola \ref{sub:Bash}). Tyto moduly jsou
 však podporované pouze pro GRASS GIS do verze 6. Nová verze GRASS GIS
 7 již moduly psané jako shellový skript nepodporuje. Jako první krok je tedy
-nutné moduly přepsat do podporovaného programovacího jazyka - Pythonu\ref{sec:python}.
+nutné moduly přepsat do podporovaného programovacího jazyka - Pythonu (kapitola \ref{sec:python}).
 
 \newpage
 
 Dále je třeba zjistit, jak postupovat, aby mohl být interpolační
 nástroj začleněn do oficiální distribuce GRASS GISu. Jednou z cest by
 mohlo být zbavení se závislosti knihovny \emph{nn-c}, která provádí
-samotnou interpolaci, na knihovně \emph{Triangle}, která konstruuje
+samotnou interpolaci, na knihovně \emph{Triangle}, která aplikuje
 Delaunayovu triangulaci. Tuto knihovnu nelze vzhledem k nevyhovující
 licenci začlenit do standardní distribuce GRASS GISu. V tomto případě
 je nutné vyzkoumat, jaké nástroje by mohly knihovnu \emph{Triangle}
 nahradit. Bude zjištěno, jaké prostředky má k dispozici samotný GRASS
-GIS, nebo zda je možné použít nějaký jiný open source nástroj, který
+GIS nebo zda je možné použít nějaký jiný open source nástroj, který
 by triangulaci provedl.
 
 Jako další cesta se jeví možnost využítí knihovny \emph{CGAL}. Tato
@@ -1181,7 +1181,7 @@ Na obrázku \ref{fig:fig:canvas1} vidíme, že nově vzniklá buňka \uv{ukradla
 \newpage
 \subsection{Sibsonova interpolace}
 \label{sub:Sibson}
-Sibsonova\footnote{Robin Sibson (narozen 1944), britský matematik. Jako první přišel s myšlenkou interpolace metodou přirozeného souseda.} interpolace je další metoda interpolace, která kromě vah přirozených sousedů počítá s funkcí gradientu $\nabla_i$ pro všechny $p_i \in P$. Metoda počítá gradient na základě vážených nejmenších čtverců roviny procházející sousedními body.Více o~tomto tématu zde: \cite{Bobach} \cite{CGAL}.
+Sibsonova\footnote{Robin Sibson (narozen 1944), britský matematik. Jako první přišel s myšlenkou interpolace metodou přirozeného souseda.} interpolace je další metoda interpolace, která kromě vah přirozených sousedů počítá s funkcí gradientu $\nabla_i$ pro všechny $p_i \in P$. Metoda počítá gradient na základě vážených nejmenších čtverců roviny procházející sousedními body. Více o~tomto tématu zde: \cite{Bobach} \cite{CGAL}.
 
 \subsection{Farinova interpolace}
 \label{sub:Farin}
@@ -1535,7 +1535,7 @@ V knihovně {\em nnbathy}, (příloha \ref{app:nnbathy}) kterou oba moduly volaj
 výpočetní část kódu.
 
 \paragraph{Rodičovská třída Nnbathy} V rodičovské třídě Nnbathy bylo
-vytvořeno několik objektů, které přebraly funkce jednotlivých procedur
+definováno několik metod, které přebraly funkce jednotlivých procedur
 %%% ML: To nejsou objekty, ale metody, resp. konstruktor a desktruktor
 %%% AL: opraveno
 %%% ML: OK
@@ -1545,7 +1545,7 @@ z předchozího kódu. Navíc byly vytvořeny tyto metody:
 %%% ML: objekt -> metoda
 %%% AL: opraveno
 %%% ML: OK
-Tato metoda (konstruktor) inicializuje dočasné soubory a~volá objekt region().
+Tato metoda (konstruktor) inicializuje dočasné soubory a~volá metodu region().
 
 \paragraph{Metoda \_\_del\_\_}
 Tato metoda (destruktor) slouží k odstranění dočasných souborů.
@@ -1578,7 +1578,7 @@ Tato třída slouží pro vstupní data v podobě ASCII souboru, její rodičovs
 \newpage
 \section{Možnosti budoucí implementace}
 V současné době jsou oba moduly k dispozici v rámci balíčků
-Add-Ons\footnote{http://grass.osgeo.org/download/addons/}, viz kapitola \ref{sub:addons}. V adresáři
+Add-Ons\footnote{\url{http://grass.osgeo.org/download/addons/}}, viz kapitola \ref{sub:addons}. V adresáři
 \emph{grass7/vector/v.surf.nnbathy} můžeme naleznout hlavní knihovnu
 \emph{nnbathy.py}, modul \emph{v.surf.nnbathy.py} a dokumentaci
 \emph{v.surf.nnbathy.html}.
@@ -1742,7 +1742,7 @@ Library)\footnote{\url{http://www.cgal.org}} je open source projekt, který
 poskytuje snadný přístup k efektivním a spolehlivým geometrickým
 algoritmům ve formě C++ knihovny. CGAL se používá v různých oblastech,
 které potřebují geometrické výpočty, jako např. v GISech, CADu,
-molekulární biologii, počítačové grafice a robotice. Knihovna CGAL je
+molekulární bio\-logii, počítačové grafice a robotice. Knihovna CGAL je
 distribuována pod licencí GNU GPL, což perfektně vyhovuje pro jeho
 použítí pro GRASS GIS.
 
@@ -1789,7 +1789,7 @@ z přílohy \ref{app:srovnani}, výstupní rastrová mapa modulu \emph{v.surf.nn
 odlišná od výstupních map jak modulu \emph{v.surf.nnbathy}, tak i ArcGIS nástroje 
 \emph{Natural Neighbor Interpolation}. Tento problém je naprosto zásadní, a pokud nebude vyřešen,
 tak se nedá uvažovat o zařazení modulu \emph{v.surf.nn} mezi ostatní moduly GRASS GISu. 
-V~takovém případě, by se ukázalo použití knihovny \emph{CGAL} jako slepá ulička.
+V~takovém případě by se ukázalo použití knihovny \emph{CGAL} jako slepá ulička.
 
 V době odevzdání této práce ještě nebyly odhaleny příčiny, proč modul interpoluje chybně.
 Na oba výše zmíněné problémy byla upozorněna i komunita vývojářů CGALu a to jednak pomocí 
@@ -1846,7 +1846,7 @@ proprietárním softwarem. Za GRASS GIS byl testován modul
 modul \emph{v.surf.nn}, který je postavený na knihovně \emph{CGAL}. Za
 Esri ArcGIS byl testován nástroj \emph{Natural Neighbour}, který se nachází
 v toolboxu Spatial Analyst. Výsledky jsou uvedeny v Příloze
-\ref{app:srovnani}
+\ref{app:srovnani}.
 
 \newpage
 \necislovana{Seznam použitých zkratek}
@@ -1967,7 +1967,7 @@ Python modul \emph{v.surf.nnbathy}, o kterém byla řeč v
 %%% ML: uvest, kde presne
 %%% AL: uvedeno
 %%% ML: OK
-kapitolách \ref{sec:python}, dále modul \emph{v.surf.nn} využívající CGAL, viz kapitola \ref{subsub:v.surf.nn}. Za ArcGIS budeme zkoumat nástroj \emph{Natural Neighbour},
+kapitole \ref{sec:python}, dále modul \emph{v.surf.nn} využívající CGAL, viz kapitola \ref{subsub:v.surf.nn}. Za ArcGIS budeme zkoumat nástroj \emph{Natural Neighbour},
 který se nachází v toolboxu \emph{Spatial Analyst}.
 
 Pro porovnání byly zvoleny tři situace. Na území o velikosti deset
@@ -2057,7 +2057,7 @@ Počet bodů & v.surf.nnbathy & v.surf.nn   & ArcGIS     \\ \hline
 \end{figure}
 
 \newpage
-Pro tvorbu grafů bylo vygenerováno dalších patnáct datových sad v rozmezí od deseti až po milión bodů. Nad všemi těmi to sadami byly poté spuštěný interpolace pomocí modulu \emph{v.surf.nnbathy} a \emph{Natural neighbor interpolation (nni)} od ESRI ArcGISu. Pouze pro modul \emph{v.surf.nn} byly testy provedeny pouze pro datové sady do sta tisíc bodů. Už pro takto velkou datovou sadu modul počítal téměr deset minut, takže testy pro větší datové sady nebyly považovány za nutné.
+Pro tvorbu grafů bylo vygenerováno dalších patnáct datových sad v rozmezí od deseti až po milión bodů. Nad všemi těmi to sadami byly poté spuštěný interpolace pomocí modulu \emph{v.surf.nnbathy} a \emph{Natural neighbor interpolation (nni)} od ESRI Arc\-GISu. Pro modul \emph{v.surf.nn} byly testy provedeny pouze pro datové sady do sta tisíc bodů. Už pro takto velkou datovou sadu modul počítal téměr deset minut, takže testy pro větší datové sady nebyly považovány za nutné.
 
 \begin{figure}[h!]
 \centering
