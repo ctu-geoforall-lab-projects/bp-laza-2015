@@ -2006,15 +2006,15 @@ Počet bodů & v.surf.nnbathy & v.surf.nn   & ArcGIS     \\ \hline
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000.png}}{\caption{ArcGIS: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_Arc}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000_grass.png}}{\caption{GRASS GIS, v.surf.nnbathy: Výstupní rastr pro 1000 bodů}}{\label{fig:b1000_grass}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000.png}}{\caption{ArcGIS: Výstupní rastr pro 1 000 bodů}}{\label{fig:b1000_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_1000_grass.png}}{\caption{GRASS GIS, v.surf.nnbathy: Výstupní rastr pro 1 000 bodů}}{\label{fig:b1000_grass}}
 \end{floatrow}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.48\textwidth]{img/body_1000_nn.png}
-\caption{GRASS GIS, v.surf.nn: Výstupní rastr pro 1000 bodů}
+\caption{GRASS GIS, v.surf.nn: Výstupní rastr pro 1 000 bodů}
 \label{fig:b1000_nn}
 \end{figure}
 
@@ -2024,8 +2024,9 @@ Počet bodů & v.surf.nnbathy & v.surf.nn   & ArcGIS     \\ \hline
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000.png}}{\caption{ArcGIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_Arc}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 100000 bodů}}{\label{fig:b100000_grass}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000.png}}{\caption{ArcGIS: Výstupní rastr pro 100 000 bodů}}{\label{fig:b100000_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_100000_grass.png}}{\caption{GRASS GIS, 
+v.surf.nn.bathy: Výstupní rastr pro 100 000 bodů}}{\label{fig:b100000_grass}}
 \end{floatrow}
 \end{figure}
 
@@ -2035,8 +2036,8 @@ Počet bodů & v.surf.nnbathy & v.surf.nn   & ArcGIS     \\ \hline
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil.png}}{\caption{ArcGIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_Arc}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{GRASS GIS: Výstupní rastr pro 1000000 bodů}}{\label{fig:b_mil_grass}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil.png}}{\caption{ArcGIS: Výstupní rastr pro 1 000 000 bodů}}{\label{fig:b_mil_Arc}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/body_mil_grass.png}}{\caption{GRASS GIS, v.surf.nnbathy: Výstupní rastr pro 1 000 000 bodů}}{\label{fig:b_mil_grass}}
 \end{floatrow}
 \end{figure}
 
@@ -2044,15 +2045,15 @@ Počet bodů & v.surf.nnbathy & v.surf.nn   & ArcGIS     \\ \hline
 \begin{figure}[h!]
 \centering
 \begin{floatrow}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/diff_1000.png}}{\caption{Rozdíl mezi výstupem GRASS a Arc GISu pro 1000 bodů}}{\label{fig:diff_1000}}
-\ffigbox{\includegraphics[width=0.48\textwidth]{img/diff_100000.png}}{\caption{Rozdíl mezi výstupem GRASS a Arc GISu pro 100000 bodů}}{\label{fig:dif_100000}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/diff_1000.png}}{\caption{Rozdíl mezi výstupem GRASS GISu (v.surf.nnbathy) a Arc GISu pro 1 000 bodů}}{\label{fig:diff_1000}}
+\ffigbox{\includegraphics[width=0.48\textwidth]{img/diff_100000.png}}{\caption{Rozdíl mezi výstupem GRASS GISu (v.surf.nnbathy) a Arc GISu pro 100 000 bodů}}{\label{fig:dif_100000}}
 \end{floatrow}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.48\textwidth]{img/diff_mil.png}
-\caption{Rozdíl mezi výstupem GRASS a Arc GISu pro 1000000 bodů}
+\caption{Rozdíl mezi výstupem GRASS GISu (v.surf.nnbathy) a Arc GISu pro 1 000 000 bodů}
 \label{fig:dif_mil}
 \end{figure}
 
@@ -2088,7 +2089,9 @@ Pro tvorbu grafů bylo vygenerováno dalších patnáct datových sad v rozmezí
 %%% ML: jeste to projdu, zatim to takto nech
 
 \newpage
-\section{Zdrojové kódy}
+\section{Ukázka zdrojových kódů}
+
+V této příloze jsou zobrazeny ukázky zdrojových kódů. Kompletní zdrojové kódy jsou uloženy na CD v adresáři \emph{testing/scripts}.
 \subsection{nnbathy.py}
 \label{app:nnbathy}
 \lstinputlisting[language=Python]{../src/nnbathy/nn_red.py}
@@ -2147,13 +2150,13 @@ Pro tvorbu grafů bylo vygenerováno dalších patnáct datových sad v rozmezí
   \put( 16, 130){\line(0, 1){10}}
   \put( 16, 130){\line(1, 0){10} {\textbf{ cgal}}}
   \put(150, 130){ zdrojové kódy cgal}
-% \put(  1, 120){\line(0, 1){50}}
-%  \put(  1, 120){\line(1, 0){10} {\textbf{ testing}}}
-%  \put( 16, 110){\line(0, 1){8}}
-%  \put( 16, 110){\line(1, 0){10} {\textbf{ src}}}
-%  \put(150, 110){ zdrojové soubory testovací aplikace}
-%  \put( 16, 100){\line(0, 1){10}}
-%  \put( 16, 100){\line(1, 0){10} {\textbf{ sample\_data}}}
-%  \put(150, 100){ testovací data}
+  \put(  1, 120){\line(0, 1){50}}
+  \put(  1, 120){\line(1, 0){10} {\textbf{ testing}}}
+  \put( 16, 110){\line(0, 1){8}}
+  \put( 16, 110){\line(1, 0){10} {\textbf{ scripts}}}
+  \put(150, 110){ testovací skripty}
+  \put( 16, 100){\line(0, 1){10}}
+  \put( 16, 100){\line(1, 0){10} {\textbf{ sample\_data}}}
+  \put(150, 100){ testovací data}
 \end{picture}
 \end{document}
