@@ -1,0 +1,95 @@
+\documentclass[czech,11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+\usepackage[pdftex,breaklinks=true,colorlinks=true,urlcolor=blue,
+  pagecolor=black,linkcolor=black]{hyperref}
+\usepackage[czech]{babel}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+  {\Large --- Posudek vedoucího bakalářské práce ---}
+\end{center}
+
+\vspace{.2cm}
+
+\noindent \begin{tabular}{rp{.75\textwidth}}
+  {\bf Bakalářská práce:} & Implementace nástroje pro interpolaci metodou přirozeného souseda do GRASS GIS \\
+  {\bf Student:} & Adam Láža \\
+  {\bf Vedoucí:} & Ing. Martin Landa, Ph.D. \\
+  {\bf Oponent:} & Ing. Tomáš Bayer, Ph.D. \\
+\end{tabular}
+
+\vspace{1cm}
+
+Zadání bakalářské práce Adama Láži vychází z praktického potřeby
+rozšířit open source projekt GRASS GIS o nativní implementaci nástroje
+pro interpolaci metodou přirozeného souseda. GRASS GIS podobným
+nástrojem již disponuje, ale pouze v tzv. formě AddOns s externí
+závislostí na knihovnu Triangle, která díky své licenční politice není
+běžně rozšířena v Linuxových distribucích a nelze ji šířit snadno ani
+jako součást instalace pod OS MS Windows. To číní tento nástroj pro
+běžné uživatele prakticky nedostupným.
+\\
+
+Student musel pro řešení této problematiky nastudovat teorii z oblasti
+výpočetní geometrieznalosti, seznámit se s prostředím nástroje GRASS
+GIS a to především z pohledu programátora a vývojáře. V první kroku
+přepsal již existující nástoje dostupné jako POSIX skripty do jazyka
+Python. To umožnilo začlenění těchto nástrojů do nové verze GRASS 7,
+která již POSIX skripty nepodporuje. Tento krok zpřístupnil nástoj pro
+interpolaci přirozeného souseda i této verzi s tím, že závislost na
+knihovně Tringle, resp. nn-c zůstala zachována. Student se musel
+naučit základy programování v jazyce Python včetně objektového návrhu
+s využitím knihoven GRASS. Výsledek byl úspěšně začleněn do GRASS jako
+AddOns.
+\\
+
+V dalším kroku se student podrobně věnoval možnosti nahrazení
+problematické závislosti na knihovně Triangle kódem, který je v
+dostupný v knihovnách systému GRASS. Tato myšlenka se ukázala jako
+realizovatelná, nicméně vzhledem k pracnosti a očekávatelnému výsledku
+bylo od této cesty upuštěno. Student v této oblasti načerpal znalosti
+v oblasti analýzy kódu a teoretickém základu, který byl třeba k
+pochopení této problematiky.
+\\
+
+Na závěr se student věnoval implementaci nástroje s využitím další
+knihovny CGAL. Tato knihovna je napsána v programovacím jazyce C++ a
+je šířena pod licencí, která je kompatibilní s GRASSem. Zde student
+projevil základní znalost programování v C++. Výsledek je prototyp
+modelu, který je funkční. Nicméně trpí závažnými problémy v rychlosti
+výpočtu a i jeho správnosti. Tato část práce by si zasložila více
+prostoru a může být vnímana jako prostor pro další pokračování tohoto
+v tématu v rámci diplomové práce.
+\\
+
+Student projevil značnou schopnost samostatné práce (včetně diskuze na
+mezinárodních forech) a analytického pohledu. Z hlediska
+programátorského pracoval student ve třech programovacích jazycích a
+to POSIX (Bash), Python a C++. Výsledkem je práce, která přestože
+obsahuje řadu nedostatků a to především v teoretické části je prací
+nadprůměrnou.
+\\
+\newpage
+Závěrem mohu konstatovat, že předložená bakalářská práce splňuje
+všechny formální náležitosti a doporučuji ji k obhajobě. Bakalářskou
+práci hodnotím stupněm
+
+\vskip 2cm
+
+\begin{center}
+{\bf -- B (velmi dobře)  --}
+\end{center}
+
+\vskip 2cm
+
+\begin{tabular}{lp{.25\textwidth}r}
+& & \ldots\ldots\ldots\ldots\ldots\ldots\ldots \\
+V~Praze dne 10. června 2015 & & Ing. Martin Landa, Ph.D. \\
+& & Fakulta stavební, ČVUT v Praze \\
+\end{tabular}
+
+\end{document}
